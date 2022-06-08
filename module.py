@@ -11,25 +11,25 @@ class Module:
         self.config = config
         self.database = database
 
-    def on_member_join(self, member: discord.Member) -> None:
+    async def on_member_join(self, member: discord.Member) -> None:
         pass
 
-    def on_member_remove(self, member: discord.Member) -> None:
+    async def on_member_remove(self, member: discord.Member) -> None:
         pass
 
-    def on_message(self, message: discord.Message) -> None:
+    async def on_message(self, message: discord.Message) -> None:
         pass
 
-    def on_message_delete(self, message: discord.Message) -> None:
+    async def on_message_delete(self, message: discord.Message) -> None:
         pass
 
-    def on_message_edit(self, before: discord.Message, after: discord.Message) -> None:
+    async def on_message_edit(self, before: discord.Message, after: discord.Message) -> None:
         pass
 
-    def on_ready(self) -> None:
+    async def on_ready(self) -> None:
         pass
 
-    def on_voice_state_update(self, member: discord.Member, before: discord.VoiceState, after: discord.VoiceState) -> None:
+    async def on_voice_state_update(self, member: discord.Member, before: discord.VoiceState, after: discord.VoiceState) -> None:
         pass
 
     @staticmethod

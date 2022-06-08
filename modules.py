@@ -9,7 +9,7 @@ class Counter(Module):
     def __init__(self, config: Config, database: Database):
         super().__init__(config, database)
 
-    def on_message(self, message: discord.Message) -> None:
+    async def on_message(self, message: discord.Message) -> None:
         content = str(message.content).lower()
         var = None
         amount = 0
@@ -48,20 +48,20 @@ class Logger(Module):
     def __init__(self, config: Config, database: Database):
         super().__init__(config, database)
 
-    def on_member_join(self, member: discord.Member) -> None:
+    async def on_member_join(self, member: discord.Member) -> None:
         embed = self.embed('Server betreten')
         embed.add_field(name='User:', value=member.mention, inline=False)
         embed.add_field(name='Account erstellt:', value=member.created_at, inline=True)
         await self.config.get_join_log().send(embed=embed)
 
-    def on_member_remove(self, member: discord.Member) -> None:
+    async def on_member_remove(self, member: discord.Member) -> None:
         embed = self.error_embed(title='Server verlassen')
         embed.add_field(name='User:', value=member.mention, inline=False)
         embed.add_field(name='Account erstellt:', value=member.created_at, inline=False)
         embed.add_field(name='Server betreten:', value=member.joined_at, inline=True)
         await self.config.get_leave_log().send(embed=embed)
 
-    def on_message_edit(self, before: discord.Message, after: discord.Message) -> None:
+    async def on_message_edit(self, before: discord.Message, after: discord.Message) -> None:
         embed = self.embed('Nachricht bearbeitet')
         embed.add_field(name='User:', value=before.author.mention, inline=False)
         embed.add_field(name='Channel:', value=before.channel.mention, inline=False)
@@ -69,14 +69,14 @@ class Logger(Module):
         embed.add_field(name='Nachher:', value=after.content, inline=True)
         await self.config.get_message_log().send(embed=embed)
 
-    def on_message_delete(self, message: discord.Message) -> None:
+    async def on_message_delete(self, message: discord.Message) -> None:
         embed = self.error_embed('Nachricht gelöscht')
         embed.add_field(name='User:', value=message.author.mention, inline=False)
         embed.add_field(name='Channel:', value=message.channel.mention, inline=False)
         embed.add_field(name='Nachricht:', value=message.content, inline=True)
         await self.config.get_message_log().send(embed=embed)
 
-    def on_voice_state_update(self, member: discord.Member, before: discord.VoiceState, after: discord.VoiceState) -> None:
+    async def on_voice_state_update(self, member: discord.Member, before: discord.VoiceState, after: discord.VoiceState) -> None:
         if before.channel is not None and after.channel is not None:
             embed = self.embed('Voicechannel gewechselt')
             embed.add_field(name='User:', value=member.mention, inline=False)
@@ -100,7 +100,7 @@ class Tricks(Module):
         super().__init__(config, database)
         self.tricks = {}
 
-    def on_message(self, message: discord.Message) -> None:
+    async def on_message(self, message: discord.Message) -> None:
         content = str(message.content).lower()
         if content.startswith('!'):
             if content.startswith('!addtrick'):
@@ -147,7 +147,7 @@ class Tricks(Module):
                     embed.add_field(name='!' + name, value=self.tricks[name], inline=True)
                     await message.channel.send(embed=embed)
 
-    def on_ready(self) -> None:
+    async def on_ready(self) -> None:
         tricks = self.database.execute('SELECT command FROM tricks;')
         for elem in tricks:
             self.tricks[elem[0]] = self.database.execute('SELECT text FROM tricks WHERE command = \'' + elem[0] + '\';')[0][0]
