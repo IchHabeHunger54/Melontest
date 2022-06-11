@@ -1,3 +1,5 @@
+from datetime import datetime
+
 import discord
 
 from config import Config
@@ -94,6 +96,24 @@ class Logger(Module):
             embed.add_field(name='User:', value=member.mention, inline=False)
             embed.add_field(name='Channel:', value=before.channel.name, inline=True)
             await self.config.get_voice_log().send(embed=embed)
+
+
+class Ping(Module):
+    def __init__(self, config: Config):
+        super().__init__(config)
+
+    async def on_message(self, message: discord.Message) -> None:
+        if str(message.content).startswith('!ping'):
+            created_at = message.created_at
+            utcnow = datetime.utcnow()
+            if utcnow > created_at:
+                time = str(utcnow - created_at)
+            else:
+                time = str(created_at - utcnow)
+            if time.startswith('0:00:'):
+                await message.channel.send('Ping: ' + str(float(str(time)[5:])) + ' Sekunden')
+            else:
+                await message.channel.send('Ping: > 1 Minute. Bitte ans Team melden!')
 
 
 class RawEcho(Module):
