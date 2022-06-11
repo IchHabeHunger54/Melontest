@@ -6,7 +6,9 @@ database = Database(config)
 modules = [
     Counter(config, database),
     Logger(config, database),
-    Tricks(config, database)
+    RawEcho(config, database),
+    Tricks(config, database),
+    VoiceSupportNotification(config, database)
 ]
 
 
@@ -24,6 +26,8 @@ async def on_member_remove(member: discord.Member) -> None:
 
 @bot.event
 async def on_message(message: discord.Message) -> None:
+    if message.author == bot.user or message.author.bot:
+        return
     for module in modules:
         await module.on_message(message)
 
@@ -56,6 +60,8 @@ async def on_ready() -> None:
 
 @bot.event
 async def on_voice_state_update(member: discord.Member, before: discord.VoiceState, after: discord.VoiceState) -> None:
+    if member == bot.user or member.bot:
+        return
     for module in modules:
         await module.on_voice_state_update(member, before, after)
 

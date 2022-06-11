@@ -95,6 +95,15 @@ class Logger(Module):
             await self.config.get_voice_log().send(embed=embed)
 
 
+class RawEcho(Module):
+    def __init__(self, config: Config, database: Database):
+        super().__init__(config, database)
+
+    async def on_message(self, message: discord.Message) -> None:
+        if str(message.content).startswith('!rawecho '):
+            await message.channel.send('`' + str(message.content)[len('!rawecho '):] + '`')
+
+
 class Tricks(Module):
     def __init__(self, config: Config, database: Database):
         super().__init__(config, database)
@@ -151,3 +160,12 @@ class Tricks(Module):
         tricks = self.database.execute('SELECT command FROM tricks;')
         for elem in tricks:
             self.tricks[elem[0]] = self.database.execute('SELECT text FROM tricks WHERE command = \'' + elem[0] + '\';')[0][0]
+
+
+class VoiceSupportNotification(Module):
+    def __init__(self, config: Config, database: Database):
+        super().__init__(config, database)
+
+    async def on_voice_state_update(self, member: discord.Member, before: discord.VoiceState, after: discord.VoiceState) -> None:
+        if after.channel is not None and after.channel.id == self.config.get_voice_support_channel().id:
+            await self.config.get_team_voice_support_channel().send(self.config.get_voice_support_role().mention + ' Benachrichtigung! ' + member.mention + ' benötigt Support per Voice!')

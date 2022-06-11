@@ -21,12 +21,16 @@ class Config:
             self.supporter_id = jsonfile['debug_supporter_id']
             self.test_moderator_id = jsonfile['debug_test_moderator_id']
             self.moderator_id = jsonfile['debug_moderator_id']
+            self.voice_support_role_id = jsonfile['debug_voice_support_role_id']
+            self.chat_support_role_id = jsonfile['debug_chat_support_role_id']
             self.head_moderator_id = jsonfile['debug_head_moderator_id']
             self.test_administrator_id = jsonfile['debug_test_administrator_id']
             self.message_channel_id = jsonfile['debug_message_log_id']
             self.voice_channel_id = jsonfile['debug_voice_log_id']
             self.join_channel_id = jsonfile['debug_join_log_id']
             self.leave_channel_id = jsonfile['debug_leave_log_id']
+            self.voice_support_channel_id = jsonfile['debug_voice_support_channel_id']
+            self.team_voice_support_channel_id = jsonfile['debug_team_voice_support_channel_id']
         else:
             self.token = jsonfile['token']
             self.guild_id = jsonfile['guild_id']
@@ -36,10 +40,14 @@ class Config:
             self.moderator_id = jsonfile['moderator_id']
             self.head_moderator_id = jsonfile['head_moderator_id']
             self.test_administrator_id = jsonfile['test_administrator_id']
+            self.voice_support_role_id = jsonfile['voice_support_role_id']
+            self.chat_support_role_id = jsonfile['chat_support_role_id']
             self.message_channel_id = jsonfile['message_log_id']
             self.voice_channel_id = jsonfile['voice_log_id']
             self.join_channel_id = jsonfile['join_log_id']
             self.leave_channel_id = jsonfile['leave_log_id']
+            self.voice_support_channel_id = jsonfile['voice_support_channel_id']
+            self.team_voice_support_channel_id = jsonfile['team_voice_support_channel_id']
 
     @staticmethod
     def has_role(member: discord.Member, roleid: int) -> bool:
@@ -76,6 +84,12 @@ class Config:
     def is_team(self, member: discord.Member) -> bool:
         return self.is_test_supporter_or_higher(member)
 
+    def get_chat_support_role(self) -> discord.Role:
+        return self.client.get_guild(self.guild_id).get_role(self.chat_support_role_id)
+
+    def get_voice_support_role(self) -> discord.Role:
+        return self.client.get_guild(self.guild_id).get_role(self.voice_support_role_id)
+
     def get_message_log(self) -> discord.TextChannel:
         return self.client.get_guild(self.guild_id).get_channel(self.message_channel_id)
 
@@ -87,3 +101,9 @@ class Config:
 
     def get_leave_log(self) -> discord.TextChannel:
         return self.client.get_guild(self.guild_id).get_channel(self.leave_channel_id)
+
+    def get_voice_support_channel(self) -> discord.VoiceChannel:
+        return self.client.get_guild(self.guild_id).get_channel(self.voice_support_channel_id)
+
+    def get_team_voice_support_channel(self) -> discord.TextChannel:
+        return self.client.get_guild(self.guild_id).get_channel(self.team_voice_support_channel_id)
