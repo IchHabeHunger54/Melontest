@@ -7,7 +7,8 @@ from module import Module
 
 class Counter(Module):
     def __init__(self, config: Config, database: Database):
-        super().__init__(config, database)
+        super().__init__(config)
+        self.database = database
 
     async def on_message(self, message: discord.Message) -> None:
         content = str(message.content).lower()
@@ -45,8 +46,8 @@ class Counter(Module):
 
 
 class Logger(Module):
-    def __init__(self, config: Config, database: Database):
-        super().__init__(config, database)
+    def __init__(self, config: Config):
+        super().__init__(config)
 
     async def on_member_join(self, member: discord.Member) -> None:
         embed = self.embed('Server betreten')
@@ -96,8 +97,8 @@ class Logger(Module):
 
 
 class RawEcho(Module):
-    def __init__(self, config: Config, database: Database):
-        super().__init__(config, database)
+    def __init__(self, config: Config):
+        super().__init__(config)
 
     async def on_message(self, message: discord.Message) -> None:
         if str(message.content).startswith('!rawecho '):
@@ -106,7 +107,8 @@ class RawEcho(Module):
 
 class Tricks(Module):
     def __init__(self, config: Config, database: Database):
-        super().__init__(config, database)
+        super().__init__(config)
+        self.database = database
         self.tricks = {}
 
     async def on_message(self, message: discord.Message) -> None:
@@ -163,8 +165,8 @@ class Tricks(Module):
 
 
 class VoiceSupportNotification(Module):
-    def __init__(self, config: Config, database: Database):
-        super().__init__(config, database)
+    def __init__(self, config: Config):
+        super().__init__(config)
 
     async def on_voice_state_update(self, member: discord.Member, before: discord.VoiceState, after: discord.VoiceState) -> None:
         if after.channel is not None and after.channel.id == self.config.get_voice_support_channel().id:

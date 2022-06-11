@@ -9,10 +9,13 @@ class Config:
         configjson = open('./config.json', 'r', 1)
         jsonfile = json.loads(configjson.read())
         configjson.close()
-        self.db_user = jsonfile['db_user']
-        self.db_pw = jsonfile['db_pw']
-        self.db_host = jsonfile['db_host']
-        self.db_db = jsonfile['db_db']
+        self.counter_user = jsonfile['´counter_user']
+        self.counter_pw = jsonfile['counter_pw']
+        self.counter_db = jsonfile['counter_db']
+        self.tricks_user = jsonfile['´tricks_user']
+        self.tricks_pw = jsonfile['tricks_pw']
+        self.tricks_db = jsonfile['tricks_db']
+        self.host = jsonfile['host']
         self.is_debug = jsonfile['is_debug']
         if self.is_debug:
             self.token = jsonfile['debug_token']

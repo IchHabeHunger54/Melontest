@@ -1,15 +1,13 @@
 import mysql.connector
 from mysql.connector import Error
 
-from config import Config
-
 
 class Database:
-    def __init__(self, config: Config):
-        self.user = config.db_user
-        self.pw = config.db_pw
-        self.host = config.db_host
-        self.db = config.db_db
+    def __init__(self, user: str, pw: str, host: str, db: str):
+        self.user = user
+        self.pw = pw
+        self.host = host
+        self.db = db
         pass
 
     def execute(self, query: str):

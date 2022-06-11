@@ -2,13 +2,12 @@ from modules import *
 
 bot = discord.Client(intents=discord.Intents.all(), command_prefix='!', case_insensitive=True)
 config = Config(bot)
-database = Database(config)
 modules = [
-    Counter(config, database),
-    Logger(config, database),
-    RawEcho(config, database),
-    Tricks(config, database),
-    VoiceSupportNotification(config, database)
+    Counter(config, Database(config.counter_user, config.counter_pw, config.host, config.counter_db)),
+    Logger(config),
+    RawEcho(config),
+    Tricks(config, Database(config.tricks_user, config.tricks_pw, config.host, config.tricks_db)),
+    VoiceSupportNotification(config)
 ]
 
 

@@ -3,13 +3,11 @@ from datetime import datetime
 import discord
 
 from config import Config
-from database import Database
 
 
 class Module:
-    def __init__(self, config: Config, database: Database):
+    def __init__(self, config: Config):
         self.config = config
-        self.database = database
 
     async def on_member_join(self, member: discord.Member) -> None:
         pass
