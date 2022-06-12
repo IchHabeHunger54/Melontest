@@ -5,6 +5,7 @@ bot = discord.Client(intents=discord.Intents.all(), command_prefix='!', case_ins
 config = Config(bot)
 modules = [
     Counter(config, Database(config.counter_user, config.counter_pw, config.host, config.counter_db)),
+    Flomote(config),
     Logger(config),
     Ping(config),
     RawEcho(config),

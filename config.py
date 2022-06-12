@@ -51,6 +51,9 @@ class Config:
             self.leave_channel_id = jsonfile['leave_log_id']
             self.voice_support_channel_id = jsonfile['voice_support_channel_id']
             self.team_voice_support_channel_id = jsonfile['team_voice_support_channel_id']
+        self.flo_1_emote = jsonfile['flo_1_emote']
+        self.flo_2_emote = jsonfile['flo_2_emote']
+        self.flo_3_emote = jsonfile['flo_3_emote']
 
     @staticmethod
     def has_role(member: discord.Member, roleid: int) -> bool:

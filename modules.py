@@ -47,6 +47,17 @@ class Counter(Module):
             await message.channel.send(embed=self.embed(var + ' = ' + str(result[0][0])))
 
 
+class Flomote(Module):
+    def __init__(self, config: Config):
+        super().__init__(config)
+
+    async def on_message(self, message: discord.Message) -> None:
+        if str(message.content).startswith('flomote'):
+            await message.channel.send(self.config.flo_1_emote + self.config.flo_2_emote + '\n' + self.config.flo_3_emote)
+        if str(message.content).startswith('floeyes'):
+            await message.channel.send(self.config.flo_1_emote + self.config.flo_2_emote)
+
+
 class Logger(Module):
     def __init__(self, config: Config):
         super().__init__(config)
