@@ -66,11 +66,14 @@ class Logger(Module):
 
     async def on_message_edit(self, before: discord.Message, after: discord.Message) -> None:
         embed = self.embed('Nachricht bearbeitet')
-        embed.add_field(name='User:', value=before.author.mention, inline=False)
-        embed.add_field(name='Channel:', value=before.channel.mention, inline=False)
-        embed.add_field(name='Vorher:', value=before.content, inline=False)
-        embed.add_field(name='Nachher:', value=after.content, inline=True)
-        await self.config.get_message_log().send(embed=embed)
+        old = str(before.content)
+        new = str(after.content)
+        if old != new:
+            embed.add_field(name='User:', value=before.author.mention, inline=False)
+            embed.add_field(name='Channel:', value=before.channel.mention, inline=False)
+            embed.add_field(name='Vorher:', value=old, inline=False)
+            embed.add_field(name='Nachher:', value=new, inline=True)
+            await self.config.get_message_log().send(embed=embed)
 
     async def on_message_delete(self, message: discord.Message) -> None:
         embed = self.error_embed('Nachricht gelöscht')
