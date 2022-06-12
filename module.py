@@ -24,6 +24,12 @@ class Module:
     async def on_message_edit(self, before: discord.Message, after: discord.Message) -> None:
         pass
 
+    async def on_reaction_add(self, reaction: discord.Reaction, member: discord.Member) -> None:
+        pass
+
+    async def on_reaction_remove(self, reaction: discord.Reaction, member: discord.Member) -> None:
+        pass
+
     async def on_ready(self) -> None:
         pass
 

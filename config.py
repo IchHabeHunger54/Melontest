@@ -28,12 +28,15 @@ class Config:
             self.chat_support_role_id = jsonfile['debug_chat_support_role_id']
             self.head_moderator_id = jsonfile['debug_head_moderator_id']
             self.test_administrator_id = jsonfile['debug_test_administrator_id']
+            self.chat_id = jsonfile['debug_chat_id']
             self.message_channel_id = jsonfile['debug_message_log_id']
             self.voice_channel_id = jsonfile['debug_voice_log_id']
             self.join_channel_id = jsonfile['debug_join_log_id']
             self.leave_channel_id = jsonfile['debug_leave_log_id']
             self.voice_support_channel_id = jsonfile['debug_voice_support_channel_id']
             self.team_voice_support_channel_id = jsonfile['debug_team_voice_support_channel_id']
+            self.among_us_delay = jsonfile['debug_among_us_delay']
+            self.among_us_delay_offset = jsonfile['debug_among_us_delay_offset']
         else:
             self.token = jsonfile['token']
             self.guild_id = jsonfile['guild_id']
@@ -45,20 +48,27 @@ class Config:
             self.test_administrator_id = jsonfile['test_administrator_id']
             self.voice_support_role_id = jsonfile['voice_support_role_id']
             self.chat_support_role_id = jsonfile['chat_support_role_id']
+            self.chat_id = jsonfile['chat_id']
             self.message_channel_id = jsonfile['message_log_id']
             self.voice_channel_id = jsonfile['voice_log_id']
             self.join_channel_id = jsonfile['join_log_id']
             self.leave_channel_id = jsonfile['leave_log_id']
             self.voice_support_channel_id = jsonfile['voice_support_channel_id']
             self.team_voice_support_channel_id = jsonfile['team_voice_support_channel_id']
+            self.among_us_delay = jsonfile['among_us_delay']
+            self.among_us_delay_offset = jsonfile['among_us_delay_offset']
         self.flo_1_emote = jsonfile['flo_1_emote']
         self.flo_2_emote = jsonfile['flo_2_emote']
         self.flo_3_emote = jsonfile['flo_3_emote']
+        self.among_us_1_emote = jsonfile['among_us_1_emote']
+        self.among_us_2_emote = jsonfile['among_us_2_emote']
+        self.among_us_3_emote = jsonfile['among_us_3_emote']
+        self.among_us_4_emote = jsonfile['among_us_4_emote']
 
     @staticmethod
-    def has_role(member: discord.Member, roleid: int) -> bool:
+    def has_role(member: discord.Member, role_id: int) -> bool:
         for role in member.roles:
-            if role.id == roleid:
+            if role.id == role_id:
                 return True
         return False
 
@@ -90,26 +100,35 @@ class Config:
     def is_team(self, member: discord.Member) -> bool:
         return self.is_test_supporter_or_higher(member)
 
+    def get_server(self) -> discord.Guild:
+        return self.client.get_guild(self.guild_id)
+
     def get_chat_support_role(self) -> discord.Role:
-        return self.client.get_guild(self.guild_id).get_role(self.chat_support_role_id)
+        return self.get_server().get_role(self.chat_support_role_id)
 
     def get_voice_support_role(self) -> discord.Role:
-        return self.client.get_guild(self.guild_id).get_role(self.voice_support_role_id)
+        return self.get_server().get_role(self.voice_support_role_id)
+
+    def get_chat(self) -> discord.TextChannel:
+        return self.get_server().get_channel(self.chat_id)
 
     def get_message_log(self) -> discord.TextChannel:
-        return self.client.get_guild(self.guild_id).get_channel(self.message_channel_id)
+        return self.get_server().get_channel(self.message_channel_id)
 
     def get_voice_log(self) -> discord.TextChannel:
-        return self.client.get_guild(self.guild_id).get_channel(self.voice_channel_id)
+        return self.get_server().get_channel(self.voice_channel_id)
 
     def get_join_log(self) -> discord.TextChannel:
-        return self.client.get_guild(self.guild_id).get_channel(self.join_channel_id)
+        return self.get_server().get_channel(self.join_channel_id)
 
     def get_leave_log(self) -> discord.TextChannel:
-        return self.client.get_guild(self.guild_id).get_channel(self.leave_channel_id)
+        return self.get_server().get_channel(self.leave_channel_id)
 
     def get_voice_support_channel(self) -> discord.VoiceChannel:
-        return self.client.get_guild(self.guild_id).get_channel(self.voice_support_channel_id)
+        return self.get_server().get_channel(self.voice_support_channel_id)
 
     def get_team_voice_support_channel(self) -> discord.TextChannel:
-        return self.client.get_guild(self.guild_id).get_channel(self.team_voice_support_channel_id)
+        return self.get_server().get_channel(self.team_voice_support_channel_id)
+
+    def get_member(self, user_id: int) -> discord.Member:
+        return self.get_server().get_member(user_id)

@@ -1,10 +1,109 @@
+import random
 from datetime import datetime
 
 import discord
+from discord.ext import tasks
 
 from config import Config
 from database import Database
 from module import Module
+
+
+class AmongUs(Module):
+    def __init__(self, config: Config):
+        super().__init__(config)
+        self.message = None
+        self.reactions = {}
+        self.order = []
+        self.impostor = None
+        self.crewmate1 = None
+        self.crewmate2 = None
+        self.votes = [0, 0, 0]
+
+    @tasks.loop(seconds=86400)
+    async def run_schedule(self):
+        members = self.config.get_server().members.copy()
+        self.impostor = members[random.randint(0, len(members) - 1)]
+        members.remove(self.impostor)
+        self.crewmate1 = members[random.randint(0, len(members) - 1)]
+        members.remove(self.crewmate1)
+        self.crewmate2 = members[random.randint(0, len(members) - 1)]
+        members.remove(self.crewmate2)
+        self.order = [self.impostor, self.crewmate1, self.crewmate2]
+        random.shuffle(self.order)
+        self.message = await self.config.get_chat().send('**Ein Impostor ist unter uns!**\n\nVote einen der **drei Crewmates** raus! ' + self.config.among_us_1_emote + '\nWenn du den **Impostor** votest, erhältst du **500 Melons** fürs Levelsystem. ' + self.config.among_us_2_emote + '\nDie **überlebenden Crewmates** erhalten jeweils **100 Melons**! Bei einem **Unentschieden** bekommt jeder **100 Melons**. ' + self.config.among_us_3_emote + '\nBeeilt euch, die Abstimmung ist auf **5 Personen** begrenzt! ' + self.config.among_us_4_emote + '\n\n**1. Verdächtiger:** ' + self.order[0].display_name + '\n**2. Verdächtiger:** ' + self.order[1].display_name + '\n**3. Verdächtiger:** ' + self.order[2].display_name)
+        await self.message.add_reaction('1️⃣')
+        await self.message.add_reaction('2️⃣')
+        await self.message.add_reaction('3️⃣')
+        self.run_schedule.change_interval(seconds=self.config.among_us_delay + 2 * random.randint(0, self.config.among_us_delay_offset) - self.config.among_us_delay_offset)
+
+    async def on_reaction_add(self, reaction: discord.Reaction, member: discord.Member) -> None:
+        if self.message is None or self.message.id != reaction.message.id:
+            return
+        if reaction.emoji != '1️⃣' and reaction.emoji != '2️⃣' and reaction.emoji != '3️⃣':
+            return
+        if self.reactions.get(member.id) is not None:
+            await reaction.message.remove_reaction(self.reactions.get(member.id), member)
+        if reaction.emoji == '1️⃣':
+            self.votes[0] += 1
+            self.reactions[member.id] = 0
+        if reaction.emoji == '2️⃣':
+            self.votes[1] += 1
+            self.reactions[member.id] = 1
+        if reaction.emoji == '3️⃣':
+            self.votes[2] += 1
+            self.reactions[member.id] = 2
+        if len(self.reactions) == 5:
+            index = None
+            if self.votes[0] > self.votes[1] and self.votes[0] > self.votes[2]:
+                index = self.votes[0]
+            if self.votes[1] > self.votes[0] and self.votes[1] > self.votes[2]:
+                index = self.votes[1]
+            if self.votes[2] > self.votes[0] and self.votes[2] > self.votes[1]:
+                index = self.votes[2]
+            if index is None:
+                user = None
+                username = '_niemand_'
+            else:
+                user = self.order[index]
+                username = user.display_name
+            users = []
+            usernames = ''
+            for key, value in self.reactions:
+                if value == index:
+                    users.append(key)
+                    usernames += ', ' + self.config.get_member(key).display_name
+            reaction.message.channel.send('**Gewählter Impostor:** ' + username + '\n**Richtiger Impostor:** ' + self.impostor.display_name + '\n**Richtigen Impostor gewählt:**' + usernames[2:])
+            # TODO level system
+            self.message = None
+            self.reactions = {}
+            self.order = []
+            self.impostor = None
+            self.crewmate1 = None
+            self.crewmate2 = None
+            self.votes = [0, 0, 0]
+
+    async def on_reaction_remove(self, reaction: discord.Reaction, member: discord.Member) -> None:
+        if self.message is None or self.message.id != reaction.message.id:
+            return
+        if reaction.emoji != '1️⃣' and reaction.emoji != '2️⃣' and reaction.emoji != '3️⃣':
+            return
+        if reaction.emoji == '1️⃣':
+            self.votes[0] -= 1
+            if self.reactions.get(member.id) == 0:
+                self.reactions.pop(member.id)
+        if reaction.emoji == '2️⃣':
+            self.votes[1] -= 1
+            if self.reactions.get(member.id) == 1:
+                self.reactions.pop(member.id)
+        if reaction.emoji == '3️⃣':
+            self.votes[2] -= 1
+            if self.reactions.get(member.id) == 2:
+                self.reactions.pop(member.id)
+
+    async def on_ready(self) -> None:
+        self.run_schedule.change_interval(seconds=self.config.among_us_delay + 2 * random.randint(0, self.config.among_us_delay_offset) - self.config.among_us_delay_offset)
+        self.run_schedule.start()
 
 
 class Counter(Module):
