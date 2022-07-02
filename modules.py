@@ -62,11 +62,9 @@ class AmongUs(Module):
             if self.votes[2] > self.votes[0] and self.votes[2] > self.votes[1]:
                 index = self.votes[2]
             if index is None:
-                user = None
                 username = '_niemand_'
             else:
-                user = self.order[index]
-                username = user.display_name
+                username = self.order[index].display_name
             users = []
             usernames = ''
             for key, value in self.reactions:
@@ -144,6 +142,15 @@ class Counter(Module):
                 self.database.execute('UPDATE counters SET val = ' + str(amount) + ' WHERE id = \'' + var + '\';')
             result = self.database.execute('SELECT val FROM counters WHERE id = \'' + var + '\';')
             await message.channel.send(embed=self.embed(var + ' = ' + str(result[0][0])))
+
+
+class Creeper(Module):
+    def __init__(self, config: Config):
+        super().__init__(config)
+
+    async def on_message(self, message: discord.Message) -> None:
+        if str(message.content).startswith('!creeper') or str(message.content).startswith('creeper') or str(message.content).startswith('creper'):
+            await message.channel.send('Es ist erlaubt, das Wort Creeper zu schreiben. Es ist jedoch verboten, den Songtext von "Creeper, Aw Man" (Revenge) zu schreiben, da es in der Vergangenheit immer wieder zu Spam geführt hat.')
 
 
 class Flomote(Module):
@@ -236,6 +243,29 @@ class RawEcho(Module):
     async def on_message(self, message: discord.Message) -> None:
         if str(message.content).startswith('!rawecho '):
             await message.channel.send('`' + str(message.content)[len('!rawecho '):] + '`')
+
+
+class Rules(Module):
+    def __init__(self, config: Config):
+        super().__init__(config)
+        self.messages = 10
+
+    @tasks.loop(seconds=1800)
+    async def run_schedule(self):
+        if self.messages > 10:
+            await self.send_message()
+
+    async def send_message(self):
+        await self.config.get_chat().send('Bitte lest euch die Regeln in <#' + str(self.config.rules_id) + '> bzw. die Kurzfassung in <#' + str(self.config.short_rules_id) + '> durch!')
+        self.messages = 0
+
+    async def on_message(self, message: discord.Message) -> None:
+        self.messages = self.messages + 1
+        if str(message.content).startswith('!regeln'):
+            await self.send_message()
+
+    async def on_ready(self) -> None:
+        self.run_schedule.start()
 
 
 class Tricks(Module):

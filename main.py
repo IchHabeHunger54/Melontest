@@ -6,10 +6,12 @@ config = Config(bot)
 modules = [
     AmongUs(config),
     Counter(config, Database(config.counter_user, config.counter_pw, config.host, config.counter_db)),
+    Creeper(config),
     Flomote(config),
     Logger(config),
     Ping(config),
     RawEcho(config),
+    Rules(config),
     Tricks(config, Database(config.tricks_user, config.tricks_pw, config.host, config.tricks_db)),
     VoiceSupportNotification(config)
 ]

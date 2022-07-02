@@ -35,6 +35,8 @@ class Config:
             self.leave_channel_id = jsonfile['debug_leave_log_id']
             self.voice_support_channel_id = jsonfile['debug_voice_support_channel_id']
             self.team_voice_support_channel_id = jsonfile['debug_team_voice_support_channel_id']
+            self.rules_id = jsonfile['debug_rules_id']
+            self.short_rules_id = jsonfile['debug_short_rules_id']
             self.among_us_delay = jsonfile['debug_among_us_delay']
             self.among_us_delay_offset = jsonfile['debug_among_us_delay_offset']
         else:
@@ -55,6 +57,8 @@ class Config:
             self.leave_channel_id = jsonfile['leave_log_id']
             self.voice_support_channel_id = jsonfile['voice_support_channel_id']
             self.team_voice_support_channel_id = jsonfile['team_voice_support_channel_id']
+            self.rules_id = jsonfile['rules_id']
+            self.short_rules_id = jsonfile['short_rules_id']
             self.among_us_delay = jsonfile['among_us_delay']
             self.among_us_delay_offset = jsonfile['among_us_delay_offset']
         self.flo_1_emote = jsonfile['flo_1_emote']
