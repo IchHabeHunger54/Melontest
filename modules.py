@@ -250,7 +250,7 @@ class Rules(Module):
         super().__init__(config)
         self.messages = 10
 
-    @tasks.loop(seconds=1800)
+    @tasks.loop(seconds=3600)
     async def run_schedule(self):
         if self.messages > 10:
             await self.send_message()
@@ -263,6 +263,31 @@ class Rules(Module):
         self.messages = self.messages + 1
         if str(message.content).startswith('!regeln'):
             await self.send_message()
+
+    async def on_ready(self) -> None:
+        self.run_schedule.start()
+
+
+class Slowmode(Module):
+    def __init__(self, config: Config):
+        super().__init__(config)
+        self.messages = 0
+
+    @tasks.loop(seconds=60)
+    async def run_schedule(self):
+        if self.messages > 15:
+            await self.config.get_chat().edit(slowmode_delay=15)
+        elif self.messages > 10:
+            await self.config.get_chat().edit(slowmode_delay=10)
+        elif self.messages > 5:
+            await self.config.get_chat().edit(slowmode_delay=5)
+        else:
+            await self.config.get_chat().edit(slowmode_delay=0)
+        self.messages = 0
+
+    async def on_message(self, message: discord.Message) -> None:
+        if message.channel.id == self.config.get_chat().id:
+            self.messages = self.messages + 1
 
     async def on_ready(self) -> None:
         self.run_schedule.start()

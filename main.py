@@ -12,6 +12,7 @@ modules = [
     Ping(config),
     RawEcho(config),
     Rules(config),
+    Slowmode(config),
     Tricks(config, Database(config.tricks_user, config.tricks_pw, config.host, config.tricks_db)),
     UserInfo(config),
     VoiceSupportNotification(config)
