@@ -256,7 +256,7 @@ class Rules(Module):
             await self.send_message()
 
     async def send_message(self):
-        await self.config.get_chat().send('Bitte lest euch die Regeln in <#' + str(self.config.rules_id) + '> bzw. die Kurzfassung in <#' + str(self.config.short_rules_id) + '> durch!')
+        await self.config.get_chat().send('Bitte lest euch die Regeln in ' + self.config.get_rules().mention + ' bzw. die Kurzfassung in ' + self.config.get_short_rules().mention + ' durch!')
         self.messages = 0
 
     async def on_message(self, message: discord.Message) -> None:
@@ -325,6 +325,46 @@ class Tricks(Module):
         tricks = self.database.execute('SELECT command FROM tricks;')
         for elem in tricks:
             self.tricks[elem[0]] = self.database.execute('SELECT text FROM tricks WHERE command = \'' + elem[0] + '\';')[0][0]
+
+
+class UserInfo(Module):
+    def __init__(self, config: Config):
+        super().__init__(config)
+
+    async def on_message(self, message: discord.Message) -> None:
+        if str(message.content).startswith('!userinfo'):
+            if message.channel.id != self.config.get_bot_channel().id:
+                await message.channel.send('Bitte benutze `!userinfo` nur in ' + self.config.get_bot_channel().mention + '!', delete_after=10)
+                await message.delete(delay=10)
+                return
+            args = str(message.content).split(' ')
+            if len(message.mentions) > 1 or len(args) > 2:
+                await message.channel.send('`!userinfo` funktioniert nur für einen User gleichzeitig!')
+                return
+            elif len(args) == 1:
+                user = message.author
+            else:
+                if args[1].startswith('<@') and args[1].endswith('>'):
+                    args[1] = args[1][2:-1]
+                try:
+                    userid = int(args[1])
+                except ValueError:
+                    await message.channel.send('`!userinfo` benötigt entweder einen Ping, eine User-ID oder überhaupt kein zusätzliches Argument!')
+                    return
+                user = self.config.get_server().get_member(userid)
+                if user is None:
+                    await message.channel.send('User `' + str(userid) + '` konnte nicht gefunden werden!')
+                    return
+            embed = self.embed(user.display_name).set_thumbnail(url=user.avatar_url)
+            embed.add_field(name='Benutzername:', value=user.name + '#' + user.discriminator, inline=False)
+            embed.add_field(name='ID:', value=user.id, inline=False)
+            embed.add_field(name='Ping:', value=user.mention, inline=False)
+            embed.add_field(name='Account erstellt:', value=self.get_readable_datetime(str(user.created_at)), inline=False)
+            embed.add_field(name='Dem Server beigetreten:', value=self.get_readable_datetime(str(user.joined_at)), inline=False)
+            premium = user.premium_since
+            if premium is not None:
+                embed.add_field(name='Booster seit:', value=self.get_readable_datetime(str(premium)), inline=False)
+            await message.channel.send(embed=embed)
 
 
 class VoiceSupportNotification(Module):

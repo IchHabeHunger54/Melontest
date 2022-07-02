@@ -13,6 +13,7 @@ modules = [
     RawEcho(config),
     Rules(config),
     Tricks(config, Database(config.tricks_user, config.tricks_pw, config.host, config.tricks_db)),
+    UserInfo(config),
     VoiceSupportNotification(config)
 ]
 
