@@ -11,6 +11,7 @@ modules = [
     Logger(config),
     Ping(config),
     RawEcho(config),
+    Roles(config),
     Rules(config),
     Slowmode(config),
     Tricks(config, Database(config.tricks_user, config.tricks_pw, config.host, config.tricks_db)),

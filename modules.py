@@ -245,6 +245,35 @@ class RawEcho(Module):
             await message.channel.send('`' + str(message.content)[len('!rawecho '):] + '`')
 
 
+class Roles(Module):
+    def __init__(self, config: Config):
+        super().__init__(config)
+
+    async def on_message(self, message: discord.Message) -> None:
+        content = str(message.content)
+        if content.startswith('!videos'):
+            await message.author.add_roles(self.config.get_video_role())
+            await message.channel.send('Du erhältst nun eine Benachrichtigung, sobald Chaosflo44 ein neues Video hochlädt!')
+        if content.startswith('!keinevideos'):
+            await message.author.remove_roles(self.config.get_video_role())
+            await message.channel.send('Du erhältst nun keine Benachrichtigung mehr, sobald Chaosflo44 ein neues Video hochlädt!')
+        if self.config.is_team(message.author):
+            if content.startswith('!chatsupport'):
+                await message.author.add_roles(self.config.get_chat_support_role())
+                await message.channel.send('Du erhältst nun eine Benachrichtigung, sobald Chatsupport benötigt wird!')
+            if content.startswith('!keinchatsupport'):
+                await message.author.remove_roles(self.config.get_chat_support_role())
+                await message.channel.send('Du erhältst nun keine Benachrichtigung mehr, sobald Chatsupport benötigt wird!')
+            if content.startswith('!voicesupport'):
+                await message.author.add_roles(self.config.get_voice_support_role())
+                await message.channel.send('Du erhältst nun eine Benachrichtigung, sobald Voicesupport benötigt wird!')
+            if content.startswith('!keinvoicesupport'):
+                await message.author.remove_roles(self.config.get_voice_support_role())
+                await message.channel.send('Du erhältst nun keine Benachrichtigung mehr, sobald Voicesupport benötigt wird!')
+        else:
+            await message.channel.send('Dieser Command ist nur für Teammitglieder verfügbar!')
+
+
 class Rules(Module):
     def __init__(self, config: Config):
         super().__init__(config)

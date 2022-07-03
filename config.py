@@ -24,10 +24,11 @@ class Config:
             self.supporter_id = jsonfile['debug_supporter_id']
             self.test_moderator_id = jsonfile['debug_test_moderator_id']
             self.moderator_id = jsonfile['debug_moderator_id']
-            self.voice_support_role_id = jsonfile['debug_voice_support_role_id']
-            self.chat_support_role_id = jsonfile['debug_chat_support_role_id']
             self.head_moderator_id = jsonfile['debug_head_moderator_id']
             self.test_administrator_id = jsonfile['debug_test_administrator_id']
+            self.voice_support_role_id = jsonfile['debug_voice_support_role_id']
+            self.chat_support_role_id = jsonfile['debug_chat_support_role_id']
+            self.video_role_id = jsonfile['debug_video_role_id']
             self.chat_id = jsonfile['debug_chat_id']
             self.bot_channel_id = jsonfile['debug_bot_channel_id']
             self.message_channel_id = jsonfile['debug_message_log_id']
@@ -51,6 +52,7 @@ class Config:
             self.test_administrator_id = jsonfile['test_administrator_id']
             self.voice_support_role_id = jsonfile['voice_support_role_id']
             self.chat_support_role_id = jsonfile['chat_support_role_id']
+            self.video_role_id = jsonfile['video_role_id']
             self.chat_id = jsonfile['chat_id']
             self.bot_channel_id = jsonfile['bot_channel_id']
             self.message_channel_id = jsonfile['message_log_id']
@@ -108,6 +110,9 @@ class Config:
 
     def get_server(self) -> discord.Guild:
         return self.client.get_guild(self.guild_id)
+
+    def get_video_role(self) -> discord.Role:
+        return self.get_server().get_role(self.video_role_id)
 
     def get_chat_support_role(self) -> discord.Role:
         return self.get_server().get_role(self.chat_support_role_id)
