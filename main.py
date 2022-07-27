@@ -5,6 +5,7 @@ bot = discord.Client(intents=discord.Intents.all(), command_prefix='!', case_ins
 config = Config(bot)
 modules = [
     AmongUs(config),
+    Clear(config),
     Counter(config),
     Creeper(config),
     Flomote(config),

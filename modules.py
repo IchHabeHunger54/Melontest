@@ -103,43 +103,56 @@ class AmongUs(Module):
         self.run_schedule.start()
 
 
+class Clear(Module):
+    def __init__(self, config: Config):
+        super().__init__(config)
+
+    async def on_message(self, message: discord.Message) -> None:
+        content = str(message.content).lower()
+        if str(message.content).lower().startswith('!clear '):
+            strings = content.split(' ')
+            if len(strings) > 1 and strings[1].isnumeric():
+                async for m in message.channel.history(limit=int(strings[1])):
+                    await m.delete()
+
+
 class Counter(Module):
     def __init__(self, config: Config):
         super().__init__(config)
 
     async def on_message(self, message: discord.Message) -> None:
         content = str(message.content).lower()
-        var = None
+        variable = None
         amount = 0
         if content.endswith('='):
-            var = content.replace('=', '')
-            result = self.config.database.execute('SELECT val FROM counters WHERE id = \'' + var + '\';')
-            await message.channel.send(var + ' = ' + str(result[0][0]))
+            variable = content.replace('=', '')
+            result = self.config.database.execute('SELECT val FROM counters WHERE id = \'' + variable + '\';')
+            await message.channel.send(variable + ' = ' + str(result[0][0]))
         elif content.endswith('++') and content.count('++') == 1:
-            var = content.replace('++', '')
+            variable = content.replace('++', '')
             amount = 1
         elif content.endswith('--') and content.count('--') == 1:
-            var = content.replace('--', '')
+            variable = content.replace('--', '')
             amount = -1
         elif content.find('+=') and content.count('+=') == 1:
             strings = content.split('+=')
             if len(strings) == 2 and strings[1].isnumeric():
-                var = strings[0]
+                variable = strings[0]
                 amount = int(strings[1])
         elif content.find('-=') and content.count('-=') == 1:
             strings = content.split('-=')
             if len(strings) == 2 and strings[1].isnumeric():
-                var = strings[0]
+                variable = strings[0]
                 amount = -int(strings[1])
-        if var is not None and amount != 0:
-            old = self.config.database.execute('SELECT val FROM counters WHERE id = \'' + var + '\';')
+        if variable is not None and amount != 0:
+            old = self.config.database.execute('SELECT val FROM counters WHERE id = \'' + variable + '\';')
             if len(old) == 0:
-                self.config.database.execute('REPLACE INTO counters (id, val) VALUES(\'' + var + '\', ' + str(amount) + ');')
+                self.config.database.execute('REPLACE INTO counters (id, val) VALUES(\'' + variable + '\', ' + str(amount) + ');')
             else:
                 amount += old[0][0]
-                self.config.database.execute('UPDATE counters SET val = ' + str(amount) + ' WHERE id = \'' + var + '\';')
-            result = self.config.database.execute('SELECT val FROM counters WHERE id = \'' + var + '\';')
-            await message.channel.send(var + ' = ' + str(result[0][0]))
+                self.config.database.execute('UPDATE counters SET val = ' + str(amount) + ' WHERE id = \'' + variable + '\';')
+            result = self.config.database.execute('SELECT val FROM counters WHERE id = \'' + variable + '\';')
+            await message.channel.send(variable + ' = ' + str(result[0][0]))
 
 
 class Creeper(Module):
