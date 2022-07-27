@@ -20,9 +20,12 @@
       "November",
       "Dezember"
     ],
-    "team_only": "Dieser Command ist nur für Teammitglieder verfügbar!",
+    "invalid": "**Fehler:** Der angegebene User existiert nicht oder ist nicht auf diesem Server!",
+    "team_only": "**Fehler:** Dieser Command ist nur für Teammitglieder verfügbar!",
+    "no_team": "**Fehler:** Dieser Command kann nicht auf Teammitglieder angewandt werden!",
+    "only_team": "**Fehler:** Dieser Command kann nur auf Teammitglieder angewandt werden!",
     "among_us": {
-      "start": "**Ein Impostor ist unter uns!**\n\nVote einen der **drei Crewmates** raus! <:floRage:529699583077646345>\nWenn du den **Impostor** votest, erhältst du **50 Melons** fürs Levelsystem. <:FloImpostor:787386229926789130>\nDie **überlebenden Crewmates** erhalten jeweils **10 Melons**! Bei einem **Unentschieden** bekommt jeder **10 Melons**. <:FloStonks:794266216993652806>\nBeeilt euch, die Abstimmung ist auf **5 Personen** begrenzt! <:TeamMeloneBLITZ:578632071577337866>\n\n**1. Verdächtiger:** %s\n**2. Verdächtiger:** %s\n**3. Verdächtiger:** %s",
+      "start": "**Ein Impostor ist unter uns!**\n\nVote einen der **drei Crewmates** raus! <:floRage:529699583077646345>\nWenn du den **Impostor** votest, erhältst du **%s Melons** fürs Levelsystem. <:FloImpostor:787386229926789130>\nDie **überlebenden Crewmates** erhalten jeweils **%s Melons**! Bei einem **Unentschieden** bekommt jeder **%s Melons**. <:FloStonks:794266216993652806>\nBeeilt euch, die Abstimmung ist auf **%s Personen** begrenzt! <:TeamMeloneBLITZ:578632071577337866>\n\n**1. Verdächtiger:** %s\n**2. Verdächtiger:** %s\n**3. Verdächtiger:** %s",
       "end": "**Gewählter Impostor:** %s\n**Richtiger Impostor:** %s\n**Richtigen Impostor gewählt:** %s",
       "none": "_niemand_"
     },
@@ -45,6 +48,17 @@
       "created": "Account erstellt:",
       "joined": "Server betreten:"
     },
+    "moderation": {
+      "warn_success": "%s **wurde verwarnt.**\n\n**Grund:** %s\n\n**Teammitglied:** %s",
+      "warn_failure": "**Fehlender User oder Grund!** Verwendung: `!warn <User oder User-ID>`<Grund>",
+      "too_many_warnings": "Zu viele Verwarnungen!",
+      "removewarn_success": "Der Warn mit der ID %s wurde entfernt.",
+      "removewarn_failure": "**Fehlende oder ungültige Warn-ID.** Verwendung: `!removewarn <Warn-ID>`",
+      "warnings_success": "**Verwarnungen von %s:** \n",
+      "warnings_item": "\n- Am **%s**, wegen **%s**, durch **%s** (ID: %s)",
+      "warnings_none": "\n_Dieser Nutzer hat keine Verwarnungen._",
+      "warnings_expired": "_ - abgelaufen_"
+    },
     "ping": {
       "success": "Ping: %s Sekunden",
       "failure": "Ping: > 1 Minute. Bitte ans Team melden!"
@@ -63,17 +77,15 @@
     },
     "rules": "Bitte lest euch die Regeln in %s bzw. die Kurzfassung in %s durch!",
     "tricks": {
-      "added": "Trick !%s wurde hinzugefügt.\n",
-      "removed": "Trick !%s wurde entfernt.\n",
-      "list": "Liste aller Trickbefehle:",
+      "added": "**Trick !%s wurde hinzugefügt.**\n\n",
+      "removed": "**Trick !%s wurde entfernt.**\n\n",
+      "list": "**Liste aller Trickbefehle:**\n",
       "none": "\n_Aktuell sind keine Trickbefehle registriert._"
     },
     "userinfo": {
       "wrong_channel": "Bitte benutze `!userinfo` nur in %s!",
       "multiple_arguments": "`!userinfo` funktioniert nur für einen User gleichzeitig!",
-      "invalid_argument": "`!userinfo` benötigt entweder einen Ping, eine User-ID oder überhaupt kein zusätzliches Argument!",
-      "unknown_user": "User `%s` konnte nicht gefunden werden!",
-      "user": "User:",
+      "member": "User:",
       "id": "ID:",
       "mention": "Ping:",
       "account_created": "Account erstellt:",
@@ -83,15 +95,22 @@
     "voice_support": "%s Benachrichtigung! %s benötigt Support per Voice!"
   },
   "delays": {
-    "among_us": 8640,
-    "among_us_offset": 2880,
-    "rules": 360,
+    "among_us": 86400,
+    "among_us_offset": 28800,
+    "rules": 3600,
     "slowmode": 60
   },
   "values": {
-    "delete_after": 10,
+    "among_us_crewmate": 100,
     "among_us_limit": 5,
-    "rules_limit": 10
+    "among_us_reward": 500,
+    "ban_warnings": 5,
+    "delete_after": 10,
+    "kick_warnings": 4,
+    "mute_duration": 259200,
+    "mute_warnings": 3,
+    "rules_limit": 10,
+    "warn_expire_days": 14
   },
   "database": {
     "hostname": "",

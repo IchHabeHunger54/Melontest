@@ -30,7 +30,7 @@ class AmongUs(Module):
         members.remove(self.crewmate2)
         self.order = [self.impostor, self.crewmate1, self.crewmate2]
         random.shuffle(self.order)
-        self.message = await self.config.get_chat().send(self.config.texts['among_us']['start'] % (self.order[0].display_name, self.order[1].display_name, self.order[2].display_name))
+        self.message = await self.config.get_chat().send(self.config.texts['among_us']['start'] % (self.config.values['among_us_reward'], self.config.values['among_us_crewmate'], self.config.values['among_us_crewmate'], self.config.values['among_us_limit'], self.order[0].display_name, self.order[1].display_name, self.order[2].display_name))
         await self.message.add_reaction('1️⃣')
         await self.message.add_reaction('2️⃣')
         await self.message.add_reaction('3️⃣')
@@ -104,29 +104,28 @@ class AmongUs(Module):
 
 
 class Clear(Module):
-    def __init__(self, config: Config):
-        super().__init__(config)
-
     async def on_message(self, message: discord.Message) -> None:
         content = str(message.content).lower()
         if str(message.content).lower().startswith('!clear '):
-            strings = content.split(' ')
-            if len(strings) > 1 and strings[1].isnumeric():
-                async for m in message.channel.history(limit=int(strings[1])):
-                    await m.delete()
+            if self.config.is_team(message.author):
+                strings = content.split(' ')
+                if len(strings) > 1 and strings[1].isnumeric():
+                    async for m in message.channel.history(limit=int(strings[1])):
+                        await m.delete()
+            else:
+                await message.channel.send(self.config.texts['team_only'], delete_after=self.config.values['delete_after'])
 
 
 class Counter(Module):
-    def __init__(self, config: Config):
-        super().__init__(config)
-
     async def on_message(self, message: discord.Message) -> None:
         content = str(message.content).lower()
+        if ' ' in content:
+            return
         variable = None
         amount = 0
         if content.endswith('='):
             variable = content.replace('=', '')
-            result = self.config.database.execute('SELECT val FROM counters WHERE id = \'' + variable + '\';')
+            result = self.config.database.execute('SELECT value FROM counters WHERE id = \'' + variable + '\';')
             await message.channel.send(variable + ' = ' + str(result[0][0]))
         elif content.endswith('++') and content.count('++') == 1:
             variable = content.replace('++', '')
@@ -145,29 +144,23 @@ class Counter(Module):
                 variable = strings[0]
                 amount = -int(strings[1])
         if variable is not None and amount != 0:
-            old = self.config.database.execute('SELECT val FROM counters WHERE id = \'' + variable + '\';')
+            old = self.config.database.execute('SELECT value FROM counters WHERE id = \'' + variable + '\';')
             if len(old) == 0:
-                self.config.database.execute('REPLACE INTO counters (id, val) VALUES(\'' + variable + '\', ' + str(amount) + ');')
+                self.config.database.execute('INSERT INTO counters (id, value) VALUES(\'' + variable + '\', ' + str(amount) + ');')
             else:
                 amount += old[0][0]
-                self.config.database.execute('UPDATE counters SET val = ' + str(amount) + ' WHERE id = \'' + variable + '\';')
-            result = self.config.database.execute('SELECT val FROM counters WHERE id = \'' + variable + '\';')
+                self.config.database.execute('UPDATE counters SET value = ' + str(amount) + ' WHERE id = \'' + variable + '\';')
+            result = self.config.database.execute('SELECT value FROM counters WHERE id = \'' + variable + '\';')
             await message.channel.send(variable + ' = ' + str(result[0][0]))
 
 
 class Creeper(Module):
-    def __init__(self, config: Config):
-        super().__init__(config)
-
     async def on_message(self, message: discord.Message) -> None:
         if str(message.content).startswith('!creeper') or str(message.content).startswith('creeper') or str(message.content).startswith('creper'):
             await message.channel.send(self.config.texts['creeper'])
 
 
 class Flomote(Module):
-    def __init__(self, config: Config):
-        super().__init__(config)
-
     async def on_message(self, message: discord.Message) -> None:
         if str(message.content).lower().startswith('flomote'):
             await message.channel.send(self.config.texts['flomote'])
@@ -176,9 +169,6 @@ class Flomote(Module):
 
 
 class Logger(Module):
-    def __init__(self, config: Config):
-        super().__init__(config)
-
     async def on_member_join(self, member: discord.Member) -> None:
         embed = self.embed(self.config.texts['logger']['guild_joined'])
         embed.add_field(name=self.config.texts['logger']['user'], value=member.mention, inline=False)
@@ -229,10 +219,115 @@ class Logger(Module):
             await self.config.get_voice_log().send(embed=embed)
 
 
-class Ping(Module):
-    def __init__(self, config: Config):
-        super().__init__(config)
+class Moderation(Module):
+    @staticmethod
+    async def timeout(member: discord.Member, duration: int, reason: str) -> None:
+        # TODO
+        pass
 
+    @staticmethod
+    async def kick(member: discord.Member, reason: str) -> None:
+        await member.kick(reason=reason)
+
+    @staticmethod
+    async def ban(member: discord.Member, reason: str) -> None:
+        await member.ban(reason=reason, delete_message_days=0)
+
+    async def on_message(self, message: discord.Message) -> None:
+        if not str(message.content).startswith('!'):
+            return
+        if not self.config.is_team(message.author):
+            await message.channel.send(self.config.texts['team_only'], delete_after=self.config.values['delete_after'])
+            await message.delete(delay=self.config.values['delete_after'])
+            return
+        args = str(message.content).split(' ')
+        args[0] = args[0].lower()[1:]
+        if args[0] == 'warn':
+            if len(args) < 3:
+                await message.channel.send(self.config.texts['moderation']['warn_failure'], delete_after=self.config.values['delete_after'])
+                await message.delete(delay=self.config.values['delete_after'])
+                return
+            member = await self.get_non_team_member_from_id_or_mention(args[1], message)
+            if member is None:
+                return
+            reason = ' '.join(args[2:])
+            self.config.database.execute('INSERT INTO warns (member, reason, time, team_member) VALUES(' + str(member.id) + ', \'' + reason + '\', \'' + str(datetime.now()) + '\', ' + str(message.author.id) + ');')
+            await message.channel.send(self.config.texts['moderation']['warn_success'] % (member.mention, reason, message.author.mention))
+            await message.delete()
+            databasecontents = self.config.database.execute('SELECT * FROM warns WHERE member = ' + str(member.id) + ' ORDER BY id;')
+            active = []
+            for i in databasecontents:
+                date = str(datetime.now() - datetime.strptime(i[3][:19], '%Y-%m-%d %H:%M:%S'))
+                if 'days' not in date:
+                    active += i
+                else:
+                    try:
+                        days = int(date.split(' ')[0])
+                        if days < self.config.values['warn_expire_days']:
+                            active += i
+                    except ValueError:
+                        pass
+            if len(active) >= self.config.values['mute_warnings']:
+                await self.timeout(member, self.config.values['mute_duration'], self.config.texts['moderation']['too_many_warnings'])
+            if len(active) >= self.config.values['kick_warnings']:
+                await self.kick(member, self.config.texts['moderation']['too_many_warnings'])
+            if len(active) >= self.config.values['ban_warnings']:
+                await self.ban(member, self.config.texts['moderation']['too_many_warnings'])
+        elif args[0] == 'removewarn':
+            try:
+                warn = int(args[1])
+            except ValueError:
+                await message.channel.send(self.config.texts['moderation']['removewarn_failure'], delete_after=self.config.values['delete_after'])
+                await message.delete(delay=self.config.values['delete_after'])
+                return
+            self.config.database.execute('DELETE FROM warns WHERE id = ' + str(warn) + ';')
+            await message.channel.send(self.config.texts['moderation']['removewarn_success'] % warn)
+            await message.delete()
+        elif args[0] == 'warnings':
+            if len(args) == 1:
+                member = message.author
+            else:
+                member = await self.get_member_from_id_or_mention(args[1], message)
+            if member is None:
+                return
+            databasecontents = self.config.database.execute('SELECT * FROM warns WHERE member = ' + str(member.id) + ' ORDER BY id;')
+            result = self.config.texts['moderation']['warnings_success'] % member.mention
+            if len(databasecontents) == 0:
+                result += self.config.texts['moderation']['warnings_none']
+            else:
+                for i in databasecontents:
+                    result += self.config.texts['moderation']['warnings_item'] % (self.get_readable_datetime(i[3]), i[2], self.config.get_member(i[4]).mention, i[0])
+                    date = str(datetime.now() - datetime.strptime(i[3][:19], '%Y-%m-%d %H:%M:%S'))
+                    if 'days' in date:
+                        try:
+                            days = int(date.split(' ')[0])
+                            if days >= self.config.values['warn_expire_days']:
+                                result += self.config.texts['moderation']['warnings_expired']
+                        except ValueError:
+                            pass
+            await message.channel.send(result)
+            print(databasecontents)
+        elif args[0] == 'mute':
+            # TODO
+            pass
+        elif args[0] == 'unmute':
+            # TODO
+            pass
+        elif args[0] == 'kick':
+            member = await self.get_non_team_member_from_id_or_mention(args[1], message)
+            if member is not None:
+                await self.kick(member, ' '.join(args[2:]))
+        elif args[0] == 'ban':
+            member = await self.get_non_team_member_from_id_or_mention(args[1], message)
+            if member is not None:
+                await self.ban(member, ' '.join(args[2:]))
+        elif args[0] == 'unban':
+            member = await self.get_member_from_id_or_mention(args[1], message)
+            if member is not None:
+                member.unban(' '.join(args[2:]))
+
+
+class Ping(Module):
     async def on_message(self, message: discord.Message) -> None:
         if str(message.content).startswith('!ping'):
             created_at = message.created_at
@@ -248,18 +343,12 @@ class Ping(Module):
 
 
 class RawEcho(Module):
-    def __init__(self, config: Config):
-        super().__init__(config)
-
     async def on_message(self, message: discord.Message) -> None:
         if str(message.content).startswith('!rawecho '):
             await message.channel.send('`' + str(message.content)[len('!rawecho '):] + '`')
 
 
 class Reload(Module):
-    def __init__(self, config: Config):
-        super().__init__(config)
-
     async def on_message(self, message: discord.Message) -> None:
         if str(message.content).startswith('!reload'):
             await message.channel.send(self.config.texts['reload']['start'])
@@ -268,9 +357,6 @@ class Reload(Module):
 
 
 class Roles(Module):
-    def __init__(self, config: Config):
-        super().__init__(config)
-
     async def on_message(self, message: discord.Message) -> None:
         content = str(message.content)
         if content.startswith('!videos'):
@@ -299,7 +385,7 @@ class Roles(Module):
 class Rules(Module):
     def __init__(self, config: Config):
         super().__init__(config)
-        self.messages = int(self.config.values['rules_limit'])
+        self.messages = 0
 
     @tasks.loop(seconds=1)
     async def run_schedule(self):
@@ -362,7 +448,7 @@ class Tricks(Module):
                 if len(split) > 2:
                     name = split[1].lower()
                     text = message.content.replace('!addtrick ' + name + ' ', '')
-                    self.config.database.execute('REPLACE INTO tricks (id, text) VALUES(\'' + name + '\', \'' + text + '\');')
+                    self.config.database.execute('INSERT INTO tricks (id, text) VALUES(\'' + name + '\', \'' + text + '\');')
                     self.tricks[name] = text
                     await message.channel.send((self.config.texts['tricks']['added'] % name) + text)
             elif content.startswith('!removetrick'):
@@ -396,9 +482,6 @@ class Tricks(Module):
 
 
 class UserInfo(Module):
-    def __init__(self, config: Config):
-        super().__init__(config)
-
     async def on_message(self, message: discord.Message) -> None:
         if str(message.content).startswith('!userinfo'):
             if message.channel.id != self.config.get_bots().id:
@@ -411,37 +494,24 @@ class UserInfo(Module):
                 await message.delete(delay=self.config.values['delete_after'])
                 return
             elif len(args) == 1:
-                user = message.author
+                member = message.author
             else:
-                if args[1].startswith('<@') and args[1].endswith('>'):
-                    args[1] = args[1][2:-1]
-                try:
-                    userid = int(args[1])
-                except ValueError:
-                    await message.channel.send(self.config.texts['userinfo']['invalid_argument'], delete_after=self.config.values['delete_after'])
-                    await message.delete(delay=self.config.values['delete_after'])
+                member = self.get_member_from_id_or_mention(args[1], message)
+                if member is None:
                     return
-                user = self.config.get_member(userid)
-                if user is None:
-                    await message.channel.send(self.config.texts['userinfo']['unknown_user'] % str(userid), delete_after=self.config.values['delete_after'])
-                    await message.delete(delay=self.config.values['delete_after'])
-                    return
-            embed = self.embed(user.display_name).set_thumbnail(url=user.avatar_url)
-            embed.add_field(name=self.config.texts['userinfo']['user'], value=user.name + '#' + user.discriminator, inline=False)
-            embed.add_field(name=self.config.texts['userinfo']['id'], value=user.id, inline=False)
-            embed.add_field(name=self.config.texts['userinfo']['mention'], value=user.mention, inline=False)
-            embed.add_field(name=self.config.texts['userinfo']['account_created'], value=self.get_readable_datetime(str(user.created_at)), inline=False)
-            embed.add_field(name=self.config.texts['userinfo']['guild_joined'], value=self.get_readable_datetime(str(user.joined_at)), inline=False)
-            premium = user.premium_since
+            embed = self.embed(member.display_name).set_thumbnail(url=member.avatar_url)
+            embed.add_field(name=self.config.texts['userinfo']['member'], value=member.name + '#' + member.discriminator, inline=False)
+            embed.add_field(name=self.config.texts['userinfo']['id'], value=member.id, inline=False)
+            embed.add_field(name=self.config.texts['userinfo']['mention'], value=member.mention, inline=False)
+            embed.add_field(name=self.config.texts['userinfo']['account_created'], value=self.get_readable_datetime(str(member.created_at)), inline=False)
+            embed.add_field(name=self.config.texts['userinfo']['guild_joined'], value=self.get_readable_datetime(str(member.joined_at)), inline=False)
+            premium = member.premium_since
             if premium is not None:
                 embed.add_field(name=self.config.texts['userinfo']['booster_since'], value=self.get_readable_datetime(str(premium)), inline=False)
             await message.channel.send(embed=embed)
 
 
 class VoiceSupport(Module):
-    def __init__(self, config: Config):
-        super().__init__(config)
-
     async def on_voice_state_update(self, member: discord.Member, before: discord.VoiceState, after: discord.VoiceState) -> None:
         if after.channel is not None and after.channel.id == self.config.get_voice_support_channel().id:
             await self.config.get_team_voice_support_channel().send(self.config.texts['voice_support'] % (self.config.get_voice_support_role().mention, member.mention))

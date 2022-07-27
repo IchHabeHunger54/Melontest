@@ -10,6 +10,7 @@ modules = [
     Creeper(config),
     Flomote(config),
     Logger(config),
+    Moderation(config),
     Ping(config),
     RawEcho(config),
     Roles(config),

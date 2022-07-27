@@ -16,12 +16,15 @@ class Database:
             connection = psycopg2.connect(user=self.username, password=self.password, host=self.hostname, database=self.database, port=self.port)
             cursor = connection.cursor()
             cursor.execute(query)
-            result = cursor.fetchall()
+            try:
+                result = cursor.fetchall()
+            except (Exception, psycopg2.DatabaseError):
+                result = None
             connection.commit()
             cursor.close()
             return result
         except (Exception, psycopg2.DatabaseError) as e:
-            print('Caught SQL Error: ', e)
+            print('Caught SQL Error:', e)
         finally:
             if connection is not None:
                 connection.close()

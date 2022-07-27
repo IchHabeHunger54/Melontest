@@ -12,7 +12,7 @@ class Config:
         self.texts = {}
         self.delays = {}
         self.values = {}
-        self.database = {}
+        self.database = None
         self.tables = {}
         self.is_debug = True
         self.token = ''

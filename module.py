@@ -55,3 +55,55 @@ class Module:
 
     def get_readable_datetime(self, date: str) -> str:
         return self.get_readable_date(date) + ', ' + date[11:19]
+
+    async def get_member_from_id_or_mention(self, mention: str, message: discord.Message):
+        if mention.startswith('<@') and mention.endswith('>'):
+            mention = mention[2:-1]
+        try:
+            userid = int(mention)
+        except ValueError:
+            await message.channel.send(self.config.texts['invalid'], delete_after=self.config.values['delete_after'])
+            await message.delete(delay=self.config.values['delete_after'])
+            return None
+        return self.config.get_member(userid)
+
+    async def get_team_member_from_id_or_mention(self, mention: str, message: discord.Message):
+        member = await self.get_member_from_id_or_mention(mention, message)
+        if member is None:
+            return None
+        if not self.config.is_team(member):
+            await message.channel.send(self.config.texts['only_team'], delete_after=self.config.values['delete_after'])
+            await message.delete(delay=self.config.values['delete_after'])
+            return None
+        return member
+
+    async def get_non_team_member_from_id_or_mention(self, mention: str, message: discord.Message):
+        member = await self.get_member_from_id_or_mention(mention, message)
+        if member is None:
+            return None
+        if self.config.is_team(member):
+            await message.channel.send(self.config.texts['no_team'], delete_after=self.config.values['delete_after'])
+            await message.delete(delay=self.config.values['delete_after'])
+            return None
+        return member
+
+    @staticmethod
+    def get_duration(duration: str):
+        duration = duration.lower()
+        if duration.endswith('s'):
+            factor = 1
+        elif duration.endswith('m'):
+            factor = 60
+        elif duration.endswith('h'):
+            factor = 3600
+        elif duration.endswith('d'):
+            factor = 86400
+        elif duration.endswith('w'):
+            factor = 604800
+        else:
+            return None
+        try:
+            base = int(duration[:-1])
+        except ValueError:
+            return None
+        return base * factor

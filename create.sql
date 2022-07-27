@@ -1,5 +1,6 @@
 DROP TABLE tricks;
 DROP TABLE counter;
+DROP TABLE warns;
 CREATE TABLE tricks (
     id VARCHAR(255) PRIMARY KEY NOT NULL,
     text VARCHAR(1023) NOT NULL
@@ -7,4 +8,11 @@ CREATE TABLE tricks (
 CREATE TABLE counter (
     id VARCHAR(255) PRIMARY KEY NOT NULL,
     value INT NOT NULL
+);
+CREATE TABLE warns (
+    id SERIAL PRIMARY KEY,
+    member BIGINT NOT NULL,
+    reason VARCHAR(255) NOT NULL,
+    time VARCHAR(255) NOT NULL,
+    team_member BIGINT NOT NULL
 );
