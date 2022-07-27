@@ -5,7 +5,7 @@ bot = discord.Client(intents=discord.Intents.all(), command_prefix='!', case_ins
 config = Config(bot)
 modules = [
     AmongUs(config),
-    Counter(config, Database(config.counter_user, config.counter_pw, config.host, config.counter_db)),
+    Counter(config),
     Creeper(config),
     Flomote(config),
     Logger(config),
@@ -14,9 +14,9 @@ modules = [
     Roles(config),
     Rules(config),
     Slowmode(config),
-    Tricks(config, Database(config.tricks_user, config.tricks_pw, config.host, config.tricks_db)),
+    Tricks(config),
     UserInfo(config),
-    VoiceSupportNotification(config)
+    VoiceSupport(config)
 ]
 
 

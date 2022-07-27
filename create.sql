@@ -1,0 +1,10 @@
+DROP TABLE tricks;
+DROP TABLE counter;
+CREATE TABLE tricks (
+    id VARCHAR(255) PRIMARY KEY NOT NULL,
+    text VARCHAR(1023) NOT NULL
+);
+CREATE TABLE counter (
+    id VARCHAR(255) PRIMARY KEY NOT NULL,
+    value INT NOT NULL
+);

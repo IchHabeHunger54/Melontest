@@ -1,7 +1,8 @@
 # Melonenbot
 
 Dies ist das offizielle GitHub-Repository für den Melonenbot. Der Melonenbot wurde exklusiv für den #TeamMelone-Server
-in der Programmiersprache Python entwickelt. Tritt dem Server hier bei: https://discord.gg/teammelone
+in der Programmiersprache Python entwickelt. Tritt dem Server hier bei:
+[https://discord.gg/teammelone](https://discord.gg/teammelone "https://discord.gg/teammelone")
 
 ## Bugs und neue Features
 
@@ -25,10 +26,10 @@ Um den Melonenbot selbst zum Laufen zu bringen, werden folgende Dinge benötigt:
 - Python 3 (wir kompilieren gegen unterschiedliche Python 3.9-Versionen, allerdings funktionieren möglicherweise auch
   ältere Versionen von Python 3; Python 2.x funktioniert nicht)
 - Das `discord.py`-Package
-- Das `mysql-connector-python`-Package
+- ~~Das `mysql-connector-python`-Package~~ Das `psycopg2`-Package
 
-Um den Melonenbot zu starten, einfach `main.py` laufen lassen. Achtung: Die Konfiguration muss händisch mit Token
-befüllt werden; wir stellen nur einen Dummy bereit, da sonst der Token öffentlich werden würde.
+Um den Melonenbot zu starten, einfach `main.py` laufen lassen. Achtung: Die Konfiguration (`config.json`) muss händisch
+mit einem Token versehen werden; wir stellen nur einen Dummy bereit, da sonst der Token öffentlich werden würde.
 
 ## Codedesign
 
@@ -45,11 +46,11 @@ iteriert, und jedes Modul führt seinen individuellen Eventhandler aus.
 Die Config ist das zweite große Designprinzip des Bots. Beim Starten des Bots werden alle Konfigurationen aus einem File
 namens `config.json` gelesen. Dabei wird ein Singleton-Pattern verwendet, d.h. es gibt nur ein einziges Config-Objekt,
 das alle Konfigurationen speichert. Die Config wird dann standardmäßig jedem Modul als Parameter übergeben. Inhalt der
-Config sind alle Kanal-IDs, Rollen-IDs, Datenbankauthentifizierungsdaten usw.
+Config sind alle Kanal-IDs, Rollen-IDs, Datenbankwerte, Texte usw.
 
-Die Config hat außerdem die meisten Werte doppelt - aktiviert oder deaktiviert wird die Verwendung der alternativen
-Werte (mit `debug_`-Präfix) durch den `is_debug`-Wert. Dies hat den Grund, dass die Entwicklung des Bots auf einem
-eigens dafür eingerichteten Server stattfindet, der logischerweise andere Kanal- und Rollen-IDs hat.
+Die Config hat außerdem einige Werte doppelt - aktiviert oder deaktiviert wird die Verwendung der alternativen Werte
+(mit `debug_`-Präfix) durch den `debug`-Wert. Dies hat den Grund, dass die Entwicklung des Bots auf einem eigens dafür
+eingerichteten Server stattfindet, der logischerweise andere Kanal- und Rollen-IDs hat.
 
 ## Entstehungsgeschichte
 

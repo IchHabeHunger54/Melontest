@@ -1,42 +1,154 @@
 {
-  "counter_user": "",
-  "counter_pw": "",
-  "counter_db": "",
-  "tricks_user": "",
-  "tricks_pw": "",
-  "tricks_db": "",
-  "host": "",
+  "embeds": {
+    "color": 15522876,
+    "error_color": 11863301,
+    "text": "Melonenbot",
+    "icon": "https://images-ext-1.discordapp.net/external/lZws7G7iw7fozgme7y0bQu-TsswDMAZHwlGVW85F2FU/https/cdn.discordapp.com/avatars/649282521066110986/62c862309170d6d10aecce16fd50cdbb.png"
+  },
+  "texts": {
+    "months": [
+      "Januar",
+      "Februar",
+      "März",
+      "April",
+      "Mai",
+      "Juni",
+      "Juli",
+      "August",
+      "September",
+      "Oktober",
+      "November",
+      "Dezember"
+    ],
+    "team_only": "Dieser Command ist nur für Teammitglieder verfügbar!",
+    "among_us": {
+      "start": "**Ein Impostor ist unter uns!**\n\nVote einen der **drei Crewmates** raus! <:floRage:529699583077646345>\nWenn du den **Impostor** votest, erhältst du **50 Melons** fürs Levelsystem. <:FloImpostor:787386229926789130>\nDie **überlebenden Crewmates** erhalten jeweils **10 Melons**! Bei einem **Unentschieden** bekommt jeder **10 Melons**. <:FloStonks:794266216993652806>\nBeeilt euch, die Abstimmung ist auf **5 Personen** begrenzt! <:TeamMeloneBLITZ:578632071577337866>\n\n**1. Verdächtiger:** %s\n**2. Verdächtiger:** %s\n**3. Verdächtiger:** %s",
+      "end": "**Gewählter Impostor:** %s\n**Richtiger Impostor:** %s\n**Richtigen Impostor gewählt:** %s",
+      "none": "_niemand_"
+    },
+    "creeper": "Es ist erlaubt, das Wort Creeper zu schreiben. Es ist jedoch verboten, den Songtext von \"Creeper, Aw Man\" (Revenge) zu schreiben, da es in der Vergangenheit immer wieder zu Spam geführt hat.",
+    "floeyes": "<:Flo_1:673538831626010631><:Flo_2:673538857937010699>",
+    "flomote": "<:Flo_1:673538831626010631><:Flo_2:673538857937010699>\n<:Flo_3:673538878048698418>",
+    "logger": {
+      "guild_joined": "Server betreten",
+      "guild_left": "Server verlassen",
+      "message_edited": "Nachricht bearbeitet",
+      "message_deleted": "Nachricht gelöscht",
+      "voice_joined": "Voicechannel betreten",
+      "voice_left": "Voicechannel verlassen",
+      "voice_switched": "Voicechannel gewechselt",
+      "user": "User:",
+      "channel": "Channel:",
+      "message": "Nachricht:",
+      "before": "Vorher:",
+      "after": "Nachher:",
+      "created": "Account erstellt:",
+      "joined": "Server betreten:"
+    },
+    "ping": {
+      "success": "Ping: %s Sekunden",
+      "failure": "Ping: > 1 Minute. Bitte ans Team melden!"
+    },
+    "reload": {
+      "start": "Lade Konfiguration neu...",
+      "end": "Konfiguration wurde geladen!"
+    },
+    "roles": {
+      "videos": "Du erhältst nun eine Benachrichtigung, sobald Chaosflo44 ein neues Video hochlädt!",
+      "keinevideos": "Du erhältst nun keine Benachrichtigung mehr, sobald Chaosflo44 ein neues Video hochlädt!",
+      "chatsupport": "Du erhältst nun eine Benachrichtigung, sobald Chatsupport benötigt wird!",
+      "keinchatsupport": "Du erhältst nun keine Benachrichtigung mehr, sobald Chatsupport benötigt wird!",
+      "voicesupport": "Du erhältst nun eine Benachrichtigung, sobald Voicesupport benötigt wird!",
+      "keinvoicesupport": "Du erhältst nun keine Benachrichtigung mehr, sobald Voicesupport benötigt wird!"
+    },
+    "rules": "Bitte lest euch die Regeln in %s bzw. die Kurzfassung in %s durch!",
+    "tricks": {
+      "added": "Trick !%s wurde hinzugefügt.\n",
+      "removed": "Trick !%s wurde entfernt.\n",
+      "list": "Liste aller Trickbefehle:",
+      "none": "\n_Aktuell sind keine Trickbefehle registriert._"
+    },
+    "userinfo": {
+      "wrong_channel": "Bitte benutze `!userinfo` nur in %s!",
+      "multiple_arguments": "`!userinfo` funktioniert nur für einen User gleichzeitig!",
+      "invalid_argument": "`!userinfo` benötigt entweder einen Ping, eine User-ID oder überhaupt kein zusätzliches Argument!",
+      "unknown_user": "User `%s` konnte nicht gefunden werden!",
+      "user": "User:",
+      "id": "ID:",
+      "mention": "Ping:",
+      "account_created": "Account erstellt:",
+      "guild_joined": "Server betreten:",
+      "booster_since": "Booster seit:"
+    },
+    "voice_support": "%s Benachrichtigung! %s benötigt Support per Voice!"
+  },
+  "delays": {
+    "among_us": 8640,
+    "among_us_offset": 2880,
+    "rules": 360,
+    "slowmode": 60
+  },
+  "values": {
+    "delete_after": 10,
+    "among_us_limit": 5,
+    "rules_limit": 10
+  },
+  "database": {
+    "hostname": "",
+    "username": "",
+    "password": "",
+    "database": "",
+    "port": 0
+  },
   "is_debug": true,
   "token": "",
   "debug_token": "",
-  "guild_id": 0,
-  "debug_guild_id": 0,
-  "test_supporter_id": 0,
-  "debug_test_supporter_id": 0,
-  "supporter_id": 0,
-  "debug_supporter_id": 0,
-  "test_moderator_id": 0,
-  "debug_test_moderator_id": 0,
-  "moderator_id": 0,
-  "debug_moderator_id": 0,
-  "head_moderator_id": 0,
-  "debug_head_moderator_id": 0,
-  "test_administrator_id": 0,
-  "debug_test_administrator_id": 0,
-  "chat_support_role_id": 0,
-  "debug_chat_support_role_id": 0,
-  "voice_support_role_id": 0,
-  "debug_voice_support_role_id": 0,
-  "message_log_id": 0,
-  "debug_message_log_id": 0,
-  "voice_log_id": 0,
-  "debug_voice_log_id": 0,
-  "join_log_id": 0,
-  "debug_join_log_id": 0,
-  "leave_log_id": 0,
-  "debug_leave_log_id": 0,
-  "voice_support_channel_id": 0,
-  "debug_voice_support_channel_id": 0,
-  "team_voice_support_channel_id": 0,
-  "debug_team_voice_support_channel_id": 0
+  "guild": 0,
+  "debug_guild": 0,
+  "channels": {
+    "chat": 0,
+    "bots": 0,
+    "rules": 0,
+    "short_rules": 0,
+    "message_log": 0,
+    "voice_log": 0,
+    "join_log": 0,
+    "leave_log": 0,
+    "voice_support": 0,
+    "team_voice_support": 0
+  },
+  "debug_channels": {
+    "chat": 0,
+    "bots": 0,
+    "rules": 0,
+    "short_rules": 0,
+    "message_log": 0,
+    "voice_log": 0,
+    "join_log": 0,
+    "leave_log": 0,
+    "voice_support": 0,
+    "team_voice_support": 0
+  },
+  "roles": {
+    "test_supporter": 0,
+    "supporter": 0,
+    "test_moderator": 0,
+    "moderator": 0,
+    "head_moderator": 0,
+    "test_administrator": 0,
+    "chat_support": 0,
+    "voice_support": 0,
+    "video": 0
+  },
+  "debug_roles": {
+    "test_supporter": 0,
+    "supporter": 0,
+    "test_moderator": 0,
+    "moderator": 0,
+    "head_moderator": 0,
+    "test_administrator": 0,
+    "chat_support": 0,
+    "voice_support": 0,
+    "video": 0
+  }
 }
