@@ -1,7 +1,12 @@
+from discord import AllowedMentions
+
 from modules import *
 
+import time
+
+time.sleep(5)
 time = datetime.now()
-bot = discord.Client(intents=discord.Intents.all(), command_prefix='!', case_insensitive=True)
+bot = discord.Client(intents=discord.Intents.all(), allowed_mentions=AllowedMentions.none())
 config = Config(bot)
 modules = [
     AmongUs(config),
@@ -13,6 +18,7 @@ modules = [
     Moderation(config),
     Ping(config),
     RawEcho(config),
+    Reload(config),
     Roles(config),
     Rules(config),
     Slowmode(config),
