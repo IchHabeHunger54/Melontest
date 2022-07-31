@@ -21,7 +21,7 @@ class AmongUs(Module):
 
     @tasks.loop(seconds=1)
     async def run_schedule(self):
-        members = self.config.get_server().members.copy()
+        members = list(self.config.get_server().members)
         self.impostor = members[random.randint(0, len(members) - 1)]
         members.remove(self.impostor)
         self.crewmate1 = members[random.randint(0, len(members) - 1)]
@@ -70,7 +70,7 @@ class AmongUs(Module):
                 if value == index:
                     users.append(key)
                     usernames += ', ' + self.config.get_member(key).display_name
-            reaction.message.channel.send(self.config.texts['among_us']['end'] % (username, self.impostor.display_name, usernames[2:]))
+            await reaction.message.channel.send(self.config.texts['among_us']['end'] % (username, self.impostor.display_name, usernames[2:]))
             # TODO levelling
             self.message = None
             self.reactions = {}

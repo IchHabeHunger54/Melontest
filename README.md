@@ -23,13 +23,22 @@ Credits zu geben, z.B. durch das Hinzufügen eines Kommentars in diesem oder ein
 Um den Melonenbot selbst zum Laufen zu bringen, werden folgende Dinge benötigt:
 
 - Eine funktionsfähige Python-IDE (wir empfehlen PyCharm oder IntelliJ IDEA mit Python-Plugin)
-- Python 3 (wir kompilieren gegen unterschiedliche Python 3.9-Versionen, allerdings funktionieren möglicherweise auch
-  ältere Versionen von Python 3; Python 2.x funktioniert nicht)
-- Das `discord.py`-Package
-- ~~Das `mysql-connector-python`-Package~~ Das `psycopg2`-Package
+- Python 3.8 oder höher
+- Das `discord.py`-Package auf Version 2.0 (Installation
+  mittels `pip install -U git+https://github.com/Rapptz/discord.py`)
+- ~~Das `mysql-connector-python`-Package~~ Das `psycopg2`-Package (Installation mittels `pip install psycopg2`)
+- Eine funktionsfähige PostgreSQL-Datenbank, deren Zugangsdaten bekannt sind
 
-Um den Melonenbot zu starten, einfach `main.py` laufen lassen. Achtung: Die Konfiguration (`config.json`) muss händisch
-mit einem Token versehen werden; wir stellen nur einen Dummy bereit, da sonst der Token öffentlich werden würde.
+Folgende Schritte müssen gesetzt werden, um den Bot tatsächlich zum Laufen zu bringen:
+
+- Die Datenbank muss gestartet werden
+- Das Create-Script `create.sql` muss (beim ersten Run) in der Datenbank ausgeführt werden
+- Eine Konfiguration muss erstellt werden. Dazu muss die Datei `dummy_config.json` auf `config.json` umbenannt (oder
+  kopiert) werden.
+- Die Konfiguration muss befüllt werden. Von Bedeutung sind alle Werte für `database`, `channels`, `roles` sowie die
+  Werte `token` und `guild`. Sollte `is_debug` auf `true` gesetzt sein, müssen die Werte mit `debug_`-Präfix stattdessen
+  gesetzt werden (optimalerweise setzt man beides).
+- Um nun den Melonenbot zu starten, einfach `main.py` laufen lassen.
 
 ## Codedesign
 
@@ -48,8 +57,8 @@ namens `config.json` gelesen. Dabei wird ein Singleton-Pattern verwendet, d.h. e
 das alle Konfigurationen speichert. Die Config wird dann standardmäßig jedem Modul als Parameter übergeben. Inhalt der
 Config sind alle Kanal-IDs, Rollen-IDs, Datenbankwerte, Texte usw.
 
-Die Config hat außerdem einige Werte doppelt - aktiviert oder deaktiviert wird die Verwendung der alternativen Werte
-(mit `debug_`-Präfix) durch den `debug`-Wert. Dies hat den Grund, dass die Entwicklung des Bots auf einem eigens dafür
+Die Config hat außerdem einige Werte doppelt - aktiviert oder deaktiviert wird die Verwendung der alternativen Werte (
+mit `debug_`-Präfix) durch den `is_debug`-Wert. Dies hat den Grund, dass die Entwicklung des Bots auf einem eigens dafür
 eingerichteten Server stattfindet, der logischerweise andere Kanal- und Rollen-IDs hat.
 
 ## Entstehungsgeschichte
