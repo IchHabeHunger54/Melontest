@@ -1,7 +1,8 @@
 import random
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 
 import discord
+import emoji
 from discord.ext import tasks
 
 from config import Config
@@ -30,7 +31,7 @@ class AmongUs(Module):
         members.remove(self.crewmate2)
         self.order = [self.impostor, self.crewmate1, self.crewmate2]
         random.shuffle(self.order)
-        self.message = await self.config.get_chat().send(self.config.texts['among_us']['start'] % (self.config.values['among_us_reward'], self.config.values['among_us_crewmate'], self.config.values['among_us_crewmate'], self.config.values['among_us_limit'], self.order[0].display_name, self.order[1].display_name, self.order[2].display_name))
+        self.message = await self.config.get_chat().send(self.config.texts['among_us']['start'] % (self.config.values['among_us_reward'], self.config.values['among_us_crewmate'], self.config.values['among_us_crewmate'], self.config.values['among_us_limit'], self.order[0].mention, self.order[1].mention, self.order[2].mention))
         await self.message.add_reaction('1️⃣')
         await self.message.add_reaction('2️⃣')
         await self.message.add_reaction('3️⃣')
@@ -63,7 +64,7 @@ class AmongUs(Module):
             if index is None:
                 username = self.config.texts['among_us']['none']
             else:
-                username = self.order[index].display_name
+                username = self.order[index].mention
             impostor = -1
             if self.impostor.id == self.order[0].id:
                 impostor = 0
@@ -76,12 +77,12 @@ class AmongUs(Module):
             for key in self.reactions:
                 if self.reactions[key] == impostor:
                     users.append(key)
-                    usernames += ', ' + self.config.get_member(key).display_name
+                    usernames += ', ' + self.config.get_member(key).mention
             if usernames == '':
                 usernames = self.config.texts['among_us']['none']
             else:
                 usernames = usernames[2:]
-            await reaction.message.channel.send(self.config.texts['among_us']['end'] % (username, self.impostor.display_name, usernames))
+            await reaction.message.channel.send(self.config.texts['among_us']['end'] % (username, self.impostor.mention, usernames))
             # TODO levelling
             self.message = None
             self.reactions = {}
@@ -110,14 +111,30 @@ class AmongUs(Module):
                 self.reactions.pop(member.id)
 
     async def on_ready(self) -> None:
-        self.run_schedule.change_interval(seconds=self.config.delays['among_us'] + 2 * random.randint(0, self.config.delays['among_us']) - self.config.delays['among_us_offset'])
+        self.run_schedule.change_interval(seconds=self.config.delays['among_us'] + 2 * random.randint(0, self.config.delays['among_us_offset']) - self.config.delays['among_us_offset'])
         self.run_schedule.start()
+
+
+class CapsModeration(Module):
+    async def on_message(self, message: discord.Message) -> None:
+        if self.config.is_team(message.author):
+            return
+        content = str(message.content)
+        if len(content) < self.config.values['caps_min']:
+            return
+        upper = 0
+        for elem in content:
+            if elem.isupper():
+                upper += 1
+        if upper / len(content) > self.config.values['caps_ratio']:
+            await message.channel.send(self.config.texts['caps_moderation'] % message.author.mention, delete_after=self.config.values['delete_after'])
+            await message.delete()
 
 
 class Clear(Module):
     async def on_message(self, message: discord.Message) -> None:
         content = str(message.content).lower()
-        if str(message.content).lower().startswith('!clear '):
+        if content.startswith('!clear '):
             if self.config.is_team(message.author):
                 strings = content.split(' ')
                 if len(strings) > 1 and strings[1].isnumeric():
@@ -167,16 +184,53 @@ class Counter(Module):
 
 class Creeper(Module):
     async def on_message(self, message: discord.Message) -> None:
-        if str(message.content).startswith('!creeper') or str(message.content).startswith('creeper') or str(message.content).startswith('creper'):
+        content = str(message.content).lower()
+        if content.startswith('!creeper') or content.startswith('creeper') or content.startswith('creper'):
             await message.channel.send(self.config.texts['creeper'])
+
+
+class EmoteModeration(Module):
+    async def on_message(self, message: discord.Message) -> None:
+        if self.config.is_team(message.author):
+            return
+        content = str(message.content)
+        emotes = content.count('<a:') + (emoji.demojize(content).count(':') - content.count(':')) / 2
+        if emotes > self.config.values['emotes_max']:
+            await message.channel.send(self.config.texts['emote_moderation'] % message.author.mention, delete_after=self.config.values['delete_after'])
+            await message.delete()
 
 
 class Flomote(Module):
     async def on_message(self, message: discord.Message) -> None:
-        if str(message.content).lower().startswith('flomote'):
+        content = str(message.content).lower()
+        if content.startswith('flomote'):
             await message.channel.send(self.config.texts['flomote'])
-        if str(message.content).lower().startswith('floeyes'):
+        if content.startswith('floeyes'):
             await message.channel.send(self.config.texts['floeyes'])
+
+
+class LinkModeration(Module):
+    async def on_message(self, message: discord.Message) -> None:
+        if self.config.is_team(message.author):
+            return
+        content = str(message.content).lower()
+        if not 'http://' in content and not 'https://' in content:
+            return
+        for elem in self.config.values['link_blacklist']:
+            if elem in content:
+                await message.channel.send(self.config.texts['link_moderation'] % message.author.mention, delete_after=self.config.values['delete_after'])
+                await message.delete()
+        delete = True
+        for elem in self.config.values['link_whitelist']:
+            if elem in content:
+                delete = False
+        if message.channel.id == self.config.get_music_channel().id:
+            for elem in self.config.values['music_link_whitelist']:
+                if elem in content:
+                    delete = False
+        if delete:
+            await message.channel.send(self.config.texts['link_moderation'] % message.author.mention, delete_after=self.config.values['delete_after'])
+            await message.delete()
 
 
 class Logger(Module):
@@ -241,7 +295,7 @@ class Moderation(Module):
 
     @staticmethod
     async def ban(member: discord.Member, reason: str) -> None:
-        await member.ban(reason=reason, delete_message_days=0)
+        await member.ban(reason=reason, delete_message_days=1)
 
     async def on_message(self, message: discord.Message) -> None:
         if not str(message.content).startswith('!'):
@@ -300,6 +354,10 @@ class Moderation(Module):
             self.config.database.execute('DELETE FROM warns WHERE id = ' + str(warn) + ';')
             await message.channel.send(self.config.texts['moderation']['removewarn_success'] % warn)
         elif args[0] == 'warnings':
+            if message.channel.id != self.config.get_bots().id:
+                await message.channel.send(self.config.texts['userinfo']['wrong_channel'] % self.config.get_bots().mention, delete_after=self.config.values['delete_after'])
+                await message.delete(delay=self.config.values['delete_after'])
+                return
             if len(args) == 1:
                 member = message.author
             else:
@@ -385,13 +443,13 @@ class Moderation(Module):
 
 class Ping(Module):
     async def on_message(self, message: discord.Message) -> None:
-        if str(message.content).startswith('!ping'):
+        if str(message.content).lower().startswith('!ping'):
             created_at = message.created_at
-            utcnow = datetime.utcnow()
-            if utcnow > created_at:
-                time = str(utcnow - created_at)
+            now = datetime.now(timezone.utc)
+            if now > created_at:
+                time = str(now - created_at)
             else:
-                time = str(created_at - utcnow)
+                time = str(created_at - now)
             if time.startswith('0:00:'):
                 await message.channel.send(self.config.texts['ping']['success'] % str(float(str(time)[5:])))
             else:
@@ -400,13 +458,14 @@ class Ping(Module):
 
 class RawEcho(Module):
     async def on_message(self, message: discord.Message) -> None:
-        if str(message.content).startswith('!rawecho '):
-            await message.channel.send('`' + str(message.content)[len('!rawecho '):] + '`')
+        content = str(message.content).lower()
+        if content.startswith('!rawecho '):
+            await message.channel.send('`' + content[len('!rawecho '):] + '`')
 
 
 class Reload(Module):
     async def on_message(self, message: discord.Message) -> None:
-        if str(message.content).startswith('!reload'):
+        if str(message.content).lower().startswith('!reload'):
             await message.channel.send(self.config.texts['reload']['start'])
             self.config.load()
             await message.channel.send(self.config.texts['reload']['end'])
@@ -414,7 +473,7 @@ class Reload(Module):
 
 class Roles(Module):
     async def on_message(self, message: discord.Message) -> None:
-        content = str(message.content)
+        content = str(message.content).lower()
         if content.startswith('!videos'):
             await message.author.add_roles(self.config.get_video_role())
             await message.channel.send(self.config.texts['roles']['videos'])
@@ -452,7 +511,7 @@ class Rules(Module):
 
     async def on_message(self, message: discord.Message) -> None:
         self.messages = self.messages + 1
-        if str(message.content).startswith('!regeln'):
+        if str(message.content).lower().startswith('!regeln'):
             await self.send_message()
 
     async def on_ready(self) -> None:
@@ -537,12 +596,13 @@ class Tricks(Module):
 
 class UserInfo(Module):
     async def on_message(self, message: discord.Message) -> None:
-        if str(message.content).startswith('!userinfo'):
+        content = str(message.content).lower()
+        if content.startswith('!userinfo'):
             if message.channel.id != self.config.get_bots().id:
                 await message.channel.send(self.config.texts['userinfo']['wrong_channel'] % self.config.get_bots().mention, delete_after=self.config.values['delete_after'])
                 await message.delete(delay=self.config.values['delete_after'])
                 return
-            args = str(message.content).split(' ')
+            args = content.split(' ')
             if len(message.mentions) > 1 or len(args) > 2:
                 await message.channel.send(self.config.texts['userinfo']['multiple_arguments'], delete_after=self.config.values['delete_after'])
                 await message.delete(delay=self.config.values['delete_after'])

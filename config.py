@@ -107,6 +107,9 @@ class Config:
     def get_team_voice_support_channel(self) -> discord.TextChannel:
         return self.get_server().get_channel(self.channels['team_voice_support'])
 
+    def get_music_channel(self) -> discord.TextChannel:
+        return self.get_server().get_channel(self.channels['music'])
+
     @staticmethod
     def has_role(member: discord.Member, role_id: int) -> bool:
         for role in member.roles:

@@ -1,19 +1,17 @@
-from discord import AllowedMentions
-
 from modules import *
 
-import time
-
-time.sleep(5)
 time = datetime.now()
-bot = discord.Client(intents=discord.Intents.all(), allowed_mentions=AllowedMentions.none())
+bot = discord.Client(intents=discord.Intents.all(), allowed_mentions=discord.AllowedMentions.none())
 config = Config(bot)
 modules = [
     AmongUs(config),
+    CapsModeration(config),
     Clear(config),
     Counter(config),
     Creeper(config),
+    EmoteModeration(config),
     Flomote(config),
+    LinkModeration(config),
     Logger(config),
     Moderation(config),
     Ping(config),
@@ -82,10 +80,10 @@ async def on_reaction_remove(reaction: discord.Reaction, member: discord.Member)
 
 @bot.event
 async def on_ready() -> None:
-    for module in modules:
-        await module.on_ready()
     print('Successfully booted up as user', bot.user)
     print('Booting took', datetime.now() - time)
+    for module in modules:
+        await module.on_ready()
 
 
 @bot.event
