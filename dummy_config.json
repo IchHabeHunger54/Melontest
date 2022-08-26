@@ -61,6 +61,7 @@
       "warnings_item": "\n- Am **%s**, wegen **%s**, durch **%s** (ID: %s)",
       "warnings_none": "\n_Dieser User hat keine Verwarnungen._",
       "warnings_expired": "_ - abgelaufen_",
+      "warnings_wrong_channel": "Bitte benutze `!warnings` nur in %s!",
       "mute_success": "%s **wurde gemutet.**\n\n**Grund:** %s\n\n**Teammitglied:** %s",
       "mute_failure": "**Fehlender User, Zeitraum oder Grund!** Verwendung: `!mute <User oder User-ID> <Zeitraum> <Grund>`",
       "unmute_success": "%s **wurde entmutet.**\n\n**Grund:** %s\n\n**Teammitglied:** %s",
@@ -68,7 +69,8 @@
       "kick_success": "%s **wurde gekickt.**\n\n**Grund:** %s\n\n**Teammitglied:** %s",
       "kick_failure": "**Fehlender User oder Grund.** Verwendung: `!kick <User oder User-ID> <Grund>`",
       "ban_success": "%s **wurde gebannt.**\n\n**Grund:** %s\n\n**Teammitglied:** %s",
-      "ban_failure": "**Fehlender User oder Grund.** Verwendung: `!ban <User oder User-ID> <Grund>`"
+      "ban_failure": "**Fehlender User oder Grund.** Verwendung: `!ban <User oder User-ID> <Grund>`",
+      "ping_reason": "Regel 4.1"
     },
     "ping": {
       "success": "Ping: %s Sekunden",
@@ -138,6 +140,13 @@
     ],
     "mute_duration": 259200,
     "mute_warnings": 3,
+    "ping_blacklist": [
+      282912142867431425,
+      373641153133936641,
+      282912778073931786,
+      411159465522495501,
+      444933507823828992
+    ],
     "rules_limit": 10,
     "warn_expire_days": 14
   },
