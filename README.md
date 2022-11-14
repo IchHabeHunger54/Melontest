@@ -27,6 +27,7 @@ Um den Melonenbot selbst zum Laufen zu bringen, werden folgende Dinge benötigt:
 - Das `discord.py`-Package auf Version 2.0 (Installation
   mittels `pip install -U git+https://github.com/Rapptz/discord.py`)
 - ~~Das `mysql-connector-python`-Package~~ Das `psycopg2`-Package (Installation mittels `pip install psycopg2`)
+- Das `emoji`-Package (Installation mittels `pip install emoji`)
 - Eine funktionsfähige PostgreSQL-Datenbank, deren Zugangsdaten bekannt sind
 
 Folgende Schritte müssen gesetzt werden, um den Bot tatsächlich zum Laufen zu bringen:

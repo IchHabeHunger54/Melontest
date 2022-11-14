@@ -214,7 +214,7 @@ class LinkModeration(Module):
         if self.config.is_team(message.author):
             return
         content = str(message.content).lower()
-        if not 'http://' in content and not 'https://' in content:
+        if 'http://' not in content and 'https://' not in content:
             return
         for elem in self.config.values['link_blacklist']:
             if elem in content:
