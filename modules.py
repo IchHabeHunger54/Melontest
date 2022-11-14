@@ -19,9 +19,14 @@ class AmongUs(Module):
         self.crewmate1 = None
         self.crewmate2 = None
         self.votes = [0, 0, 0]
+        self.first = True
 
     @tasks.loop(seconds=1)
     async def run_schedule(self):
+        self.run_schedule.change_interval(seconds=self.config.delays['among_us'] + 2 * (random.randint(0, self.config.delays['among_us']) - self.config.delays['among_us_offset']))
+        if self.first:
+            self.first = False
+            return
         members = list(self.config.get_server().members)
         self.impostor = members[random.randint(0, len(members) - 1)]
         members.remove(self.impostor)
@@ -35,7 +40,6 @@ class AmongUs(Module):
         await self.message.add_reaction('1️⃣')
         await self.message.add_reaction('2️⃣')
         await self.message.add_reaction('3️⃣')
-        self.run_schedule.change_interval(seconds=self.config.delays['among_us'] + 2 * (random.randint(0, self.config.delays['among_us']) - self.config.delays['among_us_offset']))
 
     async def on_reaction_add(self, reaction: discord.Reaction, member: discord.Member) -> None:
         if self.message is None or self.message.id != reaction.message.id:
