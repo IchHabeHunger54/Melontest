@@ -87,7 +87,13 @@ class AmongUs(Module):
             else:
                 usernames = usernames[2:]
             await reaction.message.channel.send(self.config.texts['among_us']['end'] % (username, self.impostor.display_name, usernames))
-            # TODO levelling
+            for member in users:
+                amount = self.config.database.execute('SELECT amount FROM levels WHERE id = ' + str(member) + ';')
+                if len(amount) == 0:
+                    self.config.database.execute('INSERT INTO levels (id, amount) VALUES(' + str(member) + ', 1);')
+                else:
+                    amount = amount[0][0] + self.config.values['among_us_reward']
+                    self.config.database.execute('UPDATE levels SET amount = ' + str(amount) + ' WHERE id = ' + str(member) + ';')
             self.message = None
             self.reactions = {}
             self.order = []
@@ -211,6 +217,84 @@ class Flomote(Module):
             await message.channel.send(self.config.texts['flomote'])
         if content.startswith('floeyes'):
             await message.channel.send(self.config.texts['floeyes'])
+
+
+class Levels(Module):
+    def __init__(self, config: Config):
+        super().__init__(config)
+        self.cooldowns = []
+        base = self.config.values['level_base']
+        multiplier = self.config.values['level_multiplier']
+        self.levels = {0: 0, 1: base}
+        for i in range(2, self.config.values['level_max']):
+            self.levels[i] = int(self.levels[i - 1] + base * multiplier ** i)
+        roles = self.config.roles['level']
+        self.roles = {}
+        for i in roles:
+            try:
+                self.roles[int(i)] = roles[i]
+            except ValueError:
+                pass
+
+    @tasks.loop(seconds=1)
+    async def run_schedule(self) -> None:
+        self.cooldowns = []
+
+    async def on_message(self, message: discord.Message) -> None:
+        content = message.content
+        if content.startswith('!level'):
+            if message.channel.id == self.config.get_bots().id:
+                args = content.split(' ')
+                if len(message.mentions) > 1 or len(args) > 2:
+                    await message.channel.send(self.config.texts['level']['multiple_arguments'], delete_after=self.config.values['delete_after'])
+                    await message.delete(delay=self.config.values['delete_after'])
+                    return
+                elif len(args) == 1:
+                    member = message.author.id
+                else:
+                    member = self.get_member_from_id_or_mention(args[1], message)
+                    if member is None:
+                        return
+                    else:
+                        member = member.id
+                amount = self.get_from_database(member)
+                if len(amount) == 0:
+                    amount = 0
+                else:
+                    amount = amount[0][0]
+                level = await self.get_level(amount)
+                to_next = self.levels[level + 1] - amount
+                await message.channel.send(self.config.texts['level']['success'] % (str(level), str(amount), str(to_next)))
+                for key in self.roles:
+                    if level >= key:
+                        await self.config.get_member(member).add_roles(self.config.get_server().get_role(self.roles[key]))
+            else:
+                await message.channel.send(self.config.texts['level']['wrong_channel'] % self.config.get_bots().mention, delete_after=self.config.values['delete_after'])
+                await message.delete(delay=self.config.values['delete_after'])
+            return
+        member = message.author.id
+        if member not in self.cooldowns and message.channel.id in self.config.channels['level']:
+            self.cooldowns.append(member)
+            amount = self.get_from_database(member)
+            if len(amount) == 0:
+                self.config.database.execute('INSERT INTO levels (id, amount) VALUES(' + str(member) + ', 1);')
+            else:
+                amount = amount[0][0] + random.randrange(1, 3)
+                self.config.database.execute('UPDATE levels SET amount = ' + str(amount) + ' WHERE id = ' + str(member) + ';')
+
+    async def on_ready(self) -> None:
+        self.run_schedule.change_interval(seconds=self.config.delays['levels'])
+        self.run_schedule.start()
+
+    async def get_level(self, xp: int) -> int:
+        for key in self.levels:
+            value = self.levels[key]
+            if xp < value:
+                return key - 1
+        return self.config.values['level_max']
+
+    def get_from_database(self, member):
+        return self.config.database.execute('SELECT amount FROM levels WHERE id = ' + str(member) + ';')
 
 
 class LinkModeration(Module):

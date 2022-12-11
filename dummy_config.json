@@ -34,6 +34,11 @@
     "emote_moderation": "%s Bitte sende nicht mehr als 4 Emotes pro Nachricht!",
     "floeyes": "<:Flo_1:673538831626010631><:Flo_2:673538857937010699>",
     "flomote": "<:Flo_1:673538831626010631><:Flo_2:673538857937010699>\n<:Flo_3:673538878048698418>",
+    "level": {
+      "multiple_arguments": "`!level` funktioniert nur für einen User gleichzeitig!",
+      "success": "Du bist aktuell **Level %s** (%s XP). Bis zum **nächsten Level** brauchst du noch **%s XP**.",
+      "wrong_channel": "Bitte benutze `!level` nur in %s!"
+    },
     "link_moderation": "%s Bitte sende keine Links!",
     "logger": {
       "guild_joined": "Server betreten",
@@ -110,19 +115,23 @@
   "delays": {
     "among_us": 86400,
     "among_us_offset": 28800,
+    "levels": 60,
     "rules": 3600,
     "slowmode": 60
   },
   "values": {
     "among_us_crewmate": 100,
     "among_us_limit": 5,
-    "among_us_reward": 500,
+    "among_us_reward": 200,
     "ban_warnings": 5,
     "caps_min": 10,
     "caps_ratio": 0.75,
     "delete_after": 10,
     "emotes_max": 4,
     "kick_warnings": 4,
+    "level_base": 50,
+    "level_max": 100,
+    "level_multiplier": 1.1,
     "link_blacklist": [],
     "link_whitelist": [
       "cdn.discordapp.com",
@@ -130,7 +139,8 @@
       "discord.com",
       "giphy",
       "imgur",
-      "tenor"
+      "tenor",
+      "wikipedia.org"
     ],
     "music_link_whitelist": [
       "soundcloud",
@@ -163,6 +173,7 @@
   "guild": 0,
   "debug_guild": 0,
   "channels": {
+    "level": [],
     "chat": 0,
     "bots": 0,
     "rules": 0,
@@ -176,6 +187,7 @@
     "music": 0
   },
   "debug_channels": {
+    "level": [],
     "chat": 0,
     "bots": 0,
     "rules": 0,
@@ -189,6 +201,18 @@
     "music": 0
   },
   "roles": {
+    "level": {
+      "5": 993091651780223087,
+      "10": 993091651780223087,
+      "15": 993091651780223087,
+      "20": 993091651780223087,
+      "24": 993091651780223087,
+      "28": 993091651780223087,
+      "32": 993091651780223087,
+      "36": 993091651780223087,
+      "40": 993091651780223087,
+      "44": 993091651780223087
+    },
     "test_supporter": 0,
     "supporter": 0,
     "test_moderator": 0,
@@ -200,6 +224,18 @@
     "video": 0
   },
   "debug_roles": {
+    "level": {
+      "5": 993091651780223087,
+      "10": 993091651780223087,
+      "15": 993091651780223087,
+      "20": 993091651780223087,
+      "24": 993091651780223087,
+      "28": 993091651780223087,
+      "32": 993091651780223087,
+      "36": 993091651780223087,
+      "40": 993091651780223087,
+      "44": 993091651780223087
+    },
     "test_supporter": 0,
     "supporter": 0,
     "test_moderator": 0,
