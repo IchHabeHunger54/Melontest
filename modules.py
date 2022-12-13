@@ -243,7 +243,22 @@ class Levels(Module):
     async def on_message(self, message: discord.Message) -> None:
         content = message.content
         if content.startswith('!leaderboard') or content.startswith('!lb'):
-            pass
+            length = self.config.values['leaderboard_default']
+            try:
+                s = content.split(' ')
+                if len(s) > 1:
+                    length = int(s[1])
+            except ValueError:
+                pass
+            if length > self.config.values['leaderboard_max']:
+                length = self.config.values['leaderboard_max']
+            lb = self.get_lb(length)
+            text = ''
+            rank = 1
+            for key in lb:
+                text += '#' + str(rank) + ': ' + self.config.get_member(key).mention + ' (' + str(lb[key]) + ' XP)\n'
+                rank += 1
+            await message.channel.send(text)
         elif content.startswith('!level') or content.startswith('!rank'):
             if message.channel.id == self.config.get_bots().id:
                 args = content.split(' ')
@@ -255,16 +270,17 @@ class Levels(Module):
                         return
                 amount = self.get_from_database(member.id)
                 if amount is None or len(amount) == 0:
-                    amount = 0
+                    await message.channel.send(self.config.texts['level']['no_xp'] % (str(member.mention)))
+                    return
                 else:
                     amount = amount[0][0]
                 level = await self.get_level(amount)
                 to_next = self.levels[level + 1] - amount
                 rank = self.get_rank(member.id)
                 if rank[1] is None:
-                    await message.channel.send(self.config.texts['level']['success_1'] % (str(member.display_name), str(level), str(amount), str(rank[0]), str(member.display_name), str(to_next)))
+                    await message.channel.send(self.config.texts['level']['success_1'] % (str(member.mention), str(level), str(amount), str(rank[0]), str(member.mention), str(to_next)))
                 else:
-                    await message.channel.send(self.config.texts['level']['success'] % (str(member.display_name), str(level), str(amount), str(rank[0]), str(member.display_name), str(to_next), str(member.display_name), str(rank[1])))
+                    await message.channel.send(self.config.texts['level']['success'] % (str(member.mention), str(level), str(amount), str(rank[0]), str(member.mention), str(to_next), str(member.mention), str(rank[1])))
                 for key in self.roles:
                     if level >= key:
                         await self.config.get_member(member.id).add_roles(self.config.get_server().get_role(self.roles[key]))
@@ -293,18 +309,30 @@ class Levels(Module):
                 return key - 1
         return self.config.values['level_max']
 
+    def get_lb(self, to: int = 0) -> dict:
+        lb = dict(self.config.database.execute('SELECT * FROM levels;'))
+        result = {}
+        for k in lb.keys():
+            if self.config.get_member(k) is not None:
+                result[k] = lb[k]
+        if to <= 0:
+            return dict(sorted(result.items(), key=lambda x: x[1], reverse=True))
+        else:
+            return dict(sorted(result.items(), key=lambda x: x[1], reverse=True)[:to])
+
     def get_rank(self, member) -> tuple:
-        value = self.get_from_database(member)[0][0]
-        values = sorted(self.config.database.execute('SELECT amount FROM levels;'))
-        current = 1
-        if values[-1] == value:
+        value = self.get_from_database(member)
+        if len(value) == 0:
+            return 0, None
+        else:
+            value = value[0][0]
+        values = list(self.get_lb().items())
+        if values[0][1] == value:
             return 1, None
         for i in range(1, len(values)):
-            if values[-i][0] == value:
-                return current, values[-i + 1][0] - value
-            else:
-                current += 1
-        return 0, 0
+            if values[i][1] == value:
+                return i + 1, values[i - 1][1] - value
+        return len(values), values[len(values) - 1][1] - value
 
     def get_from_database(self, member):
         return self.config.database.execute('SELECT amount FROM levels WHERE id = ' + str(member) + ';')
