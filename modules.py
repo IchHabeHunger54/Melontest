@@ -245,29 +245,24 @@ class Levels(Module):
         if content.startswith('!level'):
             if message.channel.id == self.config.get_bots().id:
                 args = content.split(' ')
-                if len(message.mentions) > 1 or len(args) > 2:
-                    await message.channel.send(self.config.texts['level']['multiple_arguments'], delete_after=self.config.values['delete_after'])
-                    await message.delete(delay=self.config.values['delete_after'])
-                    return
-                elif len(args) == 1:
-                    member = message.author.id
+                if len(args) == 1:
+                    member = message.author
                 else:
-                    member = self.get_member_from_id_or_mention(args[1], message)
-                    if member is None:
+                    member = await self.get_member_from_id_or_mention(args[1], message)
+                    if member.id is None:
                         return
-                    else:
-                        member = member.id
-                amount = self.get_from_database(member)
-                if len(amount) == 0:
+                amount = self.get_from_database(member.id)
+                if amount is None or len(amount) == 0:
                     amount = 0
                 else:
                     amount = amount[0][0]
                 level = await self.get_level(amount)
                 to_next = self.levels[level + 1] - amount
-                await message.channel.send(self.config.texts['level']['success'] % (str(level), str(amount), str(to_next)))
+                rank = 0
+                await message.channel.send(self.config.texts['level']['success'] % (str(member.display_name), str(level), str(amount), str(rank), str(member.display_name), str(to_next)))
                 for key in self.roles:
                     if level >= key:
-                        await self.config.get_member(member).add_roles(self.config.get_server().get_role(self.roles[key]))
+                        await self.config.get_member(member.id).add_roles(self.config.get_server().get_role(self.roles[key]))
             else:
                 await message.channel.send(self.config.texts['level']['wrong_channel'] % self.config.get_bots().mention, delete_after=self.config.values['delete_after'])
                 await message.delete(delay=self.config.values['delete_after'])
@@ -279,7 +274,7 @@ class Levels(Module):
             if len(amount) == 0:
                 self.config.database.execute('INSERT INTO levels (id, amount) VALUES(' + str(member) + ', 1);')
             else:
-                amount = amount[0][0] + random.randrange(1, 3)
+                amount = amount[0][0] + random.randrange(self.config.values['level_give_min'], self.config.values['level_give_max'] + 1)
                 self.config.database.execute('UPDATE levels SET amount = ' + str(amount) + ' WHERE id = ' + str(member) + ';')
 
     async def on_ready(self) -> None:
@@ -701,14 +696,10 @@ class UserInfo(Module):
                 await message.delete(delay=self.config.values['delete_after'])
                 return
             args = content.split(' ')
-            if len(message.mentions) > 1 or len(args) > 2:
-                await message.channel.send(self.config.texts['userinfo']['multiple_arguments'], delete_after=self.config.values['delete_after'])
-                await message.delete(delay=self.config.values['delete_after'])
-                return
-            elif len(args) == 1:
+            if len(args) == 1:
                 member = message.author
             else:
-                member = self.get_member_from_id_or_mention(args[1], message)
+                member = await self.get_member_from_id_or_mention(args[1], message)
                 if member is None:
                     return
             embed = self.embed(member.display_name).set_thumbnail(url=member.avatar_url)

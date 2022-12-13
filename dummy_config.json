@@ -36,7 +36,7 @@
     "flomote": "<:Flo_1:673538831626010631><:Flo_2:673538857937010699>\n<:Flo_3:673538878048698418>",
     "level": {
       "multiple_arguments": "`!level` funktioniert nur für einen User gleichzeitig!",
-      "success": "Du bist aktuell **Level %s** (%s XP). Bis zum **nächsten Level** brauchst du noch **%s XP**.",
+      "success": "%s ist aktuell **Level %s** (%s XP) und damit auf **Rang %s**.\nBis zum **nächsten Level** braucht %s noch **%s XP**.",
       "wrong_channel": "Bitte benutze `!level` nur in %s!"
     },
     "link_moderation": "%s Bitte sende keine Links!",
@@ -131,6 +131,8 @@
     "kick_warnings": 4,
     "level_base": 50,
     "level_max": 100,
+    "level_give_min": 1,
+    "level_give_max": 3,
     "level_multiplier": 1.1,
     "link_blacklist": [],
     "link_whitelist": [
