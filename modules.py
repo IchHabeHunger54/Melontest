@@ -242,7 +242,9 @@ class Levels(Module):
 
     async def on_message(self, message: discord.Message) -> None:
         content = message.content
-        if content.startswith('!level'):
+        if content.startswith('!leaderboard') or content.startswith('!lb'):
+            pass
+        elif content.startswith('!level') or content.startswith('!rank'):
             if message.channel.id == self.config.get_bots().id:
                 args = content.split(' ')
                 if len(args) == 1:
@@ -258,8 +260,11 @@ class Levels(Module):
                     amount = amount[0][0]
                 level = await self.get_level(amount)
                 to_next = self.levels[level + 1] - amount
-                rank = 0
-                await message.channel.send(self.config.texts['level']['success'] % (str(member.display_name), str(level), str(amount), str(rank), str(member.display_name), str(to_next)))
+                rank = self.get_rank(member.id)
+                if rank[1] is None:
+                    await message.channel.send(self.config.texts['level']['success_1'] % (str(member.display_name), str(level), str(amount), str(rank[0]), str(member.display_name), str(to_next)))
+                else:
+                    await message.channel.send(self.config.texts['level']['success'] % (str(member.display_name), str(level), str(amount), str(rank[0]), str(member.display_name), str(to_next), str(member.display_name), str(rank[1])))
                 for key in self.roles:
                     if level >= key:
                         await self.config.get_member(member.id).add_roles(self.config.get_server().get_role(self.roles[key]))
@@ -287,6 +292,19 @@ class Levels(Module):
             if xp < value:
                 return key - 1
         return self.config.values['level_max']
+
+    def get_rank(self, member) -> tuple:
+        value = self.get_from_database(member)[0][0]
+        values = sorted(self.config.database.execute('SELECT amount FROM levels;'))
+        current = 1
+        if values[-1] == value:
+            return 1, None
+        for i in range(1, len(values)):
+            if values[-i][0] == value:
+                return current, values[-i + 1][0] - value
+            else:
+                current += 1
+        return 0, 0
 
     def get_from_database(self, member):
         return self.config.database.execute('SELECT amount FROM levels WHERE id = ' + str(member) + ';')
