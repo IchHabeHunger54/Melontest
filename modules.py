@@ -297,6 +297,7 @@ class LinkModeration(Module):
         if self.config.is_team(message.author):
             return
         content = str(message.content).lower()
+        # noinspection HttpUrlsUsage
         if 'http://' not in content and 'https://' not in content:
             return
         for elem in self.config.values['link_blacklist']:
@@ -529,6 +530,7 @@ class Moderation(Module):
             for member in mentions:
                 client = self.config.client.user
                 if member.id in self.config.values['ping_blacklist'] and client is not None:
+                    # noinspection PyTypeChecker
                     await self.warn(message.author, self.config.texts['moderation']['ping_reason'], client, message.channel)
                     await message.delete()
 
