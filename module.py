@@ -1,13 +1,16 @@
 from datetime import datetime
+from typing import Optional
 
 import discord
+from discord.ext import tasks
 
 from config import Config
 
 
 class Module:
-    def __init__(self, config: Config):
+    def __init__(self, config: Config, interval: int = None):
         self.config = config
+        self.interval = interval
 
     async def on_member_join(self, member: discord.Member) -> None:
         pass
@@ -31,10 +34,19 @@ class Module:
         pass
 
     async def on_ready(self) -> None:
-        pass
+        if self.interval is not None:
+            self.update_interval()
+            self.run_schedule.start()
 
     async def on_voice_state_update(self, member: discord.Member, before: discord.VoiceState, after: discord.VoiceState) -> None:
         pass
+
+    @tasks.loop(seconds=1)
+    async def run_schedule(self) -> None:
+        pass
+
+    def update_interval(self) -> None:
+        self.run_schedule.change_interval(seconds=self.interval)
 
     def new_embed(self, title: str, color: int) -> discord.Embed:
         embed = discord.Embed(title=title, color=color, timestamp=datetime.utcnow())
@@ -56,7 +68,7 @@ class Module:
     def get_readable_datetime(self, date: str) -> str:
         return self.get_readable_date(date) + ', ' + date[11:19]
 
-    async def get_member_from_id_or_mention(self, mention: str, message: discord.Message):
+    async def get_member_from_id_or_mention(self, mention: str, message: discord.Message) -> Optional[discord.Member]:
         if mention.startswith('<@') and mention.endswith('>'):
             mention = mention[2:-1]
         try:
@@ -67,7 +79,7 @@ class Module:
             return None
         return self.config.get_member(userid)
 
-    async def get_team_member_from_id_or_mention(self, mention: str, message: discord.Message):
+    async def get_team_member_from_id_or_mention(self, mention: str, message: discord.Message) -> Optional[discord.Member]:
         member = await self.get_member_from_id_or_mention(mention, message)
         if member is None:
             return None
@@ -77,7 +89,7 @@ class Module:
             return None
         return member
 
-    async def get_non_team_member_from_id_or_mention(self, mention: str, message: discord.Message):
+    async def get_non_team_member_from_id_or_mention(self, mention: str, message: discord.Message) -> Optional[discord.Member]:
         member = await self.get_member_from_id_or_mention(mention, message)
         if member is None:
             return None
@@ -88,7 +100,7 @@ class Module:
         return member
 
     @staticmethod
-    def get_duration(duration: str):
+    def get_duration(duration: str) -> Optional[int]:
         duration = duration.lower()
         if duration.endswith('s'):
             factor = 1

@@ -59,6 +59,7 @@
       "joined": "Server betreten:"
     },
     "moderation": {
+      "multiple_arguments": "Moderationsbefehle funktionieren nur für einen User gleichzeitig!",
       "warn_success": "%s **wurde verwarnt.**\n\n**Grund:** %s\n\n**Teammitglied:** %s",
       "warn_failure": "**Fehlender User oder Grund!** Verwendung: `!warn <User oder User-ID> <Grund>`",
       "too_many_warnings": "Zu viele Verwarnungen!",

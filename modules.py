@@ -11,7 +11,7 @@ from module import Module
 
 class AmongUs(Module):
     def __init__(self, config: Config):
-        super().__init__(config)
+        super().__init__(config, 1)
         self.message = None
         self.reactions = {}
         self.order = []
@@ -120,9 +120,8 @@ class AmongUs(Module):
             if self.reactions.get(member.id) == 2:
                 self.reactions.pop(member.id)
 
-    async def on_ready(self) -> None:
+    def update_interval(self) -> None:
         self.run_schedule.change_interval(seconds=self.config.delays['among_us'] + 2 * random.randint(0, self.config.delays['among_us_offset']) - self.config.delays['among_us_offset'])
-        self.run_schedule.start()
 
 
 class CapsModeration(Module):
@@ -221,7 +220,7 @@ class Flomote(Module):
 
 class Levels(Module):
     def __init__(self, config: Config):
-        super().__init__(config)
+        super().__init__(config, config.delays['levels'])
         self.cooldowns = []
         base = self.config.values['level_base']
         multiplier = self.config.values['level_multiplier']
@@ -262,7 +261,11 @@ class Levels(Module):
         elif content.startswith('!level') or content.startswith('!rank'):
             if message.channel.id == self.config.get_bots().id:
                 args = content.split(' ')
-                if len(args) == 1:
+                if len(message.mentions) > 1 or len(args) > 2:
+                    await message.channel.send(self.config.texts['level']['multiple_arguments'], delete_after=self.config.values['delete_after'])
+                    await message.delete(delay=self.config.values['delete_after'])
+                    return
+                elif len(args) == 1:
                     member = message.author
                 else:
                     member = await self.get_member_from_id_or_mention(args[1], message)
@@ -297,10 +300,6 @@ class Levels(Module):
             else:
                 amount = amount[0][0] + random.randrange(self.config.values['level_give_min'], self.config.values['level_give_max'] + 1)
                 self.config.database.execute('UPDATE levels SET amount = ' + str(amount) + ' WHERE id = ' + str(member) + ';')
-
-    async def on_ready(self) -> None:
-        self.run_schedule.change_interval(seconds=self.config.delays['levels'])
-        self.run_schedule.start()
 
     async def get_level(self, xp: int) -> int:
         for key in self.levels:
@@ -488,12 +487,16 @@ class Moderation(Module):
                 await message.channel.send(self.config.texts['moderation']['warnings_wrong_channel'] % self.config.get_bots().mention, delete_after=self.config.values['delete_after'])
                 await message.delete(delay=self.config.values['delete_after'])
                 return
-            if len(args) == 1:
+            if len(message.mentions) > 1:
+                await message.channel.send(self.config.texts['moderation']['multiple_arguments'], delete_after=self.config.values['delete_after'])
+                await message.delete(delay=self.config.values['delete_after'])
+                return
+            elif len(args) == 1:
                 member = message.author
             else:
                 member = await self.get_member_from_id_or_mention(args[1], message)
-            if member is None:
-                return
+                if member is None:
+                    return
             databasecontents = self.config.database.execute('SELECT * FROM warns WHERE member = ' + str(member.id) + ' ORDER BY id;')
             result = self.config.texts['moderation']['warnings_success'] % member.mention
             if len(databasecontents) == 0:
@@ -637,7 +640,7 @@ class Roles(Module):
 
 class Rules(Module):
     def __init__(self, config: Config):
-        super().__init__(config)
+        super().__init__(config, config.delays['rules'])
         self.messages = 0
 
     @tasks.loop(seconds=1)
@@ -655,14 +658,10 @@ class Rules(Module):
         if str(message.content).lower().startswith('!regeln'):
             await self.send_message()
 
-    async def on_ready(self) -> None:
-        self.run_schedule.change_interval(seconds=self.config.delays['rules'])
-        self.run_schedule.start()
-
 
 class Slowmode(Module):
     def __init__(self, config: Config):
-        super().__init__(config)
+        super().__init__(config, config.delays['slowmode'])
         self.messages = 0
 
     @tasks.loop(seconds=1)
@@ -680,10 +679,6 @@ class Slowmode(Module):
     async def on_message(self, message: discord.Message) -> None:
         if message.channel.id == self.config.get_chat().id:
             self.messages = self.messages + 1
-
-    async def on_ready(self) -> None:
-        self.run_schedule.change_interval(seconds=self.config.delays['slowmode'])
-        self.run_schedule.start()
 
 
 class Tricks(Module):
@@ -730,6 +725,7 @@ class Tricks(Module):
                     await message.channel.send('**!' + name + '**\n\n' + self.tricks[name])
 
     async def on_ready(self) -> None:
+        await super().on_ready()
         tricks = self.config.database.execute('SELECT id FROM tricks;')
         for elem in tricks:
             self.tricks[elem[0]] = self.config.database.execute('SELECT text FROM tricks WHERE id = \'' + elem[0] + '\';')[0][0]
@@ -744,13 +740,17 @@ class UserInfo(Module):
                 await message.delete(delay=self.config.values['delete_after'])
                 return
             args = content.split(' ')
-            if len(args) == 1:
+            if len(message.mentions) > 1 or len(args) > 2:
+                await message.channel.send(self.config.texts['userinfo']['multiple_arguments'], delete_after=self.config.values['delete_after'])
+                await message.delete(delay=self.config.values['delete_after'])
+                return
+            elif len(args) == 1:
                 member = message.author
             else:
                 member = await self.get_member_from_id_or_mention(args[1], message)
                 if member is None:
                     return
-            embed = self.embed(member.display_name).set_thumbnail(url=member.avatar_url)
+            embed = self.embed(member.display_name).set_thumbnail(url=member.avatar)
             embed.add_field(name=self.config.texts['userinfo']['member'], value=member.name + '#' + member.discriminator, inline=False)
             embed.add_field(name=self.config.texts['userinfo']['id'], value=member.id, inline=False)
             embed.add_field(name=self.config.texts['userinfo']['mention'], value=member.mention, inline=False)
