@@ -237,7 +237,8 @@
     "test_administrator": 0,
     "chat_support": 0,
     "voice_support": 0,
-    "video": 0
+    "video": 0,
+    "muted": 0
   },
   "debug_roles": {
     "level": {
@@ -260,6 +261,7 @@
     "test_administrator": 0,
     "chat_support": 0,
     "voice_support": 0,
-    "video": 0
+    "video": 0,
+    "muted": 0
   }
 }

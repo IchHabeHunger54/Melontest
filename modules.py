@@ -355,6 +355,7 @@ class Moderation(Module):
                 active += 1
         if active >= self.config.values['mute_warnings']:
             await self.timeout(member, self.config.values['mute_duration'], self.config.texts['moderation']['too_many_warnings'])
+            await member.add_roles(self.config.muted_role())
         if active >= self.config.values['kick_warnings']:
             await self.kick(member, self.config.texts['moderation']['too_many_warnings'])
         if active >= self.config.values['ban_warnings']:

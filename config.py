@@ -92,6 +92,9 @@ class Config:
     def video_role(self) -> discord.Role:
         return self.server().get_role(self.roles['video'])
 
+    def muted_role(self) -> discord.Role:
+        return self.server().get_role(self.roles['muted'])
+
     def chat(self) -> discord.TextChannel:
         return self.text_channel(self.channels['chat'])
 
