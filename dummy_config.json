@@ -97,7 +97,18 @@
     "rules": "Bitte lest euch die Regeln in %s bzw. die Kurzfassung in %s durch!",
     "temp_voice": {
       "name": "\uD83C\uDF49 %s",
-      "wrong_channel": "Bitte verwende `!vc` nur in %s!"
+      "wrong_channel": "Bitte verwende `!vc` nur in %s!",
+      "failure": "Du hast keinen Voice Channel!",
+      "invalid": "Ungültige Option %s!",
+      "show": "Dein Voice Channel wird anderen Usern **angezeigt**.",
+      "hide": "Dein Voice Channel wird anderen Usern **nicht angezeigt**.",
+      "open": "Andere User können sich mit deinem Voice Channel **verbinden**.",
+      "close": "Andere User können sich mit deinem Voice Channel **nicht verbinden**.",
+      "limit_success": "Der Kanal ist auf **%s User** limitiert.",
+      "limit_failure": "Das angegebene Userlimit ist keine Zahl zwischen 0 und 99!",
+      "limit_missing": "Bitte gib ein Userlimit an!",
+      "name_success": "Der Kanal wurde auf **%s** umbenannt.",
+      "name_missing": "Bitte gib einen Namen an!"
     },
     "tickets": {
       "name": "\uD83D\uDCCBticket-%s",
@@ -239,6 +250,7 @@
       "40": 0,
       "44": 0
     },
+    "default": 0,
     "test_supporter": 0,
     "supporter": 0,
     "test_moderator": 0,
@@ -263,6 +275,7 @@
       "40": 0,
       "44": 0
     },
+    "default": 0,
     "test_supporter": 0,
     "supporter": 0,
     "test_moderator": 0,

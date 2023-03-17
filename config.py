@@ -90,6 +90,9 @@ class Config:
     def is_team(self, member: discord.Member) -> bool:
         return self.is_test_supporter_or_higher(member)
 
+    def default_role(self) -> discord.Role:
+        return self.server().get_role(self.roles['default'])
+
     def chat_support_role(self) -> discord.Role:
         return self.server().get_role(self.roles['chat_support'])
 

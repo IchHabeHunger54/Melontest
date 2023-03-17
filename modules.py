@@ -588,17 +588,59 @@ class TempVoice(Module):
                 await vc.delete()
 
     async def on_message(self, message: discord.Message) -> None:
-        content = message.content.lower()
-        if content.startswith('!vc'):
+        content = message.content
+        if content.lower().startswith('!vc '):
             if message.channel.id != self.config.bots().id:
-                await self.error_and_delete(message, self.config.texts['temp_voice']['wrong_channel'] % self.config.bots())
+                await self.error_and_delete(message, self.config.texts['temp_voice']['wrong_channel'] % self.config.bots().mention)
                 return
+            if message.author.id not in self.channels:
+                await self.error_and_delete(message, self.config.texts['temp_voice']['failure'])
+                return
+            args = content.split()
+            if args[1].lower() == 'show':
+                await self.channels[message.author.id].set_permissions(target=self.config.default_role(), view_channel=True)
+                await message.channel.send(self.config.texts['temp_voice']['show'])
+            elif args[1].lower() == 'hide':
+                await self.channels[message.author.id].set_permissions(target=self.config.default_role(), view_channel=False)
+                await message.channel.send(self.config.texts['temp_voice']['hide'])
+            elif args[1].lower() == 'open':
+                await self.channels[message.author.id].set_permissions(target=self.config.default_role(), connect=True)
+                await message.channel.send(self.config.texts['temp_voice']['open'])
+            elif args[1].lower() == 'close':
+                await self.channels[message.author.id].set_permissions(target=self.config.default_role(), connect=False)
+                await message.channel.send(self.config.texts['temp_voice']['close'])
+            elif args[1].lower() == 'limit':
+                if len(args) == 2:
+                    await self.error_and_delete(message, self.config.texts['temp_voice']['limit_missing'])
+                    return
+                try:
+                    limit = int(args[2])
+                except TypeError:
+                    await self.error_and_delete(message, self.config.texts['temp_voice']['limit_failure'])
+                    return
+                if limit < 0 or limit > 99:
+                    await self.error_and_delete(message, self.config.texts['temp_voice']['limit_failure'])
+                    return
+                await self.channels[message.author.id].edit(user_limit=limit)
+                await message.channel.send(self.config.texts['temp_voice']['limit_success'] % limit)
+            elif args[1].lower() == 'name':
+                if len(args) == 2:
+                    await self.error_and_delete(message, self.config.texts['temp_voice']['name_failure'])
+                    return
+                name = ' '.join(args[2:])
+                await self.channels[message.author.id].edit(name=self.config.texts['temp_voice']['name'] % name)
+                await message.channel.send(self.config.texts['temp_voice']['name_success'] % name)
+            else:
+                await self.error_and_delete(message, self.config.texts['temp_voice']['invalid'] % args[1])
 
     async def on_voice_state_update(self, member: discord.Member, before: discord.VoiceState, after: discord.VoiceState) -> None:
         if after.channel == self.config.voice_join():
             if member.id not in self.channels:
-                vc = await self.config.server().create_voice_channel(self.config.texts['temp_voice']['name'] % member.display_name, category=self.config.voice_category())
-                self.channels[member.id] = vc
+                self.channels[member.id] = await self.config.server().create_voice_channel(self.config.texts['temp_voice']['name'] % member.display_name, category=self.config.voice_category(), overwrites={
+                    self.config.server().default_role: discord.PermissionOverwrite(view_channel=False, connect=False),
+                    self.config.default_role(): discord.PermissionOverwrite(view_channel=True, connect=True),
+                    member: discord.PermissionOverwrite(move_members=True)
+                })
             await member.move_to(self.channels[member.id])
 
 
