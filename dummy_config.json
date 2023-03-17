@@ -99,6 +99,7 @@
       "name": "\uD83D\uDCCBticket-%s",
       "category_error": "Fehler beim Erstellen des Tickets: Konnte die Ticket-Kategorie nicht finden! Bitte pinge ein Teammitglied, das gerade online ist.",
       "ticket_wrong_channel": "Bitte benutze `!ticket` nur in %s!",
+      "ticket_wrong_content": "Bitte benutze diesen Channel ausschließlich zum Öffnen von Tickets! Benutze `!ticket`, um ein Ticket zu öffnen.",
       "ticket_failure": "Du hast bereits ein Ticket: %s",
       "ticket_success": "%s Es wird Support per Ticket benötigt!\n\n%s Bitte schildere dem Team dein Anliegen!",
       "close_wrong_channel": "`!close` kann nur in einem Ticket verwendet werden!",

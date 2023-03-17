@@ -604,6 +604,9 @@ class Tickets(Module):
             else:
                 await self.error_and_delete(message, self.config.texts['tickets']['ticket_wrong_channel'] % self.config.tickets().mention)
                 return
+        elif message.channel.id == self.config.channels['tickets']:
+            await self.error_and_delete(message, self.config.texts['tickets']['ticket_wrong_content'])
+            return
         if content.startswith('!close'):
             if any(i[0] == message.channel.id for i in self.config.database.execute('SELECT channel FROM tickets;')):
                 ticket = self.config.database.execute('SELECT owner FROM tickets WHERE channel = %s;', message.channel.id)
