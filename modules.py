@@ -28,11 +28,11 @@ class AmongUs(Module):
         if self.first:
             self.first = False
             return
-        members = random.sample(self.config.get_server().members, k=3)
+        members = random.sample(self.config.server().members, k=3)
         self.impostor, self.crewmate1, self.crewmate2 = members
         self.order = [self.impostor, self.crewmate1, self.crewmate2]
         random.shuffle(self.order)
-        self.message = await self.config.get_chat().send(self.config.texts['among_us']['start'] % (self.config.values['among_us_reward'], self.config.values['among_us_crewmate'], self.config.values['among_us_crewmate'], self.config.values['among_us_limit'], self.order[0].display_name, self.order[1].display_name, self.order[2].display_name))
+        self.message = await self.config.chat().send(self.config.texts['among_us']['start'] % (self.config.values['among_us_reward'], self.config.values['among_us_crewmate'], self.config.values['among_us_crewmate'], self.config.values['among_us_limit'], self.order[0].display_name, self.order[1].display_name, self.order[2].display_name))
         await self.message.add_reaction('1️⃣')
         await self.message.add_reaction('2️⃣')
         await self.message.add_reaction('3️⃣')
@@ -55,7 +55,7 @@ class AmongUs(Module):
             for key in self.reactions:
                 if self.reactions[key] == impostor:
                     users.append(key)
-                    usernames += ', ' + self.config.get_member(key).display_name
+                    usernames += ', ' + self.config.member(key).display_name
             usernames = self.config.texts['among_us']['none'] if usernames == '' else usernames[2:]
             await reaction.message.channel.send(self.config.texts['among_us']['end'] % (username, self.impostor.display_name, usernames))
             for member in users:
@@ -196,10 +196,10 @@ class Levels(Module):
             lb = self.get_lb(length)
             text = ''
             for rank, key in enumerate(lb, start=1):
-                text += f'#{rank}: {self.config.get_member(key).mention} ({lb[key]} XP)\n'
+                text += f'#{rank}: {self.config.member(key).mention} ({lb[key]} XP)\n'
             await message.channel.send(text)
         elif content.startswith(('!level', '!rank')):
-            if message.channel.id == self.config.get_bots().id:
+            if message.channel.id == self.config.bots().id:
                 args = content.split()
                 if len(message.mentions) > 1 or len(args) > 2:
                     await self.error_and_delete(message, self.config.texts['level']['multiple_arguments'])
@@ -222,9 +222,9 @@ class Levels(Module):
                     await message.channel.send(self.config.texts['level']['success'] % (str(member.mention), str(level), str(amount), str(rank[0]), str(member.mention), str(to_next), str(member.mention), str(rank[1])))
                 for key in self.roles:
                     if level >= key:
-                        await self.config.get_member(member.id).add_roles(self.config.get_role(self.roles[key]))
+                        await self.config.member(member.id).add_roles(self.config.role(self.roles[key]))
             else:
-                await self.error_and_delete(message, self.config.texts['level']['wrong_channel'] % self.config.get_bots().mention)
+                await self.error_and_delete(message, self.config.texts['level']['wrong_channel'] % self.config.bots().mention)
             return
         member = message.author.id
         if member not in self.cooldowns and message.channel.id in self.config.channels['level']:
@@ -246,7 +246,7 @@ class Levels(Module):
         lb = dict(self.config.database.execute('SELECT * FROM levels;'))
         result = {}
         for k in lb.keys():
-            if self.config.get_member(k) is not None:
+            if self.config.member(k) is not None:
                 result[k] = lb[k]
         if to <= 0:
             return dict(sorted(result.items(), key=lambda x: x[1], reverse=True))
@@ -289,14 +289,14 @@ class Logger(Module):
         embed = self.embed(self.config.texts['logger']['guild_joined'])
         embed.add_field(name=self.config.texts['logger']['user'], value=member.mention, inline=False)
         embed.add_field(name=self.config.texts['logger']['created'], value=self.get_readable_datetime(str(member.created_at)), inline=True)
-        await self.config.get_join_log().send(embed=embed)
+        await self.config.join_log().send(embed=embed)
 
     async def on_member_remove(self, member: discord.Member) -> None:
         embed = self.error_embed(title=self.config.texts['logger']['guild_left'])
         embed.add_field(name=self.config.texts['logger']['user'], value=member.mention, inline=False)
         embed.add_field(name=self.config.texts['logger']['created'], value=self.get_readable_datetime(str(member.created_at)), inline=False)
         embed.add_field(name=self.config.texts['logger']['joined'], value=self.get_readable_datetime(str(member.joined_at)), inline=True)
-        await self.config.get_leave_log().send(embed=embed)
+        await self.config.leave_log().send(embed=embed)
 
     async def on_message_edit(self, before: discord.Message, after: discord.Message) -> None:
         embed = self.embed(self.config.texts['logger']['message_edited'])
@@ -307,14 +307,14 @@ class Logger(Module):
             embed.add_field(name=self.config.texts['logger']['channel'], value=before.channel.mention, inline=False)
             embed.add_field(name=self.config.texts['logger']['before'], value=old, inline=False)
             embed.add_field(name=self.config.texts['logger']['after'], value=new, inline=True)
-            await self.config.get_message_log().send(embed=embed)
+            await self.config.message_log().send(embed=embed)
 
     async def on_message_delete(self, message: discord.Message) -> None:
         embed = self.error_embed(self.config.texts['logger']['message_deleted'])
         embed.add_field(name=self.config.texts['logger']['user'], value=message.author.mention, inline=False)
         embed.add_field(name=self.config.texts['logger']['channel'], value=message.channel.mention, inline=False)
         embed.add_field(name=self.config.texts['logger']['message'], value=message.content, inline=True)
-        await self.config.get_message_log().send(embed=embed)
+        await self.config.message_log().send(embed=embed)
 
     async def on_voice_state_update(self, member: discord.Member, before: discord.VoiceState, after: discord.VoiceState) -> None:
         if before.channel is not None and after.channel is not None:
@@ -322,17 +322,17 @@ class Logger(Module):
             embed.add_field(name=self.config.texts['logger']['user'], value=member.mention, inline=False)
             embed.add_field(name=self.config.texts['logger']['before'], value=before.channel.name, inline=False)
             embed.add_field(name=self.config.texts['logger']['after'], value=after.channel.name, inline=True)
-            await self.config.get_voice_log().send(embed=embed)
+            await self.config.voice_log().send(embed=embed)
         elif before.channel is None and after.channel is not None:
             embed = self.embed(self.config.texts['logger']['voice_joined'])
             embed.add_field(name=self.config.texts['logger']['user'], value=member.mention, inline=False)
             embed.add_field(name=self.config.texts['logger']['channel'], value=after.channel.name, inline=True)
-            await self.config.get_voice_log().send(embed=embed)
+            await self.config.voice_log().send(embed=embed)
         elif before.channel is not None and after.channel is None:
             embed = self.error_embed(self.config.texts['logger']['voice_left'])
             embed.add_field(name=self.config.texts['logger']['user'], value=member.mention, inline=False)
             embed.add_field(name=self.config.texts['logger']['channel'], value=before.channel.name, inline=True)
-            await self.config.get_voice_log().send(embed=embed)
+            await self.config.voice_log().send(embed=embed)
 
 
 class Moderation(Module):
@@ -393,8 +393,8 @@ class Moderation(Module):
             self.config.database.execute('DELETE FROM warns WHERE id = %s;', str(warn))
             await message.channel.send(self.config.texts['moderation']['removewarn_success'] % warn)
         elif args[0] == '!warnings':
-            if message.channel.id != self.config.get_bots().id:
-                await self.error_and_delete(message, self.config.texts['moderation']['warnings_wrong_channel'] % self.config.get_bots().mention)
+            if message.channel.id != self.config.bots().id:
+                await self.error_and_delete(message, self.config.texts['moderation']['warnings_wrong_channel'] % self.config.bots().mention)
                 return
             if len(message.mentions) > 1:
                 await self.error_and_delete(message, self.config.texts['moderation']['multiple_arguments'])
@@ -408,7 +408,7 @@ class Moderation(Module):
                 result += self.config.texts['moderation']['warnings_none']
             else:
                 for i in databasecontents:
-                    result += self.config.texts['moderation']['warnings_item'] % (self.get_readable_datetime(i[3]), i[2], self.config.get_member(i[4]).mention, i[0])
+                    result += self.config.texts['moderation']['warnings_item'] % (self.get_readable_datetime(i[3]), i[2], self.config.member(i[4]).mention, i[0])
                     if (datetime.now() - datetime.strptime(i[3][:19], '%Y-%m-%d %H:%M:%S')).days >= self.config.values['warn_expire_days']:
                         result += self.config.texts['moderation']['warnings_expired']
             await message.channel.send(result)
@@ -504,23 +504,23 @@ class Roles(Module):
     async def on_message(self, message: discord.Message) -> None:
         content = message.content.lower()
         if content.startswith('!videos'):
-            await message.author.add_roles(self.config.get_video_role())
+            await message.author.add_roles(self.config.video_role())
             await message.channel.send(self.config.texts['roles']['videos'])
         elif content.startswith('!keinevideos'):
-            await message.author.remove_roles(self.config.get_video_role())
+            await message.author.remove_roles(self.config.video_role())
             await message.channel.send(self.config.texts['roles']['keinevideos'])
         elif self.config.is_team(message.author):
             if content.startswith('!chatsupport'):
-                await message.author.add_roles(self.config.get_chat_support_role())
+                await message.author.add_roles(self.config.chat_support_role())
                 await message.channel.send(self.config.texts['roles']['chatsupport'])
             elif content.startswith('!keinchatsupport'):
-                await message.author.remove_roles(self.config.get_chat_support_role())
+                await message.author.remove_roles(self.config.chat_support_role())
                 await message.channel.send(self.config.texts['roles']['keinchatsupport'])
             elif content.startswith('!voicesupport'):
-                await message.author.add_roles(self.config.get_voice_support_role())
+                await message.author.add_roles(self.config.voice_support_role())
                 await message.channel.send(self.config.texts['roles']['voicesupport'])
             elif content.startswith('!keinvoicesupport'):
-                await message.author.remove_roles(self.config.get_voice_support_role())
+                await message.author.remove_roles(self.config.voice_support_role())
                 await message.channel.send(self.config.texts['roles']['keinvoicesupport'])
 
 
@@ -535,11 +535,11 @@ class Rules(Module):
             await self.send_message()
 
     async def send_message(self):
-        await self.config.get_chat().send(self.config.texts['rules'] % (self.config.get_rules().mention, self.config.get_short_rules().mention))
+        await self.config.chat().send(self.config.texts['rules'] % (self.config.rules().mention, self.config.short_rules().mention))
         self.messages = 0
 
     async def on_message(self, message: discord.Message) -> None:
-        if message.channel.id == self.config.get_chat().id:
+        if message.channel.id == self.config.chat().id:
             self.messages += 1
         if message.content.lower().startswith('!regeln'):
             await self.send_message()
@@ -553,17 +553,17 @@ class Slowmode(Module):
     @tasks.loop(seconds=1)
     async def run_schedule(self):
         if self.messages > 15:
-            await self.config.get_chat().edit(slowmode_delay=15)
+            await self.config.chat().edit(slowmode_delay=15)
         elif self.messages > 10:
-            await self.config.get_chat().edit(slowmode_delay=10)
+            await self.config.chat().edit(slowmode_delay=10)
         elif self.messages > 5:
-            await self.config.get_chat().edit(slowmode_delay=5)
+            await self.config.chat().edit(slowmode_delay=5)
         else:
-            await self.config.get_chat().edit(slowmode_delay=0)
+            await self.config.chat().edit(slowmode_delay=0)
         self.messages = 0
 
     async def on_message(self, message: discord.Message) -> None:
-        if message.channel.id == self.config.get_chat().id:
+        if message.channel.id == self.config.chat().id:
             self.messages += 1
 
 
@@ -577,34 +577,34 @@ class Tickets(Module):
             if message.channel.id == self.config.channels['tickets']:
                 ticket = self.config.database.execute('SELECT channel FROM tickets WHERE owner = %s', message.author.id)
                 if ticket:
-                    await self.error_and_delete(message, self.config.texts['tickets']['ticket_failure'] % self.config.get_text_channel(ticket[0][0]))
+                    await self.error_and_delete(message, self.config.texts['tickets']['ticket_failure'] % self.config.text_channel(ticket[0][0]))
                     return
                 self.config.database.execute('INSERT INTO tickets (channel, owner) VALUES(%s, %s);', 0, message.author.id)
                 overwrites = {
-                    self.config.get_server().default_role: discord.PermissionOverwrite(read_messages=False),
-                    self.config.get_server().me: discord.PermissionOverwrite(read_messages=True),
-                    self.config.get_member(message.author.id): discord.PermissionOverwrite(read_messages=True),
-                    self.config.get_role(self.config.roles['test_supporter']): discord.PermissionOverwrite(read_messages=True),
-                    self.config.get_role(self.config.roles['supporter']): discord.PermissionOverwrite(read_messages=True),
-                    self.config.get_role(self.config.roles['test_moderator']): discord.PermissionOverwrite(read_messages=True),
-                    self.config.get_role(self.config.roles['moderator']): discord.PermissionOverwrite(read_messages=True),
-                    self.config.get_role(self.config.roles['head_moderator']): discord.PermissionOverwrite(read_messages=True),
-                    self.config.get_role(self.config.roles['test_administrator']): discord.PermissionOverwrite(read_messages=True)
+                    self.config.server().default_role: discord.PermissionOverwrite(read_messages=False),
+                    self.config.server().me: discord.PermissionOverwrite(read_messages=True),
+                    self.config.member(message.author.id): discord.PermissionOverwrite(read_messages=True),
+                    self.config.role(self.config.roles['test_supporter']): discord.PermissionOverwrite(read_messages=True),
+                    self.config.role(self.config.roles['supporter']): discord.PermissionOverwrite(read_messages=True),
+                    self.config.role(self.config.roles['test_moderator']): discord.PermissionOverwrite(read_messages=True),
+                    self.config.role(self.config.roles['moderator']): discord.PermissionOverwrite(read_messages=True),
+                    self.config.role(self.config.roles['head_moderator']): discord.PermissionOverwrite(read_messages=True),
+                    self.config.role(self.config.roles['test_administrator']): discord.PermissionOverwrite(read_messages=True)
                 }
                 category = None
-                for c in self.config.get_server().categories:
+                for c in self.config.server().categories:
                     if c.id == self.config.values['ticket_category']:
                         category = c
-                ticket = await self.config.get_server().create_text_channel(name=self.config.texts['tickets']['name'] % self.config.database.execute('SELECT id FROM tickets WHERE owner = %s;', message.author.id), category=category, overwrites=overwrites)
+                ticket = await self.config.server().create_text_channel(name=self.config.texts['tickets']['name'] % self.config.database.execute('SELECT id FROM tickets WHERE owner = %s;', message.author.id), category=category, overwrites=overwrites)
                 self.config.database.execute('UPDATE tickets SET channel = %s WHERE owner = %s;', ticket.id, message.author.id)
-                await ticket.send(self.config.texts['tickets']['ticket_success'] % (self.config.get_chat_support_role().mention, message.author.mention))
+                await ticket.send(self.config.texts['tickets']['ticket_success'] % (self.config.chat_support_role().mention, message.author.mention))
             else:
-                await self.error_and_delete(message, self.config.texts['tickets']['ticket_wrong_channel'] % self.config.get_tickets().mention)
+                await self.error_and_delete(message, self.config.texts['tickets']['ticket_wrong_channel'] % self.config.tickets().mention)
                 return
         if content.startswith('!close'):
             if any(i[0] == message.channel.id for i in self.config.database.execute('SELECT channel FROM tickets;')):
                 ticket = self.config.database.execute('SELECT owner FROM tickets WHERE channel = %s;', message.channel.id)
-                await message.channel.set_permissions(target=self.config.get_member(ticket[0][0]), read_messages=False)
+                await message.channel.set_permissions(target=self.config.member(ticket[0][0]), read_messages=False)
                 await message.channel.send(self.config.texts['tickets']['close_success'])
             else:
                 await self.error_and_delete(message, self.config.texts['tickets']['close_wrong_channel'])
@@ -618,7 +618,7 @@ class Tickets(Module):
                 return
             else:
                 self.config.database.execute('DELETE FROM tickets WHERE channel = %s;', message.channel.id)
-                await self.config.get_text_channel(message.channel.id).delete()
+                await self.config.text_channel(message.channel.id).delete()
 
 
 class Tricks(Module):
@@ -671,8 +671,8 @@ class UserInfo(Module):
     async def on_message(self, message: discord.Message) -> None:
         content = message.content.lower()
         if content.startswith('!userinfo'):
-            if message.channel.id != self.config.get_bots().id:
-                await self.error_and_delete(message, self.config.texts['userinfo']['wrong_channel'] % self.config.get_bots().mention)
+            if message.channel.id != self.config.bots().id:
+                await self.error_and_delete(message, self.config.texts['userinfo']['wrong_channel'] % self.config.bots().mention)
                 return
             args = content.split()
             if len(message.mentions) > 1 or len(args) > 2:
@@ -695,5 +695,5 @@ class UserInfo(Module):
 
 class VoiceSupport(Module):
     async def on_voice_state_update(self, member: discord.Member, before: discord.VoiceState, after: discord.VoiceState) -> None:
-        if after.channel is not None and after.channel.id == self.config.get_voice_support_channel().id:
-            await self.config.get_team_voice_support_channel().send(self.config.texts['voice_support'] % (self.config.get_voice_support_role().mention, member.mention))
+        if after.channel is not None and after.channel.id == self.config.voice_support_channel().id:
+            await self.config.team_voice_support_channel().send(self.config.texts['voice_support'] % (self.config.voice_support_role().mention, member.mention))

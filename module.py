@@ -73,7 +73,7 @@ class Module:
         except ValueError:
             await self.error_and_delete(message, self.config.texts['invalid'])
             return None
-        return self.config.get_member(userid)
+        return self.config.member(userid)
 
     async def get_team_member_from_id_or_mention(self, mention: str, message: discord.Message) -> Optional[discord.Member]:
         member = await self.get_member_from_id_or_mention(mention, message)
