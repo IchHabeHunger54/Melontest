@@ -577,9 +577,15 @@ class Slowmode(Module):
 
 
 class TempVoice(Module):
-    @tasks.loop(minutes=1)
+    def __init__(self, config: Config):
+        super().__init__(config, config.delays['temp_voice'])
+        self.channels = {}
+
+    @tasks.loop(seconds=1)
     async def run_schedule(self):
-        pass
+        for vc in self.config.server().voice_channels:
+            if vc.category_id == self.config.categories['voice'] and vc.id != self.config.voice_join().id and vc.id != self.config.voice_move().id and not vc.members:
+                await vc.delete()
 
     async def on_message(self, message: discord.Message) -> None:
         content = message.content.lower()
@@ -589,7 +595,11 @@ class TempVoice(Module):
                 return
 
     async def on_voice_state_update(self, member: discord.Member, before: discord.VoiceState, after: discord.VoiceState) -> None:
-        pass
+        if after.channel == self.config.voice_join():
+            if member.id not in self.channels:
+                vc = await self.config.server().create_voice_channel(self.config.texts['temp_voice']['name'] % member.display_name, category=self.config.voice_category())
+                self.channels[member.id] = vc
+            await member.move_to(self.channels[member.id])
 
 
 class Tickets(Module):
@@ -602,7 +612,7 @@ class Tickets(Module):
                     await self.error_and_delete(message, self.config.texts['tickets']['ticket_failure'] % self.config.text_channel(ticket[0][0]))
                     return
                 self.config.database.execute('INSERT INTO tickets (channel, owner) VALUES(%s, %s);', 0, message.author.id)
-                overwrites = {
+                ticket = await self.config.server().create_text_channel(name=self.config.texts['tickets']['name'] % self.config.database.execute('SELECT id FROM tickets WHERE owner = %s;', message.author.id), category=self.config.tickets_category(), overwrites={
                     self.config.server().default_role: discord.PermissionOverwrite(read_messages=False),
                     self.config.server().me: discord.PermissionOverwrite(read_messages=True),
                     message.author: discord.PermissionOverwrite(read_messages=True),
@@ -612,15 +622,7 @@ class Tickets(Module):
                     self.config.role(self.config.roles['moderator']): discord.PermissionOverwrite(read_messages=True),
                     self.config.role(self.config.roles['head_moderator']): discord.PermissionOverwrite(read_messages=True),
                     self.config.role(self.config.roles['test_administrator']): discord.PermissionOverwrite(read_messages=True)
-                }
-                category = None
-                for c in self.config.server().categories:
-                    if c.id == self.config.categories['tickets']:
-                        category = c
-                if category is None:
-                    await self.error_and_delete(message, self.config.texts['tickets']['category_error'])
-                    return
-                ticket = await self.config.server().create_text_channel(name=self.config.texts['tickets']['name'] % self.config.database.execute('SELECT id FROM tickets WHERE owner = %s;', message.author.id), category=category, overwrites=overwrites)
+                })
                 self.config.database.execute('UPDATE tickets SET channel = %s WHERE owner = %s;', ticket.id, message.author.id)
                 await ticket.send(self.config.texts['tickets']['ticket_success'] % (self.config.chat_support_role().mention, message.author.mention))
             else:

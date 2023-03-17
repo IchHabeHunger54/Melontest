@@ -62,6 +62,13 @@ class Config:
         channel = self.server().get_channel(channel_id)
         return channel if isinstance(channel, discord.VoiceChannel) else None
 
+    def category(self, category_id: str) -> discord.CategoryChannel:
+        category = None
+        for c in self.server().categories:
+            if c.id == self.categories[category_id]:
+                category = c
+        return category
+
     def is_test_administrator_or_higher(self, member: discord.Member) -> bool:
         return self.has_role(member, self.roles['test_administrator']) or self.is_administrator(member)
 
@@ -133,6 +140,12 @@ class Config:
 
     def voice_move(self) -> discord.VoiceChannel:
         return self.voice_channel(self.channels['voice_move'])
+
+    def tickets_category(self) -> discord.CategoryChannel:
+        return self.category('tickets')
+
+    def voice_category(self) -> discord.CategoryChannel:
+        return self.category('voice')
 
     @staticmethod
     def has_role(member: discord.Member, role_id: int) -> bool:
