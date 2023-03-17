@@ -112,14 +112,8 @@ class Config:
 
     @staticmethod
     def has_role(member: discord.Member, role_id: int) -> bool:
-        for role in member.roles:
-            if role.id == role_id:
-                return True
-        return False
+        return any(role.id == role_id for role in member.roles)
 
     @staticmethod
     def is_administrator(member: discord.Member) -> bool:
-        for role in member.roles:
-            if role.permissions.administrator:
-                return True
-        return False
+        return any(role.permissions.administrator for role in member.roles)

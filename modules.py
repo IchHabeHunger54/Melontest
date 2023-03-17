@@ -20,6 +20,7 @@ class AmongUs(Module):
         self.crewmate2 = None
         self.votes = [0, 0, 0]
         self.first = True
+        self.emotes = {'1️⃣': 0, '2️⃣': 1, '3️⃣': 2}
 
     @tasks.loop(seconds=1)
     async def run_schedule(self):
@@ -27,13 +28,8 @@ class AmongUs(Module):
         if self.first:
             self.first = False
             return
-        members = list(self.config.get_server().members)
-        self.impostor = members[random.randint(0, len(members) - 1)]
-        members.remove(self.impostor)
-        self.crewmate1 = members[random.randint(0, len(members) - 1)]
-        members.remove(self.crewmate1)
-        self.crewmate2 = members[random.randint(0, len(members) - 1)]
-        members.remove(self.crewmate2)
+        members = random.sample(self.config.get_server().members, k=3)
+        self.impostor, self.crewmate1, self.crewmate2 = members
         self.order = [self.impostor, self.crewmate1, self.crewmate2]
         random.shuffle(self.order)
         self.message = await self.config.get_chat().send(self.config.texts['among_us']['start'] % (self.config.values['among_us_reward'], self.config.values['among_us_crewmate'], self.config.values['among_us_crewmate'], self.config.values['among_us_limit'], self.order[0].display_name, self.order[1].display_name, self.order[2].display_name))
@@ -42,58 +38,32 @@ class AmongUs(Module):
         await self.message.add_reaction('3️⃣')
 
     async def on_reaction_add(self, reaction: discord.Reaction, member: discord.Member) -> None:
-        if self.message is None or self.message.id != reaction.message.id:
+        if self.message is None or self.message.id != reaction.message.id or reaction.emoji not in ['1️⃣', '2️⃣', '3️⃣']:
             return
-        if reaction.emoji != '1️⃣' and reaction.emoji != '2️⃣' and reaction.emoji != '3️⃣':
-            return
-        if self.reactions.get(member.id) is not None:
+        if self.reactions.get(member.id):
             await reaction.message.remove_reaction(reaction, member)
-        if reaction.emoji == '1️⃣':
-            self.votes[0] += 1
-            self.reactions[member.id] = 0
-        if reaction.emoji == '2️⃣':
-            self.votes[1] += 1
-            self.reactions[member.id] = 1
-        if reaction.emoji == '3️⃣':
-            self.votes[2] += 1
-            self.reactions[member.id] = 2
+        if reaction.emoji in self.votes:
+            index = self.emotes[reaction.emoji]
+            self.votes[index] += 1
+            self.reactions[member.id] = index
         if len(self.reactions) == self.config.values['among_us_limit']:
-            index = None
-            if self.votes[0] > self.votes[1] and self.votes[0] > self.votes[2]:
-                index = 0
-            elif self.votes[1] > self.votes[0] and self.votes[1] > self.votes[2]:
-                index = 1
-            elif self.votes[2] > self.votes[0] and self.votes[2] > self.votes[1]:
-                index = 2
-            if index is None:
-                username = self.config.texts['among_us']['none']
-            else:
-                username = self.order[index].display_name
-            impostor = -1
-            if self.impostor.id == self.order[0].id:
-                impostor = 0
-            elif self.impostor.id == self.order[1].id:
-                impostor = 1
-            elif self.impostor.id == self.order[2].id:
-                impostor = 2
+            index = self.votes.index(max(self.votes))
+            username = self.config.texts['among_us']['none'] if self.votes.count(max(self.votes)) > 1 else self.order[index].display_name
+            impostor = self.order.index(self.impostor) if self.impostor in self.order else -1
             users = []
             usernames = ''
             for key in self.reactions:
                 if self.reactions[key] == impostor:
                     users.append(key)
                     usernames += ', ' + self.config.get_member(key).display_name
-            if usernames == '':
-                usernames = self.config.texts['among_us']['none']
-            else:
-                usernames = usernames[2:]
+            usernames = self.config.texts['among_us']['none'] if usernames == '' else usernames[2:]
             await reaction.message.channel.send(self.config.texts['among_us']['end'] % (username, self.impostor.display_name, usernames))
             for member in users:
-                amount = self.config.database.execute('SELECT amount FROM levels WHERE id = ' + str(member) + ';')
+                amount = self.config.database.execute('SELECT amount FROM levels WHERE id = %s;', str(member))
                 if len(amount) == 0:
-                    self.config.database.execute('INSERT INTO levels (id, amount) VALUES(' + str(member) + ', 1);')
+                    self.config.database.execute('INSERT INTO levels (id, amount) VALUES(%s, 1);', str(member))
                 else:
-                    amount = amount[0][0] + self.config.values['among_us_reward']
-                    self.config.database.execute('UPDATE levels SET amount = ' + str(amount) + ' WHERE id = ' + str(member) + ';')
+                    self.config.database.execute('UPDATE levels SET amount = %s WHERE id = %s;', str(amount[0][0] + self.config.values["among_us_reward"]), str(member))
             self.message = None
             self.reactions = {}
             self.order = []
@@ -103,21 +73,12 @@ class AmongUs(Module):
             self.votes = [0, 0, 0]
 
     async def on_reaction_remove(self, reaction: discord.Reaction, member: discord.Member) -> None:
-        if self.message is None or self.message.id != reaction.message.id:
+        if self.message is None or self.message.id != reaction.message.id or reaction.emoji not in ['1️⃣', '2️⃣', '3️⃣']:
             return
-        if reaction.emoji != '1️⃣' and reaction.emoji != '2️⃣' and reaction.emoji != '3️⃣':
-            return
-        if reaction.emoji == '1️⃣':
-            self.votes[0] -= 1
-            if self.reactions.get(member.id) == 0:
-                self.reactions.pop(member.id)
-        if reaction.emoji == '2️⃣':
-            self.votes[1] -= 1
-            if self.reactions.get(member.id) == 1:
-                self.reactions.pop(member.id)
-        if reaction.emoji == '3️⃣':
-            self.votes[2] -= 1
-            if self.reactions.get(member.id) == 2:
+        index = self.emotes.get(reaction.emoji)
+        if index is not None:
+            self.votes[index] -= 1
+            if self.reactions.get(member.id) == index:
                 self.reactions.pop(member.id)
 
     def update_interval(self) -> None:
@@ -131,21 +92,17 @@ class CapsModeration(Module):
         content = str(message.content)
         if len(content) < self.config.values['caps_min']:
             return
-        upper = 0
-        for elem in content:
-            if elem.isupper():
-                upper += 1
-        if upper / len(content) > self.config.values['caps_ratio']:
+        if sum(1 for elem in content if elem.isupper()) / len(content) > self.config.values['caps_ratio']:
             await message.channel.send(self.config.texts['caps_moderation'] % message.author.mention, delete_after=self.config.values['delete_after'])
             await message.delete()
 
 
 class Clear(Module):
     async def on_message(self, message: discord.Message) -> None:
-        content = str(message.content).lower()
+        content = message.content.lower()
         if content.startswith('!clear '):
             if self.config.is_team(message.author):
-                strings = content.split(' ')
+                strings = content.split()
                 if len(strings) > 1 and strings[1].isnumeric():
                     async for m in message.channel.history(limit=int(strings[1])):
                         await m.delete()
@@ -155,15 +112,15 @@ class Clear(Module):
 
 class Counter(Module):
     async def on_message(self, message: discord.Message) -> None:
-        content = str(message.content).lower()
-        if ' ' in content:
+        if ' ' in message.content:
             return
+        content = message.content.lower()
         variable = None
         amount = 0
+        update = True
         if content.endswith('='):
             variable = content.replace('=', '')
-            result = self.config.database.execute('SELECT value FROM counters WHERE id = \'' + variable + '\';')
-            await message.channel.send(variable + ' = ' + str(result[0][0]))
+            update = False
         elif content.endswith('++') and content.count('++') == 1:
             variable = content.replace('++', '')
             amount = 1
@@ -180,21 +137,21 @@ class Counter(Module):
             if len(strings) == 2 and strings[1].isnumeric():
                 variable = strings[0]
                 amount = -int(strings[1])
-        if variable is not None and amount != 0:
-            old = self.config.database.execute('SELECT value FROM counters WHERE id = \'' + variable + '\';')
-            if len(old) == 0:
-                self.config.database.execute('INSERT INTO counters (id, value) VALUES(\'' + variable + '\', ' + str(amount) + ');')
-            else:
-                amount += old[0][0]
-                self.config.database.execute('UPDATE counters SET value = ' + str(amount) + ' WHERE id = \'' + variable + '\';')
-            result = self.config.database.execute('SELECT value FROM counters WHERE id = \'' + variable + '\';')
-            await message.channel.send(variable + ' = ' + str(result[0][0]))
+        if variable is not None:
+            if amount != 0 and update:
+                old = self.config.database.execute('SELECT value FROM counter WHERE id = %s;', variable)
+                if not old:
+                    self.config.database.execute('INSERT INTO counter (id, value) VALUES(%s, %s);', variable, str(amount))
+                else:
+                    amount += old[0][0]
+                    self.config.database.execute('UPDATE counter SET value = %s WHERE id = %s;', str(amount), variable)
+            await message.channel.send(f'{variable} = {self.config.database.execute("SELECT value FROM counter WHERE id = %s;", variable)[0][0]}')
 
 
 class Creeper(Module):
     async def on_message(self, message: discord.Message) -> None:
-        content = str(message.content).lower()
-        if content.startswith('!creeper') or content.startswith('creeper') or content.startswith('creper'):
+        content = message.content.lower()
+        if any(keyword in content for keyword in ('!creeper', 'creeper', 'creper')):
             await message.channel.send(self.config.texts['creeper'])
 
 
@@ -203,7 +160,7 @@ class EmoteModeration(Module):
         if self.config.is_team(message.author):
             return
         content = str(message.content)
-        emotes = content.count('<a:') + (emoji.demojize(content).count(':') - content.count(':')) / 2
+        emotes = content.count('<a:') + (emoji.demojize(content).count(':') - content.count(':')) // 2
         if emotes > self.config.values['emotes_max']:
             await message.channel.send(self.config.texts['emote_moderation'] % message.author.mention, delete_after=self.config.values['delete_after'])
             await message.delete()
@@ -211,7 +168,7 @@ class EmoteModeration(Module):
 
 class Flomote(Module):
     async def on_message(self, message: discord.Message) -> None:
-        content = str(message.content).lower()
+        content = message.content.lower()
         if content.startswith('flomote'):
             await message.channel.send(self.config.texts['flomote'])
         if content.startswith('floeyes'):
@@ -228,12 +185,7 @@ class Levels(Module):
         for i in range(2, self.config.values['level_max']):
             self.levels[i] = int(self.levels[i - 1] + base * multiplier ** i)
         roles = self.config.roles['level']
-        self.roles = {}
-        for i in roles:
-            try:
-                self.roles[int(i)] = roles[i]
-            except ValueError:
-                pass
+        self.roles = {int(i): roles[i] for i in roles if i.isdigit()}
 
     @tasks.loop(seconds=1)
     async def run_schedule(self) -> None:
@@ -241,42 +193,29 @@ class Levels(Module):
 
     async def on_message(self, message: discord.Message) -> None:
         content = message.content
-        if content.startswith('!leaderboard') or content.startswith('!lb'):
-            length = self.config.values['leaderboard_default']
-            try:
-                s = content.split(' ')
-                if len(s) > 1:
-                    length = int(s[1])
-            except ValueError:
-                pass
-            if length > self.config.values['leaderboard_max']:
-                length = self.config.values['leaderboard_max']
+        if content.startswith(('!leaderboard', '!lb')):
+            length = min(int(content.split()[1]) if len(content.split()) > 1 else self.config.values['leaderboard_default'], self.config.values['leaderboard_max'])
             lb = self.get_lb(length)
             text = ''
-            rank = 1
-            for key in lb:
-                text += '#' + str(rank) + ': ' + self.config.get_member(key).mention + ' (' + str(lb[key]) + ' XP)\n'
-                rank += 1
+            for rank, key in enumerate(lb, start=1):
+                text += f'#{rank}: {self.config.get_member(key).mention} ({lb[key]} XP)\n'
             await message.channel.send(text)
-        elif content.startswith('!level') or content.startswith('!rank'):
+        elif content.startswith(('!level', '!rank')):
             if message.channel.id == self.config.get_bots().id:
-                args = content.split(' ')
+                args = content.split()
                 if len(message.mentions) > 1 or len(args) > 2:
                     await message.channel.send(self.config.texts['level']['multiple_arguments'], delete_after=self.config.values['delete_after'])
                     await message.delete(delay=self.config.values['delete_after'])
                     return
-                elif len(args) == 1:
-                    member = message.author
                 else:
-                    member = await self.get_member_from_id_or_mention(args[1], message)
+                    member = message.author if len(args) == 1 else await self.get_member_from_id_or_mention(args[1], message)
                     if member.id is None:
                         return
                 amount = self.get_from_database(member.id)
-                if amount is None or len(amount) == 0:
+                if not amount:
                     await message.channel.send(self.config.texts['level']['no_xp'] % (str(member.mention)))
                     return
-                else:
-                    amount = amount[0][0]
+                amount = amount[0][0]
                 level = await self.get_level(amount)
                 to_next = self.levels[level + 1] - amount
                 rank = self.get_rank(member.id)
@@ -296,10 +235,9 @@ class Levels(Module):
             self.cooldowns.append(member)
             amount = self.get_from_database(member)
             if len(amount) == 0:
-                self.config.database.execute('INSERT INTO levels (id, amount) VALUES(' + str(member) + ', 1);')
+                self.config.database.execute('INSERT INTO levels (id, amount) VALUES(%s, 1);', str(member))
             else:
-                amount = amount[0][0] + random.randrange(self.config.values['level_give_min'], self.config.values['level_give_max'] + 1)
-                self.config.database.execute('UPDATE levels SET amount = ' + str(amount) + ' WHERE id = ' + str(member) + ';')
+                self.config.database.execute('UPDATE levels SET amount = %s WHERE id = %s;', str(amount[0][0] + random.randrange(self.config.values["level_give_min"], self.config.values["level_give_max"] + 1)), str(member))
 
     async def get_level(self, xp: int) -> int:
         for key in self.levels:
@@ -321,10 +259,9 @@ class Levels(Module):
 
     def get_rank(self, member) -> tuple:
         value = self.get_from_database(member)
-        if len(value) == 0:
+        if not value:
             return 0, None
-        else:
-            value = value[0][0]
+        value = value[0][0]
         values = list(self.get_lb().items())
         if values[0][1] == value:
             return 1, None
@@ -334,30 +271,21 @@ class Levels(Module):
         return len(values), values[len(values) - 1][1] - value
 
     def get_from_database(self, member):
-        return self.config.database.execute('SELECT amount FROM levels WHERE id = ' + str(member) + ';')
+        return self.config.database.execute('SELECT amount FROM levels WHERE id = %s;', str(member))
 
 
 class LinkModeration(Module):
     async def on_message(self, message: discord.Message) -> None:
         if self.config.is_team(message.author):
             return
-        content = str(message.content).lower()
+        content = message.content.lower()
         # noinspection HttpUrlsUsage
-        if 'http://' not in content and 'https://' not in content:
+        if not any(s in content for s in ['http://', 'https://']):
             return
-        for elem in self.config.values['link_blacklist']:
-            if elem in content:
-                await message.channel.send(self.config.texts['link_moderation'] % message.author.mention, delete_after=self.config.values['delete_after'])
-                await message.delete()
-        delete = True
-        for elem in self.config.values['link_whitelist']:
-            if elem in content:
-                delete = False
-        if message.channel.id == self.config.get_music_channel().id:
-            for elem in self.config.values['music_link_whitelist']:
-                if elem in content:
-                    delete = False
-        if delete:
+        if any(elem in content for elem in self.config.values['link_blacklist']):
+            await message.channel.send(self.config.texts['link_moderation'] % message.author.mention, delete_after=self.config.values['delete_after'])
+            await message.delete()
+        elif not any(elem in content for elem in self.config.values['link_whitelist']):
             await message.channel.send(self.config.texts['link_moderation'] % message.author.mention, delete_after=self.config.values['delete_after'])
             await message.delete()
 
@@ -415,21 +343,14 @@ class Logger(Module):
 
 class Moderation(Module):
     async def warn(self, member: discord.Member, reason: str, team_member: discord.User, channel: discord.TextChannel):
-        self.config.database.execute('INSERT INTO warns (member, reason, time, team_member) VALUES(' + str(member.id) + ', \'' + reason + '\', \'' + str(datetime.now()) + '\', ' + str(team_member.id) + ');')
+        now = datetime.now()
+        self.config.database.execute('INSERT INTO warns (member, reason, time, team_member) VALUES(%s, %s, %s, %s);', str(member.id), reason, now, str(team_member.id))
         await channel.send(self.config.texts['moderation']['warn_success'] % (member.mention, reason, team_member.mention))
-        databasecontents = self.config.database.execute('SELECT * FROM warns WHERE member = ' + str(member.id) + ' ORDER BY id;')
+        databasecontents = self.config.database.execute('SELECT * FROM warns WHERE member = %s ORDER BY id;', str(member.id))
         active = 0
         for i in databasecontents:
-            date = str(datetime.now() - datetime.strptime(i[3][:19], '%Y-%m-%d %H:%M:%S'))
-            if 'days' not in date:
+            if (now - datetime.strptime(i[3][:19], '%Y-%m-%d %H:%M:%S')).days < self.config.values['warn_expire_days']:
                 active += 1
-            else:
-                try:
-                    days = int(date.split(' ')[0])
-                    if days < self.config.values['warn_expire_days']:
-                        active += 1
-                except ValueError:
-                    pass
         if active >= self.config.values['mute_warnings']:
             await self.timeout(member, self.config.values['mute_duration'], self.config.texts['moderation']['too_many_warnings'])
         if active >= self.config.values['kick_warnings']:
@@ -450,7 +371,7 @@ class Moderation(Module):
         await member.ban(reason=reason, delete_message_days=1)
 
     async def on_message(self, message: discord.Message) -> None:
-        args = str(message.content).split(' ')
+        args = message.content.split()
         args[0] = args[0].lower()
         if args[0] == '!warn':
             if not self.config.is_team(message.author):
@@ -480,7 +401,7 @@ class Moderation(Module):
                 await message.channel.send(self.config.texts['moderation']['removewarn_failure'], delete_after=self.config.values['delete_after'])
                 await message.delete(delay=self.config.values['delete_after'])
                 return
-            self.config.database.execute('DELETE FROM warns WHERE id = ' + str(warn) + ';')
+            self.config.database.execute('DELETE FROM warns WHERE id = %s;', str(warn))
             await message.channel.send(self.config.texts['moderation']['removewarn_success'] % warn)
         elif args[0] == '!warnings':
             if message.channel.id != self.config.get_bots().id:
@@ -491,27 +412,18 @@ class Moderation(Module):
                 await message.channel.send(self.config.texts['moderation']['multiple_arguments'], delete_after=self.config.values['delete_after'])
                 await message.delete(delay=self.config.values['delete_after'])
                 return
-            elif len(args) == 1:
-                member = message.author
-            else:
-                member = await self.get_member_from_id_or_mention(args[1], message)
-                if member is None:
-                    return
-            databasecontents = self.config.database.execute('SELECT * FROM warns WHERE member = ' + str(member.id) + ' ORDER BY id;')
+            member = message.author if len(args) == 1 else await self.get_member_from_id_or_mention(args[1], message)
+            if member is None:
+                return
+            databasecontents = self.config.database.execute('SELECT * FROM warns WHERE member = %s ORDER BY id;', str(member.id))
             result = self.config.texts['moderation']['warnings_success'] % member.mention
-            if len(databasecontents) == 0:
+            if not databasecontents:
                 result += self.config.texts['moderation']['warnings_none']
             else:
                 for i in databasecontents:
                     result += self.config.texts['moderation']['warnings_item'] % (self.get_readable_datetime(i[3]), i[2], self.config.get_member(i[4]).mention, i[0])
-                    date = str(datetime.now() - datetime.strptime(i[3][:19], '%Y-%m-%d %H:%M:%S'))
-                    if 'days' in date:
-                        try:
-                            days = int(date.split(' ')[0])
-                            if days >= self.config.values['warn_expire_days']:
-                                result += self.config.texts['moderation']['warnings_expired']
-                        except ValueError:
-                            pass
+                    if (datetime.now() - datetime.strptime(i[3][:19], '%Y-%m-%d %H:%M:%S')).days >= self.config.values['warn_expire_days']:
+                        result += self.config.texts['moderation']['warnings_expired']
             await message.channel.send(result)
         elif args[0] == '!mute':
             if not self.config.is_team(message.author):
@@ -538,10 +450,7 @@ class Moderation(Module):
                 return
             member = await self.get_non_team_member_from_id_or_mention(args[1], message)
             if member is not None:
-                if len(args) == 2:
-                    reason = '_kein Grund angegeben_'
-                else:
-                    reason = ' '.join(args[2:])
+                reason = self.config.texts['moderation']['no_reason'] if len(args) == 2 else ' '.join(args[2:])
                 await member.timeout(None, reason=reason)
                 await message.channel.send(self.config.texts['moderation']['unmute_success'] % (member.mention, reason, message.author.mention))
         elif args[0] == '!kick':
@@ -575,10 +484,10 @@ class Moderation(Module):
         else:
             if self.config.is_team(message.author):
                 return
-            mentions = message.mentions
-            for member in mentions:
+            blacklist = set(self.config.values['ping_blacklist'])
+            for member in message.mentions:
                 client = self.config.client.user
-                if member.id in self.config.values['ping_blacklist'] and client is not None:
+                if member.id in blacklist and client is not None:
                     # noinspection PyTypeChecker
                     await self.warn(message.author, self.config.texts['moderation']['ping_reason'], client, message.channel)
                     await message.delete()
@@ -586,29 +495,27 @@ class Moderation(Module):
 
 class Ping(Module):
     async def on_message(self, message: discord.Message) -> None:
-        if str(message.content).lower().startswith('!ping'):
+        if message.content.lower().startswith('!ping'):
             created_at = message.created_at
             now = datetime.now(timezone.utc)
-            if now > created_at:
-                time = str(now - created_at)
-            else:
-                time = str(created_at - now)
+            time = str(now - created_at) if now > created_at else str(created_at - now)
             if time.startswith('0:00:'):
-                await message.channel.send(self.config.texts['ping']['success'] % str(float(str(time)[5:])))
-            else:
-                await message.channel.send(self.config.texts['ping']['failure'])
+                time = time[5:]
+            if time.startswith('00'):
+                time = time[1:]
+            await message.channel.send(self.config.texts['ping'] % time)
 
 
 class RawEcho(Module):
     async def on_message(self, message: discord.Message) -> None:
-        content = str(message.content).lower()
+        content = message.content.lower()
         if content.startswith('!rawecho '):
-            await message.channel.send('`' + content[len('!rawecho '):] + '`')
+            await message.channel.send(f'`{content[len("!rawecho "):]}`')
 
 
 class Reload(Module):
     async def on_message(self, message: discord.Message) -> None:
-        if str(message.content).lower().startswith('!reload'):
+        if message.content.lower().startswith('!reload'):
             await message.channel.send(self.config.texts['reload']['start'])
             self.config.load()
             await message.channel.send(self.config.texts['reload']['end'])
@@ -616,7 +523,7 @@ class Reload(Module):
 
 class Roles(Module):
     async def on_message(self, message: discord.Message) -> None:
-        content = str(message.content).lower()
+        content = message.content.lower()
         if content.startswith('!videos'):
             await message.author.add_roles(self.config.get_video_role())
             await message.channel.send(self.config.texts['roles']['videos'])
@@ -654,8 +561,8 @@ class Rules(Module):
 
     async def on_message(self, message: discord.Message) -> None:
         if message.channel.id == self.config.get_chat().id:
-            self.messages = self.messages + 1
-        if str(message.content).lower().startswith('!regeln'):
+            self.messages += 1
+        if message.content.lower().startswith('!regeln'):
             await self.send_message()
 
 
@@ -678,7 +585,7 @@ class Slowmode(Module):
 
     async def on_message(self, message: discord.Message) -> None:
         if message.channel.id == self.config.get_chat().id:
-            self.messages = self.messages + 1
+            self.messages += 1
 
 
 class Tricks(Module):
@@ -687,69 +594,62 @@ class Tricks(Module):
         self.tricks = {}
 
     async def on_message(self, message: discord.Message) -> None:
-        content = str(message.content).lower()
+        content = message.content.lower()
         if content.startswith('!'):
             if content.startswith('!addtrick'):
                 if not self.config.is_team(message.author):
                     await message.channel.send(self.config.texts['team_only'], delete_after=self.config.values['delete_after'])
                     return
-                split = message.content.split(' ')
+                split = message.content.split()
                 if len(split) > 2:
                     name = split[1].lower()
                     text = message.content.replace('!addtrick ' + name + ' ', '')
-                    self.config.database.execute('INSERT INTO tricks (id, text) VALUES(\'' + name + '\', \'' + text + '\');')
+                    self.config.database.execute('INSERT INTO tricks (id, text) VALUES(%s, %s);', name, text)
                     self.tricks[name] = text
                     await message.channel.send((self.config.texts['tricks']['added'] % name) + text)
             elif content.startswith('!removetrick'):
                 if not self.config.is_team(message.author):
                     await message.channel.send(self.config.texts['team_only'], delete_after=self.config.values['delete_after'])
                     return
-                split = message.content.split(' ')
+                split = message.content.split()
                 if len(split) > 1:
                     name = split[1].lower()
-                    self.config.database.execute('DELETE FROM tricks WHERE id = \'' + name + '\';')
+                    self.config.database.execute('DELETE FROM tricks WHERE id = %s;', name)
                     self.tricks.pop(name)
                     await message.channel.send(self.config.texts['tricks']['removed'] % name)
             elif content.startswith('!tricks'):
-                tricklist = ''
-                for elem in self.tricks:
-                    tricklist += '\n!'
-                    tricklist += elem
-                if len(tricklist) == 0:
+                tricklist = '\n'.join(['!' + elem for elem in self.tricks.keys()])
+                if tricklist:
                     await message.channel.send(self.config.texts['tricks']['list'] + self.config.texts['tricks']['none'])
                 else:
                     await message.channel.send(self.config.texts['tricks']['list'] + tricklist)
             else:
-                name = content.split(' ')[0][1:]
+                name = content.split()[0][1:]
                 if name in self.tricks:
                     await message.channel.send('**!' + name + '**\n\n' + self.tricks[name])
 
     async def on_ready(self) -> None:
         await super().on_ready()
-        tricks = self.config.database.execute('SELECT id FROM tricks;')
-        for elem in tricks:
-            self.tricks[elem[0]] = self.config.database.execute('SELECT text FROM tricks WHERE id = \'' + elem[0] + '\';')[0][0]
+        for elem in self.config.database.execute('SELECT id, text FROM tricks;'):
+            self.tricks[elem[0]] = elem[1]
 
 
 class UserInfo(Module):
     async def on_message(self, message: discord.Message) -> None:
-        content = str(message.content).lower()
+        content = message.content.lower()
         if content.startswith('!userinfo'):
             if message.channel.id != self.config.get_bots().id:
                 await message.channel.send(self.config.texts['userinfo']['wrong_channel'] % self.config.get_bots().mention, delete_after=self.config.values['delete_after'])
                 await message.delete(delay=self.config.values['delete_after'])
                 return
-            args = content.split(' ')
+            args = content.split()
             if len(message.mentions) > 1 or len(args) > 2:
                 await message.channel.send(self.config.texts['userinfo']['multiple_arguments'], delete_after=self.config.values['delete_after'])
                 await message.delete(delay=self.config.values['delete_after'])
                 return
-            elif len(args) == 1:
-                member = message.author
-            else:
-                member = await self.get_member_from_id_or_mention(args[1], message)
-                if member is None:
-                    return
+            member = message.author if len(args) == 1 else await self.get_member_from_id_or_mention(args[1], message)
+            if member is None:
+                return
             embed = self.embed(member.display_name).set_thumbnail(url=member.avatar)
             embed.add_field(name=self.config.texts['userinfo']['member'], value=member.name + '#' + member.discriminator, inline=False)
             embed.add_field(name=self.config.texts['userinfo']['id'], value=member.id, inline=False)

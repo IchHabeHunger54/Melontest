@@ -78,12 +78,10 @@
       "kick_failure": "**Fehlender User oder Grund.** Verwendung: `!kick <User oder User-ID> <Grund>`",
       "ban_success": "%s **wurde gebannt.**\n\n**Grund:** %s\n\n**Teammitglied:** %s",
       "ban_failure": "**Fehlender User oder Grund.** Verwendung: `!ban <User oder User-ID> <Grund>`",
+      "no_reason": "_kein Grund angegeben_",
       "ping_reason": "Regel 4.1"
     },
-    "ping": {
-      "success": "Ping: %s Sekunden",
-      "failure": "Ping: > 1 Minute. Bitte ans Team melden!"
-    },
+    "ping": "Ping: %s Sekunden",
     "reload": {
       "start": "Lade Konfiguration neu...",
       "end": "Konfiguration wurde geladen!"
@@ -149,12 +147,6 @@
       "tenor",
       "wikipedia.org"
     ],
-    "music_link_whitelist": [
-      "soundcloud",
-      "spotify",
-      "youtube",
-      "youtu.be"
-    ],
     "mute_duration": 259200,
     "mute_warnings": 3,
     "ping_blacklist": [
@@ -190,8 +182,7 @@
     "join_log": 0,
     "leave_log": 0,
     "voice_support": 0,
-    "team_voice_support": 0,
-    "music": 0
+    "team_voice_support": 0
   },
   "debug_channels": {
     "level": [],
@@ -204,8 +195,7 @@
     "join_log": 0,
     "leave_log": 0,
     "voice_support": 0,
-    "team_voice_support": 0,
-    "music": 0
+    "team_voice_support": 0
   },
   "roles": {
     "level": {

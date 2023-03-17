@@ -60,10 +60,7 @@ class Module:
         return self.new_embed(title, self.config.embeds['error_color'])
 
     def get_readable_date(self, date: str) -> str:
-        y = int(date[:4])
-        m = int(date[5:7])
-        d = int(date[8:10])
-        return str(d) + '. ' + self.config.texts['months'][m - 1] + ' ' + str(y)
+        return date[8:10] + '. ' + self.config.texts['months'][int(date[5:7]) - 1] + ' ' + date[:4]
 
     def get_readable_datetime(self, date: str) -> str:
         return self.get_readable_date(date) + ', ' + date[11:19]
@@ -102,16 +99,9 @@ class Module:
     @staticmethod
     def get_duration(duration: str) -> Optional[int]:
         duration = duration.lower()
-        if duration.endswith('s'):
-            factor = 1
-        elif duration.endswith('m'):
-            factor = 60
-        elif duration.endswith('h'):
-            factor = 3600
-        elif duration.endswith('d'):
-            factor = 86400
-        elif duration.endswith('w'):
-            factor = 604800
+        factors = {'s': 1, 'm': 60, 'h': 3600, 'd': 86400, 'w': 604800}
+        if duration[-1] in factors.keys():
+            factor = factors[duration[-1]]
         else:
             return None
         try:
