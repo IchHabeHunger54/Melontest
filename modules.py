@@ -595,7 +595,7 @@ class TempVoice(Module):
     @tasks.loop(seconds=1)
     async def run_schedule(self):
         for vc in self.config.server().voice_channels:
-            if vc.category_id == self.config.categories['voice'] and vc.id != self.config.voice_join().id and vc.id != self.config.voice_move().id and not vc.members:
+            if vc.category_id == self.config.categories['voice'] and vc.id != self.config.afk() and vc.id != self.config.voice_join().id and vc.id != self.config.voice_move().id and not vc.members:
                 await vc.delete()
 
     async def on_message(self, message: discord.Message) -> None:

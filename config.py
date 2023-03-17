@@ -144,6 +144,9 @@ class Config:
     def tickets(self) -> discord.TextChannel:
         return self.text_channel(self.channels['tickets'])
 
+    def afk(self) -> discord.VoiceChannel:
+        return self.voice_channel(self.channels['afk'])
+
     def voice_join(self) -> discord.VoiceChannel:
         return self.voice_channel(self.channels['voice_join'])
 

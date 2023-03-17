@@ -212,6 +212,7 @@
     "voice_support": 0,
     "team_voice_support": 0,
     "tickets": 0,
+    "afk": 0,
     "voice_join": 0,
     "voice_move": 0
   },
@@ -228,6 +229,7 @@
     "voice_support": 0,
     "team_voice_support": 0,
     "tickets": 0,
+    "afk": 0,
     "voice_join": 0,
     "voice_move": 0
   },
