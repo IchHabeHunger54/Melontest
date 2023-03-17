@@ -1,4 +1,5 @@
 import json
+from typing import Optional
 
 import discord
 
@@ -47,6 +48,17 @@ class Config:
     def get_member(self, user_id: int) -> discord.Member:
         return self.get_server().get_member(user_id)
 
+    def get_role(self, role_id: int) -> discord.Role:
+        return self.get_server().get_role(role_id)
+
+    def get_text_channel(self, channel_id: int) -> Optional[discord.TextChannel]:
+        channel = self.get_server().get_channel(channel_id)
+        return channel if isinstance(channel, discord.TextChannel) else None
+
+    def get_voice_channel(self, channel_id: int) -> Optional[discord.VoiceChannel]:
+        channel = self.get_server().get_channel(channel_id)
+        return channel if isinstance(channel, discord.VoiceChannel) else None
+
     def is_test_administrator_or_higher(self, member: discord.Member) -> bool:
         return self.has_role(member, self.roles['test_administrator']) or self.is_administrator(member)
 
@@ -78,37 +90,37 @@ class Config:
         return self.get_server().get_role(self.roles['video'])
 
     def get_chat(self) -> discord.TextChannel:
-        return self.get_server().get_channel(self.channels['chat'])
+        return self.get_text_channel(self.channels['chat'])
 
     def get_bots(self) -> discord.TextChannel:
-        return self.get_server().get_channel(self.channels['bots'])
+        return self.get_text_channel(self.channels['bots'])
 
     def get_rules(self) -> discord.TextChannel:
-        return self.get_server().get_channel(self.channels['rules'])
+        return self.get_text_channel(self.channels['rules'])
 
     def get_short_rules(self) -> discord.TextChannel:
-        return self.get_server().get_channel(self.channels['short_rules'])
+        return self.get_text_channel(self.channels['short_rules'])
 
     def get_message_log(self) -> discord.TextChannel:
-        return self.get_server().get_channel(self.channels['message_log'])
+        return self.get_text_channel(self.channels['message_log'])
 
     def get_voice_log(self) -> discord.TextChannel:
-        return self.get_server().get_channel(self.channels['voice_log'])
+        return self.get_text_channel(self.channels['voice_log'])
 
     def get_join_log(self) -> discord.TextChannel:
-        return self.get_server().get_channel(self.channels['join_log'])
+        return self.get_text_channel(self.channels['join_log'])
 
     def get_leave_log(self) -> discord.TextChannel:
-        return self.get_server().get_channel(self.channels['leave_log'])
+        return self.get_text_channel(self.channels['leave_log'])
 
     def get_voice_support_channel(self) -> discord.VoiceChannel:
-        return self.get_server().get_channel(self.channels['voice_support'])
+        return self.get_voice_channel(self.channels['voice_support'])
 
     def get_team_voice_support_channel(self) -> discord.TextChannel:
-        return self.get_server().get_channel(self.channels['team_voice_support'])
+        return self.get_text_channel(self.channels['team_voice_support'])
 
-    def get_music_channel(self) -> discord.TextChannel:
-        return self.get_server().get_channel(self.channels['music'])
+    def get_tickets(self) -> discord.TextChannel:
+        return self.get_text_channel(self.channels['tickets'])
 
     @staticmethod
     def has_role(member: discord.Member, role_id: int) -> bool:

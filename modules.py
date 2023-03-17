@@ -93,8 +93,7 @@ class CapsModeration(Module):
         if len(content) < self.config.values['caps_min']:
             return
         if sum(1 for elem in content if elem.isupper()) / len(content) > self.config.values['caps_ratio']:
-            await message.channel.send(self.config.texts['caps_moderation'] % message.author.mention, delete_after=self.config.values['delete_after'])
-            await message.delete()
+            await self.error_and_delete(message, self.config.texts['caps_moderation'] % message.author.mention)
 
 
 class Clear(Module):
@@ -107,7 +106,7 @@ class Clear(Module):
                     async for m in message.channel.history(limit=int(strings[1])):
                         await m.delete()
             else:
-                await message.channel.send(self.config.texts['team_only'], delete_after=self.config.values['delete_after'])
+                await self.error_and_delete(message, self.config.texts['team_only'])
 
 
 class Counter(Module):
@@ -162,8 +161,7 @@ class EmoteModeration(Module):
         content = str(message.content)
         emotes = content.count('<a:') + (emoji.demojize(content).count(':') - content.count(':')) // 2
         if emotes > self.config.values['emotes_max']:
-            await message.channel.send(self.config.texts['emote_moderation'] % message.author.mention, delete_after=self.config.values['delete_after'])
-            await message.delete()
+            await self.error_and_delete(message, self.config.texts['emote_moderation'] % message.author.mention)
 
 
 class Flomote(Module):
@@ -204,8 +202,7 @@ class Levels(Module):
             if message.channel.id == self.config.get_bots().id:
                 args = content.split()
                 if len(message.mentions) > 1 or len(args) > 2:
-                    await message.channel.send(self.config.texts['level']['multiple_arguments'], delete_after=self.config.values['delete_after'])
-                    await message.delete(delay=self.config.values['delete_after'])
+                    await self.error_and_delete(message, self.config.texts['level']['multiple_arguments'])
                     return
                 else:
                     member = message.author if len(args) == 1 else await self.get_member_from_id_or_mention(args[1], message)
@@ -225,10 +222,9 @@ class Levels(Module):
                     await message.channel.send(self.config.texts['level']['success'] % (str(member.mention), str(level), str(amount), str(rank[0]), str(member.mention), str(to_next), str(member.mention), str(rank[1])))
                 for key in self.roles:
                     if level >= key:
-                        await self.config.get_member(member.id).add_roles(self.config.get_server().get_role(self.roles[key]))
+                        await self.config.get_member(member.id).add_roles(self.config.get_role(self.roles[key]))
             else:
-                await message.channel.send(self.config.texts['level']['wrong_channel'] % self.config.get_bots().mention, delete_after=self.config.values['delete_after'])
-                await message.delete(delay=self.config.values['delete_after'])
+                await self.error_and_delete(message, self.config.texts['level']['wrong_channel'] % self.config.get_bots().mention)
             return
         member = message.author.id
         if member not in self.cooldowns and message.channel.id in self.config.channels['level']:
@@ -283,11 +279,9 @@ class LinkModeration(Module):
         if not any(s in content for s in ['http://', 'https://']):
             return
         if any(elem in content for elem in self.config.values['link_blacklist']):
-            await message.channel.send(self.config.texts['link_moderation'] % message.author.mention, delete_after=self.config.values['delete_after'])
-            await message.delete()
+            await self.error_and_delete(message, self.config.texts['link_moderation'] % message.author.mention)
         elif not any(elem in content for elem in self.config.values['link_whitelist']):
-            await message.channel.send(self.config.texts['link_moderation'] % message.author.mention, delete_after=self.config.values['delete_after'])
-            await message.delete()
+            await self.error_and_delete(message, self.config.texts['link_moderation'] % message.author.mention)
 
 
 class Logger(Module):
@@ -375,12 +369,10 @@ class Moderation(Module):
         args[0] = args[0].lower()
         if args[0] == '!warn':
             if not self.config.is_team(message.author):
-                await message.channel.send(self.config.texts['team_only'], delete_after=self.config.values['delete_after'])
-                await message.delete(delay=self.config.values['delete_after'])
+                await self.error_and_delete(message, self.config.texts['team_only'])
                 return
             if len(args) < 3:
-                await message.channel.send(self.config.texts['moderation']['warn_failure'], delete_after=self.config.values['delete_after'])
-                await message.delete(delay=self.config.values['delete_after'])
+                await self.error_and_delete(message, self.config.texts['moderation']['warn_failure'])
                 return
             member = await self.get_non_team_member_from_id_or_mention(args[1], message)
             if member is None:
@@ -388,29 +380,24 @@ class Moderation(Module):
             await self.warn(member, ' '.join(args[2:]), message.author, message.channel)
         elif args[0] == '!removewarn':
             if not self.config.is_team(message.author):
-                await message.channel.send(self.config.texts['team_only'], delete_after=self.config.values['delete_after'])
-                await message.delete(delay=self.config.values['delete_after'])
+                await self.error_and_delete(message, self.config.texts['team_only'])
                 return
             if len(args) < 2:
-                await message.channel.send(self.config.texts['moderation']['removewarn_failure'], delete_after=self.config.values['delete_after'])
-                await message.delete(delay=self.config.values['delete_after'])
+                await self.error_and_delete(message, self.config.texts['moderation']['removewarn_failure'])
                 return
             try:
                 warn = int(args[1])
             except ValueError:
-                await message.channel.send(self.config.texts['moderation']['removewarn_failure'], delete_after=self.config.values['delete_after'])
-                await message.delete(delay=self.config.values['delete_after'])
+                await self.error_and_delete(message, self.config.texts['moderation']['removewarn_failure'])
                 return
             self.config.database.execute('DELETE FROM warns WHERE id = %s;', str(warn))
             await message.channel.send(self.config.texts['moderation']['removewarn_success'] % warn)
         elif args[0] == '!warnings':
             if message.channel.id != self.config.get_bots().id:
-                await message.channel.send(self.config.texts['moderation']['warnings_wrong_channel'] % self.config.get_bots().mention, delete_after=self.config.values['delete_after'])
-                await message.delete(delay=self.config.values['delete_after'])
+                await self.error_and_delete(message, self.config.texts['moderation']['warnings_wrong_channel'] % self.config.get_bots().mention)
                 return
             if len(message.mentions) > 1:
-                await message.channel.send(self.config.texts['moderation']['multiple_arguments'], delete_after=self.config.values['delete_after'])
-                await message.delete(delay=self.config.values['delete_after'])
+                await self.error_and_delete(message, self.config.texts['moderation']['multiple_arguments'])
                 return
             member = message.author if len(args) == 1 else await self.get_member_from_id_or_mention(args[1], message)
             if member is None:
@@ -427,12 +414,10 @@ class Moderation(Module):
             await message.channel.send(result)
         elif args[0] == '!mute':
             if not self.config.is_team(message.author):
-                await message.channel.send(self.config.texts['team_only'], delete_after=self.config.values['delete_after'])
-                await message.delete(delay=self.config.values['delete_after'])
+                await self.error_and_delete(message, self.config.texts['team_only'])
                 return
             if len(args) < 4:
-                await message.channel.send(self.config.texts['moderation']['mute_failure'], delete_after=self.config.values['delete_after'])
-                await message.delete(delay=self.config.values['delete_after'])
+                await self.error_and_delete(message, self.config.texts['moderation']['mute_failure'])
                 return
             member = await self.get_non_team_member_from_id_or_mention(args[1], message)
             if member is not None:
@@ -441,12 +426,10 @@ class Moderation(Module):
                 await message.channel.send(self.config.texts['moderation']['mute_success'] % (member.mention, reason, message.author.mention))
         elif args[0] == '!unmute':
             if not self.config.is_team(message.author):
-                await message.channel.send(self.config.texts['team_only'], delete_after=self.config.values['delete_after'])
-                await message.delete(delay=self.config.values['delete_after'])
+                await self.error_and_delete(message, self.config.texts['team_only'])
                 return
             if len(args) < 2:
-                await message.channel.send(self.config.texts['moderation']['unmute_failure'], delete_after=self.config.values['delete_after'])
-                await message.delete(delay=self.config.values['delete_after'])
+                await self.error_and_delete(message, self.config.texts['moderation']['unmute_failure'])
                 return
             member = await self.get_non_team_member_from_id_or_mention(args[1], message)
             if member is not None:
@@ -455,12 +438,10 @@ class Moderation(Module):
                 await message.channel.send(self.config.texts['moderation']['unmute_success'] % (member.mention, reason, message.author.mention))
         elif args[0] == '!kick':
             if not self.config.is_team(message.author):
-                await message.channel.send(self.config.texts['team_only'], delete_after=self.config.values['delete_after'])
-                await message.delete(delay=self.config.values['delete_after'])
+                await self.error_and_delete(message, self.config.texts['team_only'])
                 return
             if len(args) < 3:
-                await message.channel.send(self.config.texts['moderation']['kick_failure'], delete_after=self.config.values['delete_after'])
-                await message.delete(delay=self.config.values['delete_after'])
+                await self.error_and_delete(message, self.config.texts['moderation']['kick_failure'])
                 return
             member = await self.get_non_team_member_from_id_or_mention(args[1], message)
             if member is not None:
@@ -469,12 +450,10 @@ class Moderation(Module):
                 await message.channel.send(self.config.texts['moderation']['kick_success'] % (member.mention, reason, message.author.mention))
         elif args[0] == '!ban':
             if not self.config.is_team(message.author):
-                await message.channel.send(self.config.texts['team_only'], delete_after=self.config.values['delete_after'])
-                await message.delete(delay=self.config.values['delete_after'])
+                await self.error_and_delete(message, self.config.texts['team_only'])
                 return
             if len(args) < 3:
-                await message.channel.send(self.config.texts['moderation']['ban_failure'], delete_after=self.config.values['delete_after'])
-                await message.delete(delay=self.config.values['delete_after'])
+                await self.error_and_delete(message, self.config.texts['moderation']['ban_failure'])
                 return
             member = await self.get_non_team_member_from_id_or_mention(args[1], message)
             if member is not None:
@@ -588,6 +567,60 @@ class Slowmode(Module):
             self.messages += 1
 
 
+class Tickets(Module):
+    def __init__(self, config: Config):
+        super().__init__(config)
+
+    async def on_message(self, message: discord.Message) -> None:
+        content = message.content.lower()
+        if content.startswith('!ticket'):
+            if message.channel.id == self.config.channels['tickets']:
+                ticket = self.config.database.execute('SELECT channel FROM tickets WHERE owner = %s', message.author.id)
+                if ticket:
+                    await self.error_and_delete(message, self.config.texts['tickets']['ticket_failure'] % self.config.get_text_channel(ticket[0][0]))
+                    return
+                self.config.database.execute('INSERT INTO tickets (channel, owner) VALUES(%s, %s);', 0, message.author.id)
+                overwrites = {
+                    self.config.get_server().default_role: discord.PermissionOverwrite(read_messages=False),
+                    self.config.get_server().me: discord.PermissionOverwrite(read_messages=True),
+                    self.config.get_member(message.author.id): discord.PermissionOverwrite(read_messages=True),
+                    self.config.get_role(self.config.roles['test_supporter']): discord.PermissionOverwrite(read_messages=True),
+                    self.config.get_role(self.config.roles['supporter']): discord.PermissionOverwrite(read_messages=True),
+                    self.config.get_role(self.config.roles['test_moderator']): discord.PermissionOverwrite(read_messages=True),
+                    self.config.get_role(self.config.roles['moderator']): discord.PermissionOverwrite(read_messages=True),
+                    self.config.get_role(self.config.roles['head_moderator']): discord.PermissionOverwrite(read_messages=True),
+                    self.config.get_role(self.config.roles['test_administrator']): discord.PermissionOverwrite(read_messages=True)
+                }
+                category = None
+                for c in self.config.get_server().categories:
+                    if c.id == self.config.values['ticket_category']:
+                        category = c
+                ticket = await self.config.get_server().create_text_channel(name=self.config.texts['tickets']['name'] % self.config.database.execute('SELECT id FROM tickets WHERE owner = %s;', message.author.id), category=category, overwrites=overwrites)
+                self.config.database.execute('UPDATE tickets SET channel = %s WHERE owner = %s;', ticket.id, message.author.id)
+                await ticket.send(self.config.texts['tickets']['ticket_success'] % (self.config.get_chat_support_role().mention, message.author.mention))
+            else:
+                await self.error_and_delete(message, self.config.texts['tickets']['ticket_wrong_channel'] % self.config.get_tickets().mention)
+                return
+        if content.startswith('!close'):
+            if any(i[0] == message.channel.id for i in self.config.database.execute('SELECT channel FROM tickets;')):
+                ticket = self.config.database.execute('SELECT owner FROM tickets WHERE channel = %s;', message.channel.id)
+                await message.channel.set_permissions(target=self.config.get_member(ticket[0][0]), read_messages=False)
+                await message.channel.send(self.config.texts['tickets']['close_success'])
+            else:
+                await self.error_and_delete(message, self.config.texts['tickets']['close_wrong_channel'])
+                return
+        if content.startswith('!delete'):
+            if not any(i[0] == message.channel.id for i in self.config.database.execute('SELECT channel FROM tickets;')):
+                await self.error_and_delete(message, self.config.texts['tickets']['delete_wrong_channel'])
+                return
+            elif not self.config.is_team(message.author):
+                await self.error_and_delete(message, self.config.texts['team_only'])
+                return
+            else:
+                self.config.database.execute('DELETE FROM tickets WHERE channel = %s;', message.channel.id)
+                await self.config.get_text_channel(message.channel.id).delete()
+
+
 class Tricks(Module):
     def __init__(self, config: Config):
         super().__init__(config)
@@ -598,7 +631,7 @@ class Tricks(Module):
         if content.startswith('!'):
             if content.startswith('!addtrick'):
                 if not self.config.is_team(message.author):
-                    await message.channel.send(self.config.texts['team_only'], delete_after=self.config.values['delete_after'])
+                    await self.error_and_delete(message, self.config.texts['team_only'])
                     return
                 split = message.content.split()
                 if len(split) > 2:
@@ -609,7 +642,7 @@ class Tricks(Module):
                     await message.channel.send((self.config.texts['tricks']['added'] % name) + text)
             elif content.startswith('!removetrick'):
                 if not self.config.is_team(message.author):
-                    await message.channel.send(self.config.texts['team_only'], delete_after=self.config.values['delete_after'])
+                    await self.error_and_delete(message, self.config.texts['team_only'])
                     return
                 split = message.content.split()
                 if len(split) > 1:
@@ -639,13 +672,11 @@ class UserInfo(Module):
         content = message.content.lower()
         if content.startswith('!userinfo'):
             if message.channel.id != self.config.get_bots().id:
-                await message.channel.send(self.config.texts['userinfo']['wrong_channel'] % self.config.get_bots().mention, delete_after=self.config.values['delete_after'])
-                await message.delete(delay=self.config.values['delete_after'])
+                await self.error_and_delete(message, self.config.texts['userinfo']['wrong_channel'] % self.config.get_bots().mention)
                 return
             args = content.split()
             if len(message.mentions) > 1 or len(args) > 2:
-                await message.channel.send(self.config.texts['userinfo']['multiple_arguments'], delete_after=self.config.values['delete_after'])
-                await message.delete(delay=self.config.values['delete_after'])
+                await self.error_and_delete(message, self.config.texts['userinfo']['multiple_arguments'])
                 return
             member = message.author if len(args) == 1 else await self.get_member_from_id_or_mention(args[1], message)
             if member is None:

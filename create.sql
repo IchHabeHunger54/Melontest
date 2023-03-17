@@ -8,7 +8,8 @@ CREATE TABLE counter (
     value INT NOT NULL
 );
 CREATE TABLE tickets (
-    channel BIGINT PRIMARY KEY NOT NULL,
+    id SERIAL PRIMARY KEY,
+    channel BIGINT NOT NULL,
     owner BIGINT NOT NULL
 );
 CREATE TABLE tricks (

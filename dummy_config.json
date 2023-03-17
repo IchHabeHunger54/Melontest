@@ -95,6 +95,15 @@
       "keinvoicesupport": "Du erhältst nun keine Benachrichtigung mehr, sobald Voicesupport benötigt wird!"
     },
     "rules": "Bitte lest euch die Regeln in %s bzw. die Kurzfassung in %s durch!",
+    "tickets": {
+      "name": "\uD83D\uDCCBticket-%s",
+      "ticket_wrong_channel": "Bitte benutze `!ticket` nur in %s!",
+      "ticket_failure": "Du hast bereits ein Ticket: %s",
+      "ticket_success": "%s Es wird Support per Ticket benötigt!\n\n%s Bitte schildere dem Team dein Anliegen!",
+      "close_wrong_channel": "`!close` kann nur in einem Ticket verwendet werden!",
+      "close_success": "Das Ticket wurde geschlossen!",
+      "delete_wrong_channel": "`!delete` kann nur in einem Ticket verwendet werden!"
+    },
     "tricks": {
       "added": "**Trick !%s wurde hinzugefügt.**\n\n",
       "removed": "**Trick !%s wurde entfernt.**\n\n",
@@ -157,6 +166,7 @@
       444933507823828992
     ],
     "rules_limit": 10,
+    "ticket_category": 0,
     "warn_expire_days": 14
   },
   "database": {
@@ -182,7 +192,8 @@
     "join_log": 0,
     "leave_log": 0,
     "voice_support": 0,
-    "team_voice_support": 0
+    "team_voice_support": 0,
+    "tickets": 0
   },
   "debug_channels": {
     "level": [],
@@ -195,7 +206,8 @@
     "join_log": 0,
     "leave_log": 0,
     "voice_support": 0,
-    "team_voice_support": 0
+    "team_voice_support": 0,
+    "tickets": 0
   },
   "roles": {
     "level": {

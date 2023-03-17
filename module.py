@@ -71,8 +71,7 @@ class Module:
         try:
             userid = int(mention)
         except ValueError:
-            await message.channel.send(self.config.texts['invalid'], delete_after=self.config.values['delete_after'])
-            await message.delete(delay=self.config.values['delete_after'])
+            await self.error_and_delete(message, self.config.texts['invalid'])
             return None
         return self.config.get_member(userid)
 
@@ -81,8 +80,7 @@ class Module:
         if member is None:
             return None
         if not self.config.is_team(member):
-            await message.channel.send(self.config.texts['only_team'], delete_after=self.config.values['delete_after'])
-            await message.delete(delay=self.config.values['delete_after'])
+            await self.error_and_delete(message, self.config.texts['only_team'])
             return None
         return member
 
@@ -91,10 +89,13 @@ class Module:
         if member is None:
             return None
         if self.config.is_team(member):
-            await message.channel.send(self.config.texts['no_team'], delete_after=self.config.values['delete_after'])
-            await message.delete(delay=self.config.values['delete_after'])
+            await self.error_and_delete(message, self.config.texts['no_team'])
             return None
         return member
+
+    async def error_and_delete(self, message: discord.Message, text: str) -> None:
+        await message.channel.send(text, delete_after=self.config.values['delete_after'])
+        await message.delete()
 
     @staticmethod
     def get_duration(duration: str) -> Optional[int]:
