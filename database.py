@@ -9,7 +9,7 @@ class Database:
         self.database = database['database']
         self.port = database['port']
 
-    def execute(self, query: str, *args):
+    def execute(self, query: str, *args) -> list[tuple]:
         try:
             with psycopg2.connect(user=self.username, password=self.password, host=self.hostname, database=self.database, port=self.port) as connection:
                 with connection.cursor() as cursor:
@@ -17,7 +17,6 @@ class Database:
                     try:
                         result = cursor.fetchall()
                     except psycopg2.ProgrammingError as e:
-                        print('Caught SQL Error:', e)
                         result = None
                     connection.commit()
                     return result

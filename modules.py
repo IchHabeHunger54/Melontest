@@ -185,9 +185,14 @@ class Levels(Module):
         roles = self.config.roles['level']
         self.roles = {int(i): roles[i] for i in roles if i.isdigit()}
 
-    @tasks.loop(seconds=1)
+    @tasks.loop(minutes=1)
     async def run_schedule(self) -> None:
         self.cooldowns = []
+        for vc in self.config.server().voice_channels:
+            if len(vc.members) > 1 and vc.category_id != self.config.values['ticket_category']:
+                for member in vc.members:
+                    if not member.voice.afk and ((not member.voice.mute and not member.voice.self_mute) or member.voice.self_stream):
+                        self.award_level(member)
 
     async def on_message(self, message: discord.Message) -> None:
         content = message.content
@@ -226,14 +231,8 @@ class Levels(Module):
             else:
                 await self.error_and_delete(message, self.config.texts['level']['wrong_channel'] % self.config.bots().mention)
             return
-        member = message.author.id
-        if member not in self.cooldowns and message.channel.id in self.config.channels['level']:
-            self.cooldowns.append(member)
-            amount = self.get_from_database(member)
-            if len(amount) == 0:
-                self.config.database.execute('INSERT INTO levels (id, amount) VALUES(%s, 1);', str(member))
-            else:
-                self.config.database.execute('UPDATE levels SET amount = %s WHERE id = %s;', str(amount[0][0] + random.randrange(self.config.values["level_give_min"], self.config.values["level_give_max"] + 1)), str(member))
+        if message.channel.id in self.config.channels['level']:
+            self.award_level(message.author)
 
     async def get_level(self, xp: int) -> int:
         for key in self.levels:
@@ -253,7 +252,7 @@ class Levels(Module):
         else:
             return dict(sorted(result.items(), key=lambda x: x[1], reverse=True)[:to])
 
-    def get_rank(self, member) -> tuple:
+    def get_rank(self, member: int) -> tuple:
         value = self.get_from_database(member)
         if not value:
             return 0, None
@@ -266,8 +265,17 @@ class Levels(Module):
                 return i + 1, values[i - 1][1] - value
         return len(values), values[len(values) - 1][1] - value
 
-    def get_from_database(self, member):
-        return self.config.database.execute('SELECT amount FROM levels WHERE id = %s;', str(member))
+    def get_from_database(self, member: int) -> list[tuple]:
+        return self.config.database.execute('SELECT amount FROM levels WHERE id = %s;', member)
+
+    def award_level(self, member: discord.Member) -> None:
+        if member not in self.cooldowns:
+            self.cooldowns.append(member)
+            amount = self.get_from_database(member.id)
+            if len(amount) == 0:
+                self.config.database.execute('INSERT INTO levels (id, amount) VALUES(%s, 1);', member.id)
+            else:
+                self.config.database.execute('UPDATE levels SET amount = %s WHERE id = %s;', amount[0][0] + random.randrange(self.config.values["level_give_min"], self.config.values["level_give_max"] + 1), member.id)
 
 
 class LinkModeration(Module):
