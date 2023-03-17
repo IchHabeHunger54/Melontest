@@ -234,6 +234,12 @@ class Levels(Module):
         if message.channel.id in self.config.channels['level']:
             self.award_level(message.author)
 
+    async def on_ready(self) -> None:
+        await super().on_ready()
+        for i in self.config.server().members:
+            await i.remove_roles(self.config.special_role())
+        await random.choice([i for i in self.config.server().members if not i.bot]).add_roles(self.config.special_role())
+
     async def get_level(self, xp: int) -> int:
         for key in self.levels:
             value = self.levels[key]
@@ -272,10 +278,15 @@ class Levels(Module):
         if member not in self.cooldowns:
             self.cooldowns.append(member)
             amount = self.get_from_database(member.id)
+            multiplier = 1
+            if member.get_role(self.config.premium_role().id):
+                multiplier *= self.config.values['level_boost_premium']
+            if member.get_role(self.config.special_role().id):
+                multiplier *= self.config.values['level_boost_special']
             if len(amount) == 0:
                 self.config.database.execute('INSERT INTO levels (id, amount) VALUES(%s, 1);', member.id)
             else:
-                self.config.database.execute('UPDATE levels SET amount = %s WHERE id = %s;', amount[0][0] + random.randrange(self.config.values["level_give_min"], self.config.values["level_give_max"] + 1), member.id)
+                self.config.database.execute('UPDATE levels SET amount = %s WHERE id = %s;', amount[0][0] + int(random.randrange(self.config.values["level_give_min"], self.config.values["level_give_max"] + 1) * multiplier), member.id)
 
 
 class LinkModeration(Module):

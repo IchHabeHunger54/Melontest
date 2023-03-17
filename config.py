@@ -93,6 +93,12 @@ class Config:
     def default_role(self) -> discord.Role:
         return self.server().get_role(self.roles['default'])
 
+    def premium_role(self) -> discord.Role:
+        return self.server().get_role(self.roles['premium'])
+
+    def special_role(self) -> discord.Role:
+        return self.server().get_role(self.roles['special'])
+
     def chat_support_role(self) -> discord.Role:
         return self.server().get_role(self.roles['chat_support'])
 

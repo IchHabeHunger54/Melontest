@@ -163,6 +163,8 @@
     "level_give_min": 1,
     "level_give_max": 3,
     "level_multiplier": 1.1,
+    "level_boost_premium": 1.5,
+    "level_boost_special": 2,
     "link_blacklist": [],
     "link_whitelist": [
       "cdn.discordapp.com",
@@ -251,6 +253,8 @@
       "44": 0
     },
     "default": 0,
+    "premium": 0,
+    "special": 0,
     "test_supporter": 0,
     "supporter": 0,
     "test_moderator": 0,
@@ -276,6 +280,8 @@
       "44": 0
     },
     "default": 0,
+    "premium": 0,
+    "special": 0,
     "test_supporter": 0,
     "supporter": 0,
     "test_moderator": 0,
