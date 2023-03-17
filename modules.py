@@ -583,7 +583,7 @@ class Tickets(Module):
                 overwrites = {
                     self.config.server().default_role: discord.PermissionOverwrite(read_messages=False),
                     self.config.server().me: discord.PermissionOverwrite(read_messages=True),
-                    self.config.member(message.author.id): discord.PermissionOverwrite(read_messages=True),
+                    message.author: discord.PermissionOverwrite(read_messages=True),
                     self.config.role(self.config.roles['test_supporter']): discord.PermissionOverwrite(read_messages=True),
                     self.config.role(self.config.roles['supporter']): discord.PermissionOverwrite(read_messages=True),
                     self.config.role(self.config.roles['test_moderator']): discord.PermissionOverwrite(read_messages=True),
@@ -595,6 +595,9 @@ class Tickets(Module):
                 for c in self.config.server().categories:
                     if c.id == self.config.values['ticket_category']:
                         category = c
+                if category is None:
+                    await self.error_and_delete(message, self.config.texts['tickets']['category_error'])
+                    return
                 ticket = await self.config.server().create_text_channel(name=self.config.texts['tickets']['name'] % self.config.database.execute('SELECT id FROM tickets WHERE owner = %s;', message.author.id), category=category, overwrites=overwrites)
                 self.config.database.execute('UPDATE tickets SET channel = %s WHERE owner = %s;', ticket.id, message.author.id)
                 await ticket.send(self.config.texts['tickets']['ticket_success'] % (self.config.chat_support_role().mention, message.author.mention))
