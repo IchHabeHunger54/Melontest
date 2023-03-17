@@ -21,6 +21,7 @@ modules = [
     Roles(config),
     Rules(config),
     Slowmode(config),
+    TempVoice(config),
     Tickets(config),
     Tricks(config),
     UserInfo(config),

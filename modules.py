@@ -576,10 +576,23 @@ class Slowmode(Module):
             self.messages += 1
 
 
-class Tickets(Module):
-    def __init__(self, config: Config):
-        super().__init__(config)
+class TempVoice(Module):
+    @tasks.loop(minutes=1)
+    async def run_schedule(self):
+        pass
 
+    async def on_message(self, message: discord.Message) -> None:
+        content = message.content.lower()
+        if content.startswith('!vc'):
+            if message.channel.id != self.config.bots().id:
+                await self.error_and_delete(message, self.config.texts['temp_voice']['wrong_channel'] % self.config.bots())
+                return
+
+    async def on_voice_state_update(self, member: discord.Member, before: discord.VoiceState, after: discord.VoiceState) -> None:
+        pass
+
+
+class Tickets(Module):
     async def on_message(self, message: discord.Message) -> None:
         content = message.content.lower()
         if content.startswith('!ticket'):
@@ -710,5 +723,5 @@ class UserInfo(Module):
 
 class VoiceSupport(Module):
     async def on_voice_state_update(self, member: discord.Member, before: discord.VoiceState, after: discord.VoiceState) -> None:
-        if after.channel is not None and after.channel.id == self.config.voice_support_channel().id:
-            await self.config.team_voice_support_channel().send(self.config.texts['voice_support'] % (self.config.voice_support_role().mention, member.mention))
+        if after.channel is not None and after.channel.id == self.config.voice_support().id:
+            await self.config.team_voice_support().send(self.config.texts['voice_support'] % (self.config.voice_support_role().mention, member.mention))

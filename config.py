@@ -119,14 +119,20 @@ class Config:
     def leave_log(self) -> discord.TextChannel:
         return self.text_channel(self.channels['leave_log'])
 
-    def voice_support_channel(self) -> discord.VoiceChannel:
+    def voice_support(self) -> discord.VoiceChannel:
         return self.voice_channel(self.channels['voice_support'])
 
-    def team_voice_support_channel(self) -> discord.TextChannel:
+    def team_voice_support(self) -> discord.TextChannel:
         return self.text_channel(self.channels['team_voice_support'])
 
     def tickets(self) -> discord.TextChannel:
         return self.text_channel(self.channels['tickets'])
+
+    def voice_join(self) -> discord.VoiceChannel:
+        return self.voice_channel(self.channels['voice_join'])
+
+    def voice_move(self) -> discord.VoiceChannel:
+        return self.voice_channel(self.channels['voice_move'])
 
     @staticmethod
     def has_role(member: discord.Member, role_id: int) -> bool:

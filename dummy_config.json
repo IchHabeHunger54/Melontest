@@ -95,6 +95,9 @@
       "keinvoicesupport": "Du erhältst nun keine Benachrichtigung mehr, sobald Voicesupport benötigt wird!"
     },
     "rules": "Bitte lest euch die Regeln in %s bzw. die Kurzfassung in %s durch!",
+    "temp_voice": {
+      "wrong_channel": "Bitte verwende `!vc` nur in %s!"
+    },
     "tickets": {
       "name": "\uD83D\uDCCBticket-%s",
       "category_error": "Fehler beim Erstellen des Tickets: Konnte die Ticket-Kategorie nicht finden! Bitte pinge ein Teammitglied, das gerade online ist.",
@@ -194,7 +197,9 @@
     "leave_log": 0,
     "voice_support": 0,
     "team_voice_support": 0,
-    "tickets": 0
+    "tickets": 0,
+    "voice_join": 0,
+    "voice_move": 0
   },
   "debug_channels": {
     "level": [],
@@ -208,13 +213,17 @@
     "leave_log": 0,
     "voice_support": 0,
     "team_voice_support": 0,
-    "tickets": 0
+    "tickets": 0,
+    "voice_join": 0,
+    "voice_move": 0
   },
   "categories": {
-    "tickets": 0
+    "tickets": 0,
+    "voice": 0
   },
   "debug_categories": {
-    "tickets": 0
+    "tickets": 0,
+    "voice": 0
   },
   "roles": {
     "level": {
