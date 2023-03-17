@@ -25,7 +25,8 @@ modules = [
     Tickets(config),
     Tricks(config),
     UserInfo(config),
-    VoiceSupport(config)
+    VoiceSupport(config),
+    Write(config)
 ]
 
 

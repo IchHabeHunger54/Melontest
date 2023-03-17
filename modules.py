@@ -780,3 +780,15 @@ class VoiceSupport(Module):
     async def on_voice_state_update(self, member: discord.Member, before: discord.VoiceState, after: discord.VoiceState) -> None:
         if after.channel is not None and after.channel.id == self.config.voice_support().id:
             await self.config.team_voice_support().send(self.config.texts['voice_support'] % (self.config.voice_support_role().mention, member.mention))
+
+
+class Write(Module):
+    async def on_message(self, message: discord.Message) -> None:
+        if message.content.startswith('!write ') and self.config.is_team(message.author):
+            args = message.content.split()
+            if args[1].startswith('<#') and args[1].endswith('>'):
+                args[1] = args[1][2:-1]
+            try:
+                await self.config.text_channel(int(args[1])).send(' '.join(args[2:]))
+            except ValueError:
+                await self.error_and_delete(message, self.config.texts['invalid_channel'])

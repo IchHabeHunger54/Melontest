@@ -21,6 +21,7 @@
       "Dezember"
     ],
     "invalid": "**Fehler:** Der angegebene User existiert nicht oder ist nicht auf diesem Server!",
+    "invalid_channel": "**Fehler:** Der angegebene Channel existiert nicht!",
     "team_only": "**Fehler:** Dieser Command ist nur für Teammitglieder verfügbar!",
     "no_team": "**Fehler:** Dieser Command kann nicht auf Teammitglieder angewandt werden!",
     "only_team": "**Fehler:** Dieser Command kann nur auf Teammitglieder angewandt werden!",
