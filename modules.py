@@ -189,7 +189,7 @@ class Levels(Module):
     async def run_schedule(self) -> None:
         self.cooldowns = []
         for vc in self.config.server().voice_channels:
-            if len(vc.members) > 1 and vc.category_id != self.config.values['ticket_category']:
+            if len(vc.members) > 1 and vc.category_id != self.config.categories['tickets']:
                 for member in vc.members:
                     if not member.voice.afk and ((not member.voice.mute and not member.voice.self_mute) or member.voice.self_stream):
                         self.award_level(member)
@@ -601,7 +601,7 @@ class Tickets(Module):
                 }
                 category = None
                 for c in self.config.server().categories:
-                    if c.id == self.config.values['ticket_category']:
+                    if c.id == self.config.categories['tickets']:
                         category = c
                 if category is None:
                     await self.error_and_delete(message, self.config.texts['tickets']['category_error'])

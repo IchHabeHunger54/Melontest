@@ -19,6 +19,7 @@ class Config:
         self.token = ''
         self.guild = 0
         self.channels = {}
+        self.categories = {}
         self.roles = {}
         self.load()
 
@@ -35,11 +36,13 @@ class Config:
             self.token = jsonfile['debug_token']
             self.guild = jsonfile['debug_guild']
             self.channels = jsonfile['debug_channels']
+            self.categories = jsonfile['debug_categories']
             self.roles = jsonfile['debug_roles']
         else:
             self.token = jsonfile['token']
             self.guild = jsonfile['guild']
             self.channels = jsonfile['channels']
+            self.categories = jsonfile['categories']
             self.roles = jsonfile['roles']
 
     def server(self) -> discord.Guild:
