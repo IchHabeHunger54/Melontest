@@ -16,6 +16,7 @@ modules = [
     Logger(config),
     Moderation(config),
     Ping(config),
+    PrankMute(config),
     RawEcho(config),
     Reload(config),
     Roles(config),
@@ -84,10 +85,10 @@ async def on_reaction_remove(reaction: discord.Reaction, member: discord.Member)
 
 @bot.event
 async def on_ready() -> None:
-    print('Successfully booted up as user', bot.user)
-    print('Booting took', datetime.now() - time)
     for module in modules:
         await module.on_ready()
+    print('Successfully booted up as user', bot.user)
+    print('Booting took', datetime.now() - time)
 
 
 @bot.event

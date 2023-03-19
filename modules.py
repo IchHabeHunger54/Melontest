@@ -1,3 +1,4 @@
+import asyncio
 import random
 from datetime import datetime, timedelta, timezone
 
@@ -503,6 +504,30 @@ class Ping(Module):
             if time.startswith('00'):
                 time = time[1:]
             await message.channel.send(self.config.texts['ping'] % time)
+
+
+class PrankMute(Module):
+    async def on_message(self, message: discord.Message) -> None:
+        args = message.content.split()
+        if args[0].lower() == '?mute':
+            if not message.author.get_role(self.config.prank_mute_requirement_role().id):
+                await self.error_and_delete(message, self.config.texts['prank_mute']['failure'])
+                return
+            if len(args) == 1:
+                await self.error_and_delete(message, self.config.texts['prank_mute']['missing_user'])
+                return
+            if len(args) == 2:
+                await self.error_and_delete(message, self.config.texts['prank_mute']['missing_reason'])
+                return
+            member = await self.get_member_from_id_or_mention(args[1], message)
+            if member is None:
+                return
+            reason = ' '.join(args[2:])
+            await Moderation.timeout(member, 86400, reason)
+            await message.channel.send(self.config.texts['prank_mute']['start'] % (member.mention, reason, message.author.mention), delete_after=self.config.values['prank_mute_duration'])
+            await asyncio.sleep(self.config.values['prank_mute_duration'])
+            await member.timeout(None)
+            await message.channel.send(self.config.texts['prank_mute']['end'])
 
 
 class RawEcho(Module):

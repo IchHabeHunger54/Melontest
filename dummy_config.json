@@ -83,6 +83,13 @@
       "ping_reason": "Regel 4.1"
     },
     "ping": "Ping: %s Sekunden",
+    "prank_mute": {
+      "failure": "Verdiene mehr XP, um diesen Command zu benutzen!",
+      "missing_user": "Bitte gib einen User an!",
+      "missing_reason": "Bitte gib einen Grund an!",
+      "start": "%s **wurde gemutet.**\n\n**Grund:** %s\n\n**Teammitglied:** %s",
+      "end": "**It's just a prank!**"
+    },
     "reload": {
       "start": "Lade Konfiguration neu...",
       "end": "Konfiguration wurde geladen!"
@@ -185,6 +192,7 @@
       411159465522495501,
       444933507823828992
     ],
+    "prank_mute_duration": 5,
     "rules_limit": 10,
     "warn_expire_days": 14
   },
