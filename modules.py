@@ -25,7 +25,7 @@ class AmongUs(Module):
 
     @tasks.loop(seconds=1)
     async def run_schedule(self):
-        self.run_schedule.change_interval(seconds=self.config.delays['among_us'] + 2 * (random.randint(0, self.config.delays['among_us']) - self.config.delays['among_us_offset']))
+        self.run_schedule.change_interval(seconds=self.config.intervals['among_us'] + 2 * (random.randint(0, self.config.intervals['among_us']) - self.config.intervals['among_us_offset']))
         if self.first:
             self.first = False
             return
@@ -83,7 +83,7 @@ class AmongUs(Module):
                 self.reactions.pop(member.id)
 
     def update_interval(self) -> None:
-        self.run_schedule.change_interval(seconds=self.config.delays['among_us'] + 2 * random.randint(0, self.config.delays['among_us_offset']) - self.config.delays['among_us_offset'])
+        self.run_schedule.change_interval(seconds=self.config.intervals['among_us'] + 2 * random.randint(0, self.config.intervals['among_us_offset']) - self.config.intervals['among_us_offset'])
 
 
 class CapsModeration(Module):
@@ -192,7 +192,7 @@ class Help(Module):
 
 class Levels(Module):
     def __init__(self, config: Config):
-        super().__init__(config, config.delays['levels'])
+        super().__init__(config, config.intervals['levels'])
         self.cooldowns = []
         base = self.config.values['level_base']
         multiplier = self.config.values['level_multiplier']
@@ -593,7 +593,7 @@ class Roles(Module):
 
 class Rules(Module):
     def __init__(self, config: Config):
-        super().__init__(config, config.delays['rules'])
+        super().__init__(config, config.intervals['rules'])
         self.messages = 0
 
     @tasks.loop(seconds=1)
@@ -614,7 +614,7 @@ class Rules(Module):
 
 class Slowmode(Module):
     def __init__(self, config: Config):
-        super().__init__(config, config.delays['slowmode'])
+        super().__init__(config, config.intervals['slowmode'])
         self.messages = 0
 
     @tasks.loop(seconds=1)
@@ -636,7 +636,7 @@ class Slowmode(Module):
 
 class TempVoice(Module):
     def __init__(self, config: Config):
-        super().__init__(config, config.delays['temp_voice'])
+        super().__init__(config, config.intervals['temp_voice'])
         self.channels = {}
 
     @tasks.loop(seconds=1)

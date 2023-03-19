@@ -180,7 +180,7 @@
     },
     "voice_support": "%s %s benötigt Support per Voice!"
   },
-  "delays": {
+  "intervals": {
     "among_us": 86400,
     "among_us_offset": 28800,
     "levels": 60,

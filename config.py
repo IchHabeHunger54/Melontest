@@ -11,7 +11,7 @@ class Config:
         self.client = client
         self.embeds = {}
         self.texts = {}
-        self.delays = {}
+        self.intervals = {}
         self.values = {}
         self.database = None
         self.tables = {}
@@ -28,7 +28,7 @@ class Config:
             jsonfile = json.loads(file.read())
         self.embeds = jsonfile['embeds']
         self.texts = jsonfile['texts']
-        self.delays = jsonfile['delays']
+        self.intervals = jsonfile['intervals']
         self.values = jsonfile['values']
         self.database = Database(jsonfile['database'])
         self.is_debug = jsonfile['is_debug']
