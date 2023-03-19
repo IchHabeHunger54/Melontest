@@ -60,11 +60,11 @@ class AmongUs(Module):
             usernames = self.config.texts['among_us']['none'] if usernames == '' else usernames[2:]
             await reaction.message.channel.send(self.config.texts['among_us']['end'] % (username, self.impostor.display_name, usernames))
             for member in users:
-                amount = self.config.database.execute('SELECT amount FROM levels WHERE id = %s;', str(member))
+                amount = self.config.database.execute('SELECT amount FROM levels WHERE id = %s;', member)
                 if len(amount) == 0:
-                    self.config.database.execute('INSERT INTO levels (id, amount) VALUES(%s, 1);', str(member))
+                    self.config.database.execute('INSERT INTO levels (id, amount) VALUES(%s, 1);', member)
                 else:
-                    self.config.database.execute('UPDATE levels SET amount = %s WHERE id = %s;', str(amount[0][0] + self.config.values["among_us_reward"]), str(member))
+                    self.config.database.execute('UPDATE levels SET amount = %s WHERE id = %s;', amount[0][0] + self.config.values["among_us_reward"], member)
             self.message = None
             self.reactions = {}
             self.order = []
@@ -90,7 +90,7 @@ class CapsModeration(Module):
     async def on_message(self, message: discord.Message) -> None:
         if self.config.is_team(message.author):
             return
-        content = str(message.content)
+        content = message.content
         if len(content) < self.config.values['caps_min']:
             return
         if sum(1 for elem in content if elem.isupper()) / len(content) > self.config.values['caps_ratio']:
@@ -141,10 +141,10 @@ class Counter(Module):
             if amount != 0 and update:
                 old = self.config.database.execute('SELECT value FROM counter WHERE id = %s;', variable)
                 if not old:
-                    self.config.database.execute('INSERT INTO counter (id, value) VALUES(%s, %s);', variable, str(amount))
+                    self.config.database.execute('INSERT INTO counter (id, value) VALUES(%s, %s);', variable, amount)
                 else:
                     amount += old[0][0]
-                    self.config.database.execute('UPDATE counter SET value = %s WHERE id = %s;', str(amount), variable)
+                    self.config.database.execute('UPDATE counter SET value = %s WHERE id = %s;', amount, variable)
             await message.channel.send(f'{variable} = {self.config.database.execute("SELECT value FROM counter WHERE id = %s;", variable)[0][0]}')
 
 
@@ -159,7 +159,7 @@ class EmoteModeration(Module):
     async def on_message(self, message: discord.Message) -> None:
         if self.config.is_team(message.author):
             return
-        content = str(message.content)
+        content = message.content
         emotes = content.count('<a:') + (emoji.demojize(content).count(':') - content.count(':')) // 2
         if emotes > self.config.values['emotes_max']:
             await self.error_and_delete(message, self.config.texts['emote_moderation'] % message.author.mention)
@@ -251,16 +251,16 @@ class Levels(Module):
                         return
                 amount = self.get_from_database(member.id)
                 if not amount:
-                    await message.channel.send(self.config.texts['level']['no_xp'] % (str(member.mention)))
+                    await message.channel.send(self.config.texts['level']['no_xp'] % member.mention)
                     return
                 amount = amount[0][0]
                 level = await self.get_level(amount)
                 to_next = self.levels[level + 1] - amount
                 rank = self.get_rank(member.id)
                 if rank[1] is None:
-                    await message.channel.send(self.config.texts['level']['success_1'] % (str(member.mention), str(level), str(amount), str(rank[0]), str(member.mention), str(to_next)))
+                    await message.channel.send(self.config.texts['level']['success_1'] % (member.mention, level, amount, rank[0], member.mention, to_next))
                 else:
-                    await message.channel.send(self.config.texts['level']['success'] % (str(member.mention), str(level), str(amount), str(rank[0]), str(member.mention), str(to_next), str(member.mention), str(rank[1])))
+                    await message.channel.send(self.config.texts['level']['success'] % (member.mention, level, amount, rank[0], member.mention, to_next, member.mention, rank[1]))
                 for key in self.roles:
                     if level >= key:
                         await self.config.member(member.id).add_roles(self.config.role(self.roles[key]))
@@ -351,8 +351,8 @@ class Logger(Module):
         await self.config.leave_log().send(embed=embed)
 
     async def on_message_edit(self, before: discord.Message, after: discord.Message) -> None:
-        old = str(before.content)
-        new = str(after.content)
+        old = before.content
+        new = after.content
         if old != new:
             embed = self.embed(self.config.texts['logger']['message_edited'])
             embed.add_field(name=self.config.texts['logger']['user'], value=before.author.mention, inline=False)
@@ -390,9 +390,9 @@ class Logger(Module):
 class Moderation(Module):
     async def warn(self, member: discord.Member, reason: str, team_member: discord.User, channel: discord.TextChannel):
         now = datetime.now()
-        self.config.database.execute('INSERT INTO warns (member, reason, time, team_member) VALUES(%s, %s, %s, %s);', str(member.id), reason, now, str(team_member.id))
+        self.config.database.execute('INSERT INTO warns (member, reason, time, team_member) VALUES(%s, %s, %s, %s);', member.id, reason, now, team_member.id)
         await channel.send(self.config.texts['moderation']['warn_success'] % (member.mention, reason, team_member.mention))
-        databasecontents = self.config.database.execute('SELECT * FROM warns WHERE member = %s ORDER BY id;', str(member.id))
+        databasecontents = self.config.database.execute('SELECT * FROM warns WHERE member = %s ORDER BY id;', member.id)
         active = 0
         for i in databasecontents:
             if (now - datetime.strptime(i[3][:19], '%Y-%m-%d %H:%M:%S')).days < self.config.values['warn_expire_days']:
@@ -443,7 +443,7 @@ class Moderation(Module):
             except ValueError:
                 await self.error_and_delete(message, self.config.texts['moderation']['removewarn_failure'])
                 return
-            self.config.database.execute('DELETE FROM warns WHERE id = %s;', str(warn))
+            self.config.database.execute('DELETE FROM warns WHERE id = %s;', warn)
             await message.channel.send(self.config.texts['moderation']['removewarn_success'] % warn)
         elif args[0] == '!warnings':
             if message.channel.id != self.config.bots().id:
@@ -455,7 +455,7 @@ class Moderation(Module):
             member = message.author if len(args) == 1 else await self.get_member_from_id_or_mention(args[1], message)
             if member is None:
                 return
-            databasecontents = self.config.database.execute('SELECT * FROM warns WHERE member = %s ORDER BY id;', str(member.id))
+            databasecontents = self.config.database.execute('SELECT * FROM warns WHERE member = %s ORDER BY id;', member.id)
             result = self.config.texts['moderation']['warnings_success'] % member.mention
             if not databasecontents:
                 result += self.config.texts['moderation']['warnings_none']
