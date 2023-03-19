@@ -236,9 +236,9 @@ class Levels(Module):
 
     async def on_ready(self) -> None:
         await super().on_ready()
-        for i in self.config.server().members:
+        for i in [i for i in self.config.server().members if i.get_role(self.config.special_requirement_role().id)]:
             await i.remove_roles(self.config.special_role())
-        await random.choice([i for i in self.config.server().members if not i.bot]).add_roles(self.config.special_role())
+        await random.choice([i for i in self.config.server().members if i.get_role(self.config.special_requirement_role().id)]).add_roles(self.config.special_role())
 
     async def get_level(self, xp: int) -> int:
         for key in self.levels:
@@ -595,7 +595,7 @@ class TempVoice(Module):
     @tasks.loop(seconds=1)
     async def run_schedule(self):
         for vc in self.config.server().voice_channels:
-            if vc.category_id == self.config.voice_category().id and vc.id != self.config.afk() and vc.id != self.config.voice_join().id and vc.id != self.config.voice_move().id and not vc.members:
+            if vc.category_id == self.config.voice_category().id and vc.id != self.config.afk().id and vc.id != self.config.voice_join().id and vc.id != self.config.voice_move().id and not vc.members:
                 await vc.delete()
 
     async def on_message(self, message: discord.Message) -> None:

@@ -99,6 +99,12 @@ class Config:
     def special_role(self) -> discord.Role:
         return self.server().get_role(self.roles['special'])
 
+    def special_requirement_role(self) -> discord.Role:
+        return self.server().get_role(self.roles['special_requirement'])
+
+    def prank_mute_requirement_role(self) -> discord.Role:
+        return self.server().get_role(self.roles['prank_mute_requirement'])
+
     def chat_support_role(self) -> discord.Role:
         return self.server().get_role(self.roles['chat_support'])
 
