@@ -214,11 +214,30 @@ class Levels(Module):
     async def on_message(self, message: discord.Message) -> None:
         content = message.content
         if content.startswith(('!leaderboard', '!lb')):
-            length = min(int(content.split()[1]) if len(content.split()) > 1 else self.config.values['leaderboard_default'], self.config.values['leaderboard_max'])
-            lb = self.get_lb(length)
+            args = content.split()
+            lb = self.get_lb(min(self.config.values['leaderboard_default'], len(self.config.server().members) - 1))
+            start = 0
+            if len(args) >= 2 and '-' in args[1]:
+                ints = args[1].split('-')
+                if len(ints) == 2 and (i.isdigit for i in ints):
+                    try:
+                        start = max(1, int(ints[0]))
+                        end = min(int(ints[1]), start + self.config.values['leaderboard_max'], len(self.config.server().members) - 1)
+                        if start >= end:
+                            await self.error_and_delete(message, self.config.texts['leaderboard']['invalid'])
+                            return
+                        lb = self.get_lb(end, start - 1)
+                    except ValueError:
+                        await self.error_and_delete(message, self.config.texts['leaderboard']['invalid'])
+                        return
+                else:
+                    await self.error_and_delete(message, self.config.texts['leaderboard']['invalid'])
+                    return
+            elif len(args) >= 2 and args[1].isdigit():
+                lb = self.get_lb(min(int(args[1]), self.config.values['leaderboard_max'], len(self.config.server().members) - 1))
             text = ''
             for rank, key in enumerate(lb, start=1):
-                text += f'#{rank}: {self.config.member(key).mention} ({lb[key]} XP)\n'
+                text += self.config.texts['leaderboard']['row'] % (rank + start, self.config.member(key).mention, lb[key], await self.get_level(lb[key]))
             await message.channel.send(text)
         elif content.startswith(('!level', '!rank')):
             if message.channel.id == self.config.bots().id:
@@ -264,23 +283,20 @@ class Levels(Module):
                 return key - 1
         return self.config.values['level_max']
 
-    def get_lb(self, to: int = 0) -> dict:
+    def get_lb(self, end: int, begin: int = 0) -> dict:
         lb = dict(self.config.database.execute('SELECT * FROM levels;'))
         result = {}
         for k in lb.keys():
             if self.config.member(k) is not None:
                 result[k] = lb[k]
-        if to <= 0:
-            return dict(sorted(result.items(), key=lambda x: x[1], reverse=True))
-        else:
-            return dict(sorted(result.items(), key=lambda x: x[1], reverse=True)[:to])
+        return dict(sorted(result.items(), key=lambda x: x[1], reverse=True)[begin:end])
 
     def get_rank(self, member: int) -> tuple:
         value = self.get_from_database(member)
         if not value:
             return 0, None
         value = value[0][0]
-        values = list(self.get_lb().items())
+        values = list(self.get_lb(len(self.config.server().members)).items())
         if values[0][1] == value:
             return 1, None
         for i in range(1, len(values)):

@@ -74,6 +74,10 @@
         "warnings": "**Verwendung:** `!warnings <optional: User>`\n**Nur im Botchannel verwendbar.**\n\nZeigt die Warns von <User> an.\n\n**Optionen:**\n- <User>: Der User, für den die Warns angezeigt werden sollen. Kann entweder ein Ping oder eine ID sein. **Optional, verwendet den Absender der Nachricht wenn nicht angegeben.**"
       }
     },
+    "leaderboard": {
+      "invalid": "Die angegebene Range ist ungültig! Es müssen 2 Zahlen sein, und der Beginn muss kleiner als das Ende sein!",
+      "row": "**#%s:** %s (%s XP, Level %s)\n"
+    },
     "level": {
       "multiple_arguments": "`!level` funktioniert nur für einen User gleichzeitig!",
       "no_xp": "%s hat noch keine XP!",
