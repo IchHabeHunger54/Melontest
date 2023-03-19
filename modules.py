@@ -178,7 +178,7 @@ class Help(Module):
     async def on_message(self, message: discord.Message) -> None:
         if message.content.lower().startswith('!help'):
             if message.channel.id != self.config.bots().id:
-                await self.error_and_delete(message, self.config.texts['help']['wrong_channel'] % self.config.bots().mention)
+                await self.error_and_delete(message, self.config.texts['wrong_channel'] % ('!help', self.config.bots().mention))
                 return
             args = message.content.split()
             if len(args) == 1:
@@ -187,7 +187,7 @@ class Help(Module):
             try:
                 await message.channel.send(self.config.texts['help']['command'][args[1]])
             except KeyError:
-                await self.error_and_delete(message, self.config.texts['help']['invalid'])
+                await self.error_and_delete(message, self.config.texts['help']['invalid'] % args[1])
 
 
 class Levels(Module):
@@ -246,7 +246,7 @@ class Levels(Module):
                     if level >= key:
                         await self.config.member(member.id).add_roles(self.config.role(self.roles[key]))
             else:
-                await self.error_and_delete(message, self.config.texts['level']['wrong_channel'] % self.config.bots().mention)
+                await self.error_and_delete(message, self.config.texts['wrong_channel'] % ('!level', self.config.bots().mention))
             return
         if message.channel.id in self.config.channels['level']:
             self.award_level(message.author)
@@ -431,7 +431,7 @@ class Moderation(Module):
             await message.channel.send(self.config.texts['moderation']['removewarn_success'] % warn)
         elif args[0] == '!warnings':
             if message.channel.id != self.config.bots().id:
-                await self.error_and_delete(message, self.config.texts['moderation']['warnings_wrong_channel'] % self.config.bots().mention)
+                await self.error_and_delete(message, self.config.texts['wrong_channel'] % ('!warnings', self.config.bots().mention))
                 return
             if len(message.mentions) > 1:
                 await self.error_and_delete(message, self.config.texts['moderation']['multiple_arguments'])
@@ -555,7 +555,7 @@ class RawEcho(Module):
 
 class Reload(Module):
     async def on_message(self, message: discord.Message) -> None:
-        if message.content.lower().startswith('!reload'):
+        if message.content.lower().startswith('!reload') and self.config.is_team(message.author):
             await message.channel.send(self.config.texts['reload']['start'])
             self.config.load()
             await message.channel.send(self.config.texts['reload']['end'])
@@ -565,9 +565,15 @@ class Roles(Module):
     async def on_message(self, message: discord.Message) -> None:
         content = message.content.lower()
         if content.startswith('!videos'):
+            if message.channel.id != self.config.bots().id:
+                await self.error_and_delete(message, self.config.texts['wrong_channel'] % ('!videos', self.config.bots().mention))
+                return
             await message.author.add_roles(self.config.video_role())
             await message.channel.send(self.config.texts['roles']['videos'])
         elif content.startswith('!keinevideos'):
+            if message.channel.id != self.config.bots().id:
+                await self.error_and_delete(message, self.config.texts['wrong_channel'] % ('!keinevideos', self.config.bots().mention))
+                return
             await message.author.remove_roles(self.config.video_role())
             await message.channel.send(self.config.texts['roles']['keinevideos'])
         elif self.config.is_team(message.author):
@@ -643,7 +649,7 @@ class TempVoice(Module):
         content = message.content
         if content.lower().startswith('!vc '):
             if message.channel.id != self.config.bots().id:
-                await self.error_and_delete(message, self.config.texts['temp_voice']['wrong_channel'] % self.config.bots().mention)
+                await self.error_and_delete(message, self.config.texts['wrong_channel'] % ('!vc', self.config.bots().mention))
                 return
             if message.author.id not in self.channels:
                 await self.error_and_delete(message, self.config.texts['temp_voice']['failure'])
@@ -720,10 +726,10 @@ class Tickets(Module):
                 self.config.database.execute('UPDATE tickets SET channel = %s WHERE owner = %s;', ticket.id, message.author.id)
                 await ticket.send(self.config.texts['tickets']['ticket_success'] % (self.config.chat_support_role().mention, message.author.mention))
             else:
-                await self.error_and_delete(message, self.config.texts['tickets']['ticket_wrong_channel'] % self.config.tickets().mention)
+                await self.error_and_delete(message, self.config.texts['wrong_channel'] % ('!ticket', self.config.tickets().mention))
                 return
         elif message.channel.id == self.config.channels['tickets']:
-            await self.error_and_delete(message, self.config.texts['tickets']['ticket_wrong_content'])
+            await self.error_and_delete(message, self.config.texts['tickets']['ticket_invalid'])
             return
         if content.startswith('!close'):
             if any(i[0] == message.channel.id for i in self.config.database.execute('SELECT channel FROM tickets;')):
@@ -775,6 +781,9 @@ class Tricks(Module):
                     self.tricks.pop(name)
                     await message.channel.send(self.config.texts['tricks']['removed'] % name)
             elif content.startswith('!tricks'):
+                if message.channel.id != self.config.bots().id:
+                    await self.error_and_delete(message, self.config.texts['wrong_channel'] % ('!tricks', self.config.bots().mention))
+                    return
                 tricklist = '\n'.join(['!' + elem for elem in self.tricks.keys()])
                 if tricklist:
                     await message.channel.send(self.config.texts['tricks']['list'] + self.config.texts['tricks']['none'])
@@ -796,7 +805,7 @@ class UserInfo(Module):
         content = message.content.lower()
         if content.startswith('!userinfo'):
             if message.channel.id != self.config.bots().id:
-                await self.error_and_delete(message, self.config.texts['userinfo']['wrong_channel'] % self.config.bots().mention)
+                await self.error_and_delete(message, self.config.texts['wrong_channel'] % ('!userinfo', self.config.bots().mention))
                 return
             args = content.split()
             if len(message.mentions) > 1 or len(args) > 2:
