@@ -139,6 +139,17 @@
       "voicesupport": "Du erhältst nun eine Benachrichtigung, sobald Voicesupport benötigt wird!",
       "keinvoicesupport": "Du erhältst nun keine Benachrichtigung mehr, sobald Voicesupport benötigt wird!"
     },
+    "rps": {
+      "start": "Schreibe `Schere`, `Stein` oder `Papier`!",
+      "rock": "Stein",
+      "paper": "Papier",
+      "scissors": "Schere",
+      "result": "**User:** %s | **Bot:** %s\n%s",
+      "win": "Gratulation! Du hast mich geschlagen.",
+      "lose": "HA! Du hast verloren! noob l2p",
+      "draw": "Unentschieden. Hm.",
+      "invalid": "Ungültige Eingabe! Starte das Spiel mit `!ssp` erneut."
+    },
     "rules": "Bitte lest euch die Regeln in %s bzw. die Kurzfassung in %s durch!",
     "self_destruct": {
       "title": "Selbstzerstörung",

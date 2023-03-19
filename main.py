@@ -20,6 +20,7 @@ modules = [
     PrankMute(config),
     RawEcho(config),
     Reload(config),
+    RockPaperScissors(config),
     Roles(config),
     Rules(config),
     SelfDestruct(config),

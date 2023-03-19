@@ -561,6 +561,39 @@ class Reload(Module):
             await message.channel.send(self.config.texts['reload']['end'])
 
 
+class RockPaperScissors(Module):
+    def __init__(self, config: Config):
+        super().__init__(config)
+        self.players = []
+
+    async def on_message(self, message: discord.Message) -> None:
+        content = message.content.lower()
+        if content.startswith('!ssp') and message.author.id not in self.players:
+            self.players.append(message.author.id)
+            await message.channel.send(self.config.texts['rps']['start'])
+        elif message.author.id in self.players:
+            self.players.remove(message.author.id)
+            if content.startswith(self.config.texts['rps']['rock'].lower()):
+                result = self.get_result(0)
+            elif content.startswith(self.config.texts['rps']['paper'].lower()):
+                result = self.get_result(1)
+            elif content.startswith(self.config.texts['rps']['scissors'].lower()):
+                result = self.get_result(2)
+            else:
+                result = self.config.texts['rps']['invalid']
+            await message.channel.send(result)
+
+    def get_result(self, prompt: int) -> str:
+        choice = random.choice([0, 1, 2])
+        texts = [self.config.texts['rps']['rock'], self.config.texts['rps']['paper'], self.config.texts['rps']['scissors']]
+        if (prompt == 0 and choice == 1) or (prompt == 1 and choice == 2) or (prompt == 2 and choice == 0):
+            return self.config.texts['rps']['result'] % (texts[prompt], texts[choice], self.config.texts['rps']['lose'])
+        elif (prompt == 1 and choice == 0) or (prompt == 2 and choice == 1) or (prompt == 0 and choice == 2):
+            return self.config.texts['rps']['result'] % (texts[prompt], texts[choice], self.config.texts['rps']['win'])
+        else:
+            return self.config.texts['rps']['result'] % (texts[prompt], texts[choice], self.config.texts['rps']['draw'])
+
+
 class Roles(Module):
     async def on_message(self, message: discord.Message) -> None:
         content = message.content.lower()
