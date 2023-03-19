@@ -237,7 +237,7 @@ class Levels(Module):
                 lb = self.get_lb(min(int(args[1]), self.config.values['leaderboard_max'], len(self.config.server().members) - 1))
             text = ''
             for rank, key in enumerate(lb, start=1):
-                text += self.config.texts['leaderboard']['row'] % (rank + start, self.config.member(key).mention, lb[key], await self.get_level(lb[key]))
+                text += self.config.texts['leaderboard']['row'] % (rank + start - 1, self.config.member(key).mention, lb[key], await self.get_level(lb[key]))
             await message.channel.send(text)
         elif content.startswith(('!level', '!rank')):
             if message.channel.id == self.config.bots().id:
