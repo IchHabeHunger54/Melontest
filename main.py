@@ -22,6 +22,7 @@ modules = [
     Reload(config),
     Roles(config),
     Rules(config),
+    SelfDestruct(config),
     Slowmode(config),
     TempVoice(config),
     Tickets(config),

@@ -140,6 +140,15 @@
       "keinvoicesupport": "Du erhältst nun keine Benachrichtigung mehr, sobald Voicesupport benötigt wird!"
     },
     "rules": "Bitte lest euch die Regeln in %s bzw. die Kurzfassung in %s durch!",
+    "self_destruct": {
+      "title": "Selbstzerstörung",
+      "text_3": "Selbstzerstörung in 3...",
+      "text_2": "Selbstzerstörung in 2...",
+      "text_1": "Selbstzerstörung in 1...",
+      "text_0": "KABOOM!",
+      "image_1": "https://static.wikia.nocookie.net/minecraft_de_gamepedia/images/1/1e/TNT.png",
+      "image_0": "https://i.pinimg.com/originals/06/c3/92/06c392b847166a9a671bfcd590d8fff7.gif"
+    },
     "temp_voice": {
       "name": "\uD83C\uDF49 %s",
       "failure": "Du hast keinen Voice Channel!",

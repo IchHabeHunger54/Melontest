@@ -335,10 +335,10 @@ class Logger(Module):
         await self.config.leave_log().send(embed=embed)
 
     async def on_message_edit(self, before: discord.Message, after: discord.Message) -> None:
-        embed = self.embed(self.config.texts['logger']['message_edited'])
         old = str(before.content)
         new = str(after.content)
         if old != new:
+            embed = self.embed(self.config.texts['logger']['message_edited'])
             embed.add_field(name=self.config.texts['logger']['user'], value=before.author.mention, inline=False)
             embed.add_field(name=self.config.texts['logger']['channel'], value=before.channel.mention, inline=False)
             embed.add_field(name=self.config.texts['logger']['before'], value=old, inline=False)
@@ -601,7 +601,7 @@ class Rules(Module):
         if self.messages > int(self.config.values['rules_limit']):
             await self.send_message()
 
-    async def send_message(self):
+    async def send_message(self) -> None:
         await self.config.chat().send(self.config.texts['rules'] % (self.config.rules().mention, self.config.short_rules().mention))
         self.messages = 0
 
@@ -610,6 +610,25 @@ class Rules(Module):
             self.messages += 1
         if message.content.lower().startswith('!regeln'):
             await self.send_message()
+
+
+class SelfDestruct(Module):
+    async def on_message(self, message: discord.Message) -> None:
+        if message.content.lower().startswith('!selbstzerstörung'):
+            msg = await message.channel.send(embed=self.make_embed('text_3'))
+            await asyncio.sleep(1)
+            await msg.edit(embed=self.make_embed('text_2'))
+            await asyncio.sleep(1)
+            await msg.edit(embed=self.make_embed('text_1'))
+            await asyncio.sleep(1)
+            await msg.edit(embed=self.make_embed('text_0'))
+            await message.channel.send(self.config.texts['self_destruct']['image_0'])
+
+    def make_embed(self, text_id: str) -> discord.Embed:
+        embed = self.embed(self.config.texts['self_destruct']['title'])
+        embed.set_thumbnail(url=self.config.texts['self_destruct']['image_1'])
+        embed.add_field(name=self.config.texts['self_destruct'][text_id], value='', inline=True)
+        return embed
 
 
 class Slowmode(Module):
