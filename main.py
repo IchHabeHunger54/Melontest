@@ -11,6 +11,7 @@ modules = [
     Creeper(config),
     EmoteModeration(config),
     Flomote(config),
+    Help(config),
     Levels(config),
     LinkModeration(config),
     Logger(config),

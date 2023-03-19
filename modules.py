@@ -174,6 +174,22 @@ class Flomote(Module):
             await message.channel.send(self.config.texts['floeyes'])
 
 
+class Help(Module):
+    async def on_message(self, message: discord.Message) -> None:
+        if message.content.lower().startswith('!help'):
+            if message.channel.id != self.config.bots().id:
+                await self.error_and_delete(message, self.config.texts['help']['wrong_channel'] % self.config.bots().mention)
+                return
+            args = message.content.split()
+            if len(args) == 1:
+                await self.error_and_delete(message, self.config.texts['help']['missing'])
+                return
+            try:
+                await message.channel.send(self.config.texts['help']['command'][args[1]])
+            except KeyError:
+                await self.error_and_delete(message, self.config.texts['help']['invalid'])
+
+
 class Levels(Module):
     def __init__(self, config: Config):
         super().__init__(config, config.delays['levels'])

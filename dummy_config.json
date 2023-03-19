@@ -35,6 +35,14 @@
     "emote_moderation": "%s Bitte sende nicht mehr als 4 Emotes pro Nachricht!",
     "floeyes": "<:Flo_1:673538831626010631><:Flo_2:673538857937010699>",
     "flomote": "<:Flo_1:673538831626010631><:Flo_2:673538857937010699>\n<:Flo_3:673538878048698418>",
+    "help": {
+      "wrong_channel": "Bitte verwende `!help` nur in %s!",
+      "invalid": "**Unbekannter Command** `%s`.\n\n**Achtung:** Trickbefehle haben keine Help-Commands. Alle Trickbefehle geben simple Texte aus.",
+      "missing": "Bitte gib einen Command an!",
+      "command": {
+        "help": "**Verwendung:** `!help <Command>`\n**Nur im Botchannel verwendbar.**\n\nZeigt Hilfe für den gegebenen Command an.\n\n**Optionen:**\n- <Command>: Der Command, für den Hilfe angezeigt werden soll."
+      }
+    },
     "level": {
       "multiple_arguments": "`!level` funktioniert nur für einen User gleichzeitig!",
       "no_xp": "%s hat noch keine XP!",
