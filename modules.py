@@ -237,7 +237,7 @@ class Levels(Module):
                 lb = self.get_lb(min(int(args[1]), self.config.values['leaderboard_max'], len(self.config.server().members) - 1))
             text = ''
             for rank, key in enumerate(lb, start=1):
-                text += self.config.texts['leaderboard']['row'] % (rank + start - 1, self.config.member(key).mention, lb[key], await self.get_level(lb[key]))
+                text += self.config.texts['leaderboard']['row'] % (rank + start, self.config.member(key).mention, lb[key], await self.get_level(lb[key]))
             await message.channel.send(text)
         elif content.startswith(('!level', '!rank')):
             if message.channel.id == self.config.bots().id:
@@ -274,7 +274,7 @@ class Levels(Module):
         await super().on_ready()
         for i in [i for i in self.config.server().members if i.get_role(self.config.special_requirement_role().id)]:
             await i.remove_roles(self.config.special_role())
-        await random.choice([i for i in self.config.server().members if i.get_role(self.config.special_requirement_role().id)]).add_roles(self.config.special_role())
+        await random.choice([i for i in self.config.server().members if not self.config.is_team(i) and i.get_role(self.config.special_requirement_role().id)]).add_roles(self.config.special_role())
 
     async def get_level(self, xp: int) -> int:
         for key in self.levels:
@@ -762,12 +762,26 @@ class TempVoice(Module):
     async def on_voice_state_update(self, member: discord.Member, before: discord.VoiceState, after: discord.VoiceState) -> None:
         if after.channel == self.config.voice_join():
             if member.id not in self.channels:
-                self.channels[member.id] = await self.config.server().create_voice_channel(self.config.texts['temp_voice']['name'] % member.display_name, category=self.config.voice_category(), overwrites={
-                    self.config.server().default_role: discord.PermissionOverwrite(view_channel=False, connect=False),
-                    self.config.default_role(): discord.PermissionOverwrite(view_channel=True, connect=True),
-                    member: discord.PermissionOverwrite(move_members=True)
-                })
+                await self.get_channel(member)
             await member.move_to(self.channels[member.id])
+
+    async def get_channel(self, member: discord.Member) -> None:
+        try:
+            self.channels[member.id] = await self.config.server().create_voice_channel(self.config.texts['temp_voice']['name'] % member.display_name, category=self.config.voice_category(), overwrites={
+                self.config.server().default_role: discord.PermissionOverwrite(view_channel=False, connect=False),
+                self.config.default_role(): discord.PermissionOverwrite(view_channel=True, connect=True),
+                self.config.server().get_role(self.config.roles['test_supporter']): discord.PermissionOverwrite(view_channel=True, connect=True),
+                self.config.server().get_role(self.config.roles['supporter']): discord.PermissionOverwrite(view_channel=True, connect=True),
+                self.config.server().get_role(self.config.roles['test_moderator']): discord.PermissionOverwrite(view_channel=True, connect=True),
+                self.config.server().get_role(self.config.roles['moderator']): discord.PermissionOverwrite(view_channel=True, connect=True),
+                self.config.server().get_role(self.config.roles['head_moderator']): discord.PermissionOverwrite(view_channel=True, connect=True),
+                self.config.server().get_role(self.config.roles['test_administrator']): discord.PermissionOverwrite(view_channel=True, connect=True),
+                member: discord.PermissionOverwrite(move_members=True)
+            })
+            await asyncio.sleep(1)
+        except discord.HTTPException:
+            await asyncio.sleep(1)
+            await self.get_channel(member)
 
 
 class Tickets(Module):
