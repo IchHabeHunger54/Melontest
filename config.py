@@ -129,6 +129,12 @@ class Config:
     def short_rules(self) -> discord.TextChannel:
         return self.text_channel(self.channels['short_rules'])
 
+    def moderation_log(self) -> discord.TextChannel:
+        return self.text_channel(self.channels['moderation_log'])
+
+    def member_log(self) -> discord.TextChannel:
+        return self.text_channel(self.channels['member_log'])
+
     def message_log(self) -> discord.TextChannel:
         return self.text_channel(self.channels['message_log'])
 

@@ -18,6 +18,12 @@ class Module:
     async def on_member_remove(self, member: discord.Member) -> None:
         pass
 
+    async def on_member_update(self, before: discord.Member, after: discord.Member) -> None:
+        pass
+
+    async def on_user_update(self, before: discord.User, after: discord.User) -> None:
+        pass
+
     async def on_message(self, message: discord.Message) -> None:
         pass
 

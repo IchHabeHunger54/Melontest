@@ -339,16 +339,70 @@ class LinkModeration(Module):
 class Logger(Module):
     async def on_member_join(self, member: discord.Member) -> None:
         embed = self.embed(self.config.texts['logger']['guild_joined'])
-        embed.add_field(name=self.config.texts['logger']['user'], value=member.mention, inline=False)
+        embed.add_field(name=self.config.texts['logger']['user'], value=str(member), inline=False)
+        embed.add_field(name=self.config.texts['logger']['ping'], value=member.mention, inline=False)
         embed.add_field(name=self.config.texts['logger']['created'], value=self.get_readable_datetime(str(member.created_at)), inline=True)
+        embed.set_thumbnail(url=member.display_avatar.url)
         await self.config.join_log().send(embed=embed)
 
     async def on_member_remove(self, member: discord.Member) -> None:
         embed = self.error_embed(title=self.config.texts['logger']['guild_left'])
-        embed.add_field(name=self.config.texts['logger']['user'], value=member.mention, inline=False)
+        embed.add_field(name=self.config.texts['logger']['user'], value=str(member), inline=False)
+        embed.add_field(name=self.config.texts['logger']['ping'], value=member.mention, inline=False)
         embed.add_field(name=self.config.texts['logger']['created'], value=self.get_readable_datetime(str(member.created_at)), inline=False)
         embed.add_field(name=self.config.texts['logger']['joined'], value=self.get_readable_datetime(str(member.joined_at)), inline=True)
+        embed.set_thumbnail(url=member.display_avatar.url)
         await self.config.leave_log().send(embed=embed)
+
+    async def on_member_update(self, before: discord.Member, after: discord.Member) -> None:
+        if after.nick != before.nick:
+            embed = self.embed(self.config.texts['logger']['nick_updated'])
+            embed.add_field(name=self.config.texts['logger']['user'], value=str(before), inline=False)
+            embed.add_field(name=self.config.texts['logger']['ping'], value=before.mention, inline=False)
+            embed.add_field(name=self.config.texts['logger']['before'], value=before.nick, inline=False)
+            embed.add_field(name=self.config.texts['logger']['after'], value=after.nick, inline=True)
+            await self.config.member_log().send(embed=embed)
+        if after.guild_avatar is not None and before.guild_avatar is None:
+            embed = self.embed(self.config.texts['logger']['guild_avatar_added'])
+            embed.add_field(name=self.config.texts['logger']['user'], value=str(before), inline=False)
+            embed.add_field(name=self.config.texts['logger']['ping'], value=before.mention, inline=True)
+            embed.set_image(url=after.guild_avatar.url)
+            await self.config.member_log().send(embed=embed)
+        if after.guild_avatar is None and before.guild_avatar is not None:
+            embed = self.embed(self.config.texts['logger']['guild_avatar_updated'])
+            embed.add_field(name=self.config.texts['logger']['user'], value=str(before), inline=False)
+            embed.add_field(name=self.config.texts['logger']['ping'], value=before.mention, inline=True)
+            embed.set_thumbnail(url=before.guild_avatar.url)
+            await self.config.member_log().send(embed=embed)
+        if after.guild_avatar != before.guild_avatar:
+            embed = self.embed(self.config.texts['logger']['guild_avatar_updated'])
+            embed.add_field(name=self.config.texts['logger']['user'], value=str(before), inline=False)
+            embed.add_field(name=self.config.texts['logger']['ping'], value=before.mention, inline=True)
+            embed.set_thumbnail(url=before.guild_avatar.url)
+            embed.set_image(url=after.guild_avatar.url)
+            await self.config.member_log().send(embed=embed)
+
+    async def on_user_update(self, before: discord.User, after: discord.User) -> None:
+        if str(after) != str(before):
+            embed = self.embed(self.config.texts['logger']['name_updated'])
+            embed.add_field(name=self.config.texts['logger']['ping'], value=before.mention, inline=False)
+            embed.add_field(name=self.config.texts['logger']['before'], value=str(before), inline=False)
+            embed.add_field(name=self.config.texts['logger']['after'], value=str(after), inline=True)
+            await self.config.member_log().send(embed=embed)
+        if after.global_name != before.global_name:
+            embed = self.embed(self.config.texts['logger']['global_name_updated'])
+            embed.add_field(name=self.config.texts['logger']['user'], value=str(before), inline=False)
+            embed.add_field(name=self.config.texts['logger']['ping'], value=before.mention, inline=False)
+            embed.add_field(name=self.config.texts['logger']['before'], value=before.global_name, inline=False)
+            embed.add_field(name=self.config.texts['logger']['after'], value=after.global_name, inline=True)
+            await self.config.member_log().send(embed=embed)
+        if after.avatar.url != before.avatar.url:
+            embed = self.embed(self.config.texts['logger']['avatar_updated'])
+            embed.add_field(name=self.config.texts['logger']['user'], value=str(before), inline=False)
+            embed.add_field(name=self.config.texts['logger']['ping'], value=before.mention, inline=True)
+            embed.set_thumbnail(url=before.avatar.url)
+            embed.set_image(url=after.avatar.url)
+            await self.config.member_log().send(embed=embed)
 
     async def on_message_edit(self, before: discord.Message, after: discord.Message) -> None:
         old = before.content
@@ -387,35 +441,40 @@ class Logger(Module):
             await self.config.voice_log().send(embed=embed)
 
 
+# noinspection PyTypeChecker
 class Moderation(Module):
     async def warn(self, member: discord.Member, reason: str, team_member: discord.User, channel: discord.TextChannel):
         now = datetime.now()
         self.config.database.execute('INSERT INTO warns (member, reason, time, team_member) VALUES(%s, %s, %s, %s);', member.id, reason, now, team_member.id)
         await channel.send(self.config.texts['moderation']['warn_success'] % (member.mention, reason, team_member.mention))
+        await self.config.moderation_log().send(self.config.texts['moderation']['warn_success'] % (member.mention, reason, team_member.mention))
         databasecontents = self.config.database.execute('SELECT * FROM warns WHERE member = %s ORDER BY id;', member.id)
         active = 0
         for i in databasecontents:
             if (now - datetime.strptime(i[3][:19], '%Y-%m-%d %H:%M:%S')).days < self.config.values['warn_expire_days']:
                 active += 1
         if active >= self.config.values['mute_warnings']:
-            await self.timeout(member, self.config.values['mute_duration'], self.config.texts['moderation']['too_many_warnings'])
-            await member.add_roles(self.config.muted_role())
+            await self.timeout(member, self.config.values['mute_duration'], self.config.texts['moderation']['too_many_warnings'], self.config.client.user, channel)
         if active >= self.config.values['kick_warnings']:
-            await self.kick(member, self.config.texts['moderation']['too_many_warnings'])
+            await self.kick(member, self.config.texts['moderation']['too_many_warnings'], self.config.client.user, channel)
         if active >= self.config.values['ban_warnings']:
-            await self.ban(member, self.config.texts['moderation']['too_many_warnings'])
+            await self.ban(member, self.config.texts['moderation']['too_many_warnings'], self.config.client.user, channel)
 
-    @staticmethod
-    async def timeout(member: discord.Member, duration: int, reason: str) -> None:
+    async def timeout(self, member: discord.Member, duration: int, reason: str, team_member: discord.User, channel: discord.TextChannel) -> None:
         await member.timeout(datetime.now().astimezone() + timedelta(seconds=duration), reason=reason)
+        await channel.send(self.config.texts['moderation']['mute_success'] % (member.mention, reason, team_member.mention))
+        await self.config.moderation_log().send(self.config.texts['moderation']['mute_success'] % (member.mention, reason, team_member.mention))
+        await member.add_roles(self.config.muted_role())
 
-    @staticmethod
-    async def kick(member: discord.Member, reason: str) -> None:
+    async def kick(self, member: discord.Member, reason: str, team_member: discord.User, channel: discord.TextChannel) -> None:
         await member.kick(reason=reason)
+        await channel.send(self.config.texts['moderation']['kick_success'] % (member.mention, reason, team_member.mention))
+        await self.config.moderation_log().send(self.config.texts['moderation']['kick_success'] % (member.mention, reason, team_member.mention))
 
-    @staticmethod
-    async def ban(member: discord.Member, reason: str) -> None:
+    async def ban(self, member: discord.Member, reason: str, team_member: discord.User, channel: discord.TextChannel) -> None:
         await member.ban(reason=reason, delete_message_days=1)
+        await channel.send(self.config.texts['moderation']['ban_success'] % (member.mention, reason, team_member.mention))
+        await self.config.moderation_log().send(self.config.texts['moderation']['ban_success'] % (member.mention, reason, team_member.mention))
 
     async def on_message(self, message: discord.Message) -> None:
         args = message.content.split()
@@ -445,6 +504,7 @@ class Moderation(Module):
                 return
             self.config.database.execute('DELETE FROM warns WHERE id = %s;', warn)
             await message.channel.send(self.config.texts['moderation']['removewarn_success'] % warn)
+            await self.config.moderation_log().send(self.config.texts['moderation']['removewarn_success'] % warn)
         elif args[0] == '!warnings':
             if message.channel.id != self.config.bots().id:
                 await self.error_and_delete(message, self.config.texts['wrong_channel'] % ('!warnings', self.config.bots().mention))
@@ -474,9 +534,7 @@ class Moderation(Module):
                 return
             member = await self.get_non_team_member_from_id_or_mention(args[1], message)
             if member is not None:
-                reason = ' '.join(args[3:])
-                await self.timeout(member, self.get_duration(args[2]), reason)
-                await message.channel.send(self.config.texts['moderation']['mute_success'] % (member.mention, reason, message.author.mention))
+                await self.timeout(member, self.get_duration(args[2]), ' '.join(args[3:]), self.config.client.user, message.channel)
         elif args[0] == '!unmute':
             if not self.config.is_team(message.author):
                 await self.error_and_delete(message, self.config.texts['team_only'])
@@ -489,6 +547,7 @@ class Moderation(Module):
                 reason = self.config.texts['moderation']['no_reason'] if len(args) == 2 else ' '.join(args[2:])
                 await member.timeout(None, reason=reason)
                 await message.channel.send(self.config.texts['moderation']['unmute_success'] % (member.mention, reason, message.author.mention))
+                await self.config.moderation_log().send(self.config.texts['moderation']['unmute_success'] % (member.mention, reason, message.author.mention))
         elif args[0] == '!kick':
             if not self.config.is_team(message.author):
                 await self.error_and_delete(message, self.config.texts['team_only'])
@@ -498,9 +557,7 @@ class Moderation(Module):
                 return
             member = await self.get_non_team_member_from_id_or_mention(args[1], message)
             if member is not None:
-                reason = ' '.join(args[2:])
-                await self.kick(member, reason)
-                await message.channel.send(self.config.texts['moderation']['kick_success'] % (member.mention, reason, message.author.mention))
+                await self.kick(member, ' '.join(args[2:]), self.config.client.user, message.channel)
         elif args[0] == '!ban':
             if not self.config.is_team(message.author):
                 await self.error_and_delete(message, self.config.texts['team_only'])
@@ -510,18 +567,14 @@ class Moderation(Module):
                 return
             member = await self.get_non_team_member_from_id_or_mention(args[1], message)
             if member is not None:
-                reason = ' '.join(args[2:])
-                await self.ban(member, reason)
-                await message.channel.send(self.config.texts['moderation']['ban_success'] % (member.mention, reason, message.author.mention))
+                await self.ban(member, ' '.join(args[2:]), self.config.client.user, message.channel)
         else:
             if self.config.is_team(message.author):
                 return
             blacklist = set(self.config.values['ping_blacklist'])
             for member in message.mentions:
-                client = self.config.client.user
-                if member.id in blacklist and client is not None:
-                    # noinspection PyTypeChecker
-                    await self.warn(message.author, self.config.texts['moderation']['ping_reason'], client, message.channel)
+                if member.id in blacklist:
+                    await self.warn(message.author, self.config.texts['moderation']['ping_reason'], self.config.client.user, message.channel)
                     await message.delete()
 
 
@@ -555,7 +608,7 @@ class PrankMute(Module):
             if member is None:
                 return
             reason = ' '.join(args[2:])
-            await Moderation.timeout(member, 86400, reason)
+            await member.timeout(datetime.now().astimezone() + timedelta(seconds=86400), reason=reason)
             await message.channel.send(self.config.texts['prank_mute']['start'] % (member.mention, reason, message.author.mention), delete_after=self.config.values['prank_mute_duration'])
             await asyncio.sleep(self.config.values['prank_mute_duration'])
             await member.timeout(None)
@@ -726,15 +779,19 @@ class TempVoice(Module):
             if args[1].lower() == 'show':
                 await self.channels[message.author.id].set_permissions(target=self.config.default_role(), view_channel=True)
                 await message.channel.send(self.config.texts['temp_voice']['show'])
+                await self.config.voice_log().send(self.config.texts['temp_voice']['show_log'] % message.author.id)
             elif args[1].lower() == 'hide':
                 await self.channels[message.author.id].set_permissions(target=self.config.default_role(), view_channel=False)
                 await message.channel.send(self.config.texts['temp_voice']['hide'])
+                await self.config.voice_log().send(self.config.texts['temp_voice']['hide_log'] % message.author.id)
             elif args[1].lower() == 'open':
                 await self.channels[message.author.id].set_permissions(target=self.config.default_role(), connect=True)
                 await message.channel.send(self.config.texts['temp_voice']['open'])
+                await self.config.voice_log().send(self.config.texts['temp_voice']['open_log'] % message.author.id)
             elif args[1].lower() == 'close':
                 await self.channels[message.author.id].set_permissions(target=self.config.default_role(), connect=False)
                 await message.channel.send(self.config.texts['temp_voice']['close'])
+                await self.config.voice_log().send(self.config.texts['temp_voice']['close_log'] % message.author.id)
             elif args[1].lower() == 'limit':
                 if len(args) == 2:
                     await self.error_and_delete(message, self.config.texts['temp_voice']['limit_missing'])
@@ -749,6 +806,7 @@ class TempVoice(Module):
                     return
                 await self.channels[message.author.id].edit(user_limit=limit)
                 await message.channel.send(self.config.texts['temp_voice']['limit_success'] % limit)
+                await self.config.voice_log().send(self.config.texts['temp_voice']['limit_log'] % (message.author.id, limit))
             elif args[1].lower() == 'name':
                 if len(args) == 2:
                     await self.error_and_delete(message, self.config.texts['temp_voice']['name_failure'])
@@ -756,6 +814,7 @@ class TempVoice(Module):
                 name = ' '.join(args[2:])
                 await self.channels[message.author.id].edit(name=self.config.texts['temp_voice']['name'] % name)
                 await message.channel.send(self.config.texts['temp_voice']['name_success'] % name)
+                await self.config.voice_log().send(self.config.texts['temp_voice']['name_log'] % (message.author.id, name))
             else:
                 await self.error_and_delete(message, self.config.texts['temp_voice']['invalid'] % args[1])
 

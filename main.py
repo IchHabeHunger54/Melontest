@@ -47,6 +47,22 @@ async def on_member_remove(member: discord.Member) -> None:
 
 
 @bot.event
+async def on_member_update(before: discord.Member, after: discord.Member) -> None:
+    if before is None or after is None:
+        return
+    for module in modules:
+        await module.on_member_update(before, after)
+
+
+@bot.event
+async def on_user_update(before: discord.User, after: discord.User) -> None:
+    if before is None or after is None:
+        return
+    for module in modules:
+        await module.on_user_update(before, after)
+
+
+@bot.event
 async def on_message(message: discord.Message) -> None:
     if message.author == bot.user or message.author.bot:
         return
@@ -96,7 +112,7 @@ async def on_ready() -> None:
 
 @bot.event
 async def on_voice_state_update(member: discord.Member, before: discord.VoiceState, after: discord.VoiceState) -> None:
-    if member == bot.user or member.bot:
+    if member is None or member == bot.user or member.bot:
         return
     for module in modules:
         await module.on_voice_state_update(member, before, after)
