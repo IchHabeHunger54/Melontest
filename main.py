@@ -1,121 +1,122 @@
 from modules import *
 
 time = datetime.now()
-bot = discord.Client(intents=discord.Intents.all(), allowed_mentions=discord.AllowedMentions.none())
+bot = Client(intents=Intents.all(), allowed_mentions=AllowedMentions.none())
 config = Config(bot)
-modules = [
-    AmongUs(config),
-    CapsModeration(config),
-    Clear(config),
-    Counter(config),
-    Creeper(config),
-    EmoteModeration(config),
-    Flomote(config),
-    Help(config),
-    Levels(config),
-    LinkModeration(config),
-    Logger(config),
-    Moderation(config),
-    Ping(config),
-    PrankMute(config),
-    RawEcho(config),
-    Reload(config),
-    RockPaperScissors(config),
-    Roles(config),
-    Rules(config),
-    SelfDestruct(config),
-    Slowmode(config),
-    TempVoice(config),
-    Tickets(config),
-    Tricks(config),
-    UserInfo(config),
-    VoiceSupport(config),
-    Write(config)
+config.modules = [
+    AmongUs(config, 'among_us'),
+    CapsModeration(config, 'caps_moderation'),
+    Clear(config, 'clear'),
+    Counter(config, 'counter'),
+    Creeper(config, 'creeper'),
+    EmoteModeration(config, 'emote_moderation'),
+    Flomote(config, 'flomote'),
+    Help(config, 'help'),
+    Levels(config, 'levels'),
+    LinkModeration(config, 'link_moderation'),
+    Logger(config, 'logger'),
+    Moderation(config, 'moderation'),
+    Ping(config, 'ping'),
+    PrankMute(config, 'prank_mute'),
+    RawEcho(config, 'raw_echo'),
+    Reload(config, 'reload'),
+    RockPaperScissors(config, 'rps'),
+    Roles(config, 'roles'),
+    Rules(config, 'rules'),
+    SelfDestruct(config, 'self_destruct'),
+    Slowmode(config, 'slowmode'),
+    TempVoice(config, 'temp_voice'),
+    Tickets(config, 'tickets'),
+    Tricks(config, 'tricks'),
+    Userinfo(config, 'userinfo'),
+    VoiceSupport(config, 'voice_support'),
+    Write(config, 'write')
 ]
+config.load()
 
 
 @bot.event
-async def on_member_join(member: discord.Member) -> None:
-    for module in modules:
-        await module.on_member_join(member)
+async def on_member_join(member: Member) -> None:
+    for m in config.modules:
+        await m.on_member_join(member)
 
 
 @bot.event
-async def on_member_remove(member: discord.Member) -> None:
-    for module in modules:
-        await module.on_member_remove(member)
+async def on_member_remove(member: Member) -> None:
+    for m in config.modules:
+        await m.on_member_remove(member)
 
 
 @bot.event
-async def on_member_update(before: discord.Member, after: discord.Member) -> None:
+async def on_member_update(before: Member, after: Member) -> None:
     if before is None or after is None:
         return
-    for module in modules:
-        await module.on_member_update(before, after)
+    for m in config.modules:
+        await m.on_member_update(before, after)
 
 
 @bot.event
-async def on_user_update(before: discord.User, after: discord.User) -> None:
+async def on_user_update(before: User, after: User) -> None:
     if before is None or after is None:
         return
-    for module in modules:
-        await module.on_user_update(before, after)
+    for m in config.modules:
+        await m.on_user_update(before, after)
 
 
 @bot.event
-async def on_message(message: discord.Message) -> None:
+async def on_message(message: Message) -> None:
     if message.author == bot.user or message.author.bot:
         return
-    for module in modules:
-        await module.on_message(message)
+    for m in config.modules:
+        await m.on_message(message)
 
 
 @bot.event
-async def on_message_delete(message: discord.Message) -> None:
+async def on_message_delete(message: Message) -> None:
     if message.author == bot.user or message.author.bot:
         return
-    for module in modules:
-        await module.on_message_delete(message)
+    for m in config.modules:
+        await m.on_message_delete(message)
 
 
 @bot.event
-async def on_message_edit(before: discord.Message, after: discord.Message) -> None:
+async def on_message_edit(before: Message, after: Message) -> None:
     if before.author == bot.user or before.author.bot:
         return
-    for module in modules:
-        await module.on_message_edit(before, after)
+    for m in config.modules:
+        await m.on_message_edit(before, after)
 
 
 @bot.event
-async def on_reaction_add(reaction: discord.Reaction, member: discord.Member) -> None:
+async def on_reaction_add(reaction: Reaction, member: Member) -> None:
     if member == bot.user or member.bot:
         return
-    for module in modules:
-        await module.on_reaction_add(reaction, member)
+    for m in config.modules:
+        await m.on_reaction_add(reaction, member)
 
 
 @bot.event
-async def on_reaction_remove(reaction: discord.Reaction, member: discord.Member) -> None:
+async def on_reaction_remove(reaction: Reaction, member: Member) -> None:
     if member == bot.user or member.bot:
         return
-    for module in modules:
-        await module.on_reaction_remove(reaction, member)
+    for m in config.modules:
+        await m.on_reaction_remove(reaction, member)
 
 
 @bot.event
 async def on_ready() -> None:
-    for module in modules:
-        await module.on_ready()
+    for m in config.modules:
+        await m.on_ready()
     print('Successfully booted up as user', bot.user)
     print('Booting took', datetime.now() - time)
 
 
 @bot.event
-async def on_voice_state_update(member: discord.Member, before: discord.VoiceState, after: discord.VoiceState) -> None:
+async def on_voice_state_update(member: Member, before: VoiceState, after: VoiceState) -> None:
     if member is None or member == bot.user or member.bot:
         return
-    for module in modules:
-        await module.on_voice_state_update(member, before, after)
+    for m in config.modules:
+        await m.on_voice_state_update(member, before, after)
 
 
 bot.run(config.token)

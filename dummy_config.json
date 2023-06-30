@@ -34,8 +34,10 @@
     "caps_moderation": "%s Bitte sende keine Nachrichten in Caps (Großbuchstaben)!",
     "creeper": "Es ist erlaubt, das Wort Creeper zu schreiben. Es ist jedoch verboten, den Songtext von \"Creeper, Aw Man\" (Revenge) zu schreiben, da es in der Vergangenheit immer wieder zu Spam geführt hat.",
     "emote_moderation": "%s Bitte sende nicht mehr als 4 Emotes pro Nachricht!",
-    "floeyes": "<:Flo_1:673538831626010631><:Flo_2:673538857937010699>",
-    "flomote": "<:Flo_1:673538831626010631><:Flo_2:673538857937010699>\n<:Flo_3:673538878048698418>",
+    "flomote": {
+      "floeyes": "<:Flo_1:673538831626010631><:Flo_2:673538857937010699>",
+      "flomote": "<:Flo_1:673538831626010631><:Flo_2:673538857937010699>\n<:Flo_3:673538878048698418>"
+    },
     "help": {
       "invalid": "**Unbekannter Command** `%s`.\n\n**Achtung:** Trickbefehle haben keine Help-Commands. Alle Trickbefehle geben simple Texte aus.",
       "missing": "Bitte gib einen Command an!",
@@ -76,15 +78,14 @@
         "warnings": "**Verwendung:** `!warnings <optional: User>`\n**Nur im Botchannel verwendbar.**\n\nZeigt die Warns von <User> an.\n\n**Optionen:**\n- <User>: Der User, für den die Warns angezeigt werden sollen. Kann entweder ein Ping oder eine ID sein. **Optional, verwendet den Absender der Nachricht wenn nicht angegeben.**"
       }
     },
-    "leaderboard": {
+    "levels": {
       "invalid": "Die angegebene Range ist ungültig! Es müssen 2 Zahlen sein, und der Beginn muss kleiner als das Ende sein!",
-      "row": "**#%s:** %s (%s XP, Level %s)\n"
-    },
-    "level": {
+      "row": "**#%s:** %s (%s XP, Level %s)\n",
       "multiple_arguments": "`!level` funktioniert nur für einen User gleichzeitig!",
       "no_xp": "%s hat noch keine XP!",
       "success": "%s ist aktuell **Level %s** (%s XP) und damit auf **Rang %s**.\nBis zum **nächsten Level** braucht %s noch **%s XP**.\nBis zum **nächsten Rang** braucht %s noch **%s XP**.",
-      "success_1": "%s ist aktuell **Level %s** (%s XP) und damit auf **Rang %s**.\nBis zum **nächsten Level** braucht %s noch **%s XP**."
+      "success_1": "%s ist aktuell **Level %s** (%s XP) und damit auf **Rang %s**.\nBis zum **nächsten Level** braucht %s noch **%s XP**.",
+      "special_notification": "Und die heutige Wundermelone ist... %s! Als Wundermelone bekommst du doppelte XP durch Schreiben und Voice-Aktivität."
     },
     "link_moderation": "%s Bitte sende keine Links!",
     "logger": {
@@ -174,7 +175,6 @@
       "image_1": "https://static.wikia.nocookie.net/minecraft_de_gamepedia/images/1/1e/TNT.png",
       "image_0": "https://i.pinimg.com/originals/06/c3/92/06c392b847166a9a671bfcd590d8fff7.gif"
     },
-    "special_notification": "Und die heutige Wundermelone ist... %s! Als Wundermelone bekommst du doppelte XP durch Schreiben und Voice-Aktivität.",
     "temp_voice": {
       "name": "\uD83C\uDF49 %s",
       "failure": "Du hast keinen Voice Channel!",
@@ -224,46 +224,56 @@
     "temp_voice": 60
   },
   "values": {
-    "among_us_crewmate": 100,
-    "among_us_limit": 5,
-    "among_us_reward": 200,
-    "ban_warnings": 5,
-    "caps_min": 10,
-    "caps_ratio": 0.75,
+    "among_us": {
+      "crewmate": 100,
+      "limit": 5,
+      "reward": 200
+    },
+    "caps_moderation": {
+      "min": 10,
+      "ratio": 0.75
+    },
     "delete_after": 10,
-    "emotes_max": 4,
-    "kick_warnings": 4,
-    "leaderboard_default": 10,
-    "leaderboard_max": 20,
-    "level_base": 50,
-    "level_max": 100,
-    "level_give_min": 1,
-    "level_give_max": 3,
-    "level_multiplier": 1.1,
-    "level_boost_premium": 1.5,
-    "level_boost_special": 2,
-    "link_blacklist": [],
-    "link_whitelist": [
-      "cdn.discordapp.com",
-      "cdn.discordapp.net",
-      "discord.com",
-      "giphy",
-      "imgur",
-      "tenor",
-      "wikipedia.org"
-    ],
-    "mute_duration": 259200,
-    "mute_warnings": 3,
-    "ping_blacklist": [
-      282912142867431425,
-      373641153133936641,
-      282912778073931786,
-      411159465522495501,
-      444933507823828992
-    ],
-    "prank_mute_duration": 5,
-    "rules_limit": 10,
-    "warn_expire_days": 14
+    "emote_moderation": 4,
+    "levels": {
+      "base": 50,
+      "max": 100,
+      "give_min": 1,
+      "give_max": 3,
+      "leaderboard_default": 10,
+      "leaderboard_max": 20,
+      "multiplier": 1.1,
+      "premium": 1.5,
+      "special": 2
+    },
+    "link_moderation": {
+      "blacklist": [],
+      "whitelist": [
+        "cdn.discordapp.com",
+        "cdn.discordapp.net",
+        "discord.com",
+        "giphy",
+        "imgur",
+        "tenor",
+        "wikipedia.org"
+      ]
+    },
+    "moderation": {
+      "ban_warnings": 5,
+      "kick_warnings": 4,
+      "mute_duration": 259200,
+      "mute_warnings": 3,
+      "ping_blacklist": [
+        282912142867431425,
+        373641153133936641,
+        282912778073931786,
+        411159465522495501,
+        444933507823828992
+      ],
+      "warn_expire_days": 14
+    },
+    "prank_mute": 5,
+    "rules": 10
   },
   "database": {
     "hostname": "",
