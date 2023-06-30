@@ -278,7 +278,7 @@ class Levels(Module):
             await i.remove_roles(self.config.special_role())
         special = random.choice([i for i in self.config.server().members if not self.config.is_team(i) and i.get_role(self.config.special_requirement_role().id)])
         await special.add_roles(self.config.special_role())
-        await self.config.chat().send(self.config.texts['special_notification'] % special.mention)
+        await self.config.chat().send(self.config.texts['special_notification'] % special.mention, allowed_mentions=discord.AllowedMentions.all())
 
     async def get_level(self, xp: int) -> int:
         for key in self.levels:
@@ -777,10 +777,10 @@ class TempVoice(Module):
 
     async def on_message(self, message: discord.Message) -> None:
         content = message.content
-        author = message.author.id
-        channel_id = self.channels[author]
-        channel = self.config.voice_channel(channel_id)
         if content.lower().startswith('!vc '):
+            author = message.author.id
+            channel_id = self.channels[author]
+            channel = self.config.voice_channel(channel_id)
             if message.channel.id != self.config.bots().id:
                 await self.error_and_delete(message, self.config.texts['wrong_channel'] % ('!vc', self.config.bots().mention))
                 return
@@ -886,7 +886,7 @@ class Tickets(Module):
                     self.config.role(self.config.roles['test_administrator']): discord.PermissionOverwrite(read_messages=True)
                 })
                 self.config.database.execute('UPDATE tickets SET channel = %s WHERE owner = %s;', ticket.id, message.author.id)
-                await ticket.send(self.config.texts['tickets']['ticket_success'] % (self.config.chat_support_role().mention, message.author.mention))
+                await ticket.send(self.config.texts['tickets']['ticket_success'] % (self.config.chat_support_role().mention, message.author.mention), allowed_mentions=discord.AllowedMentions.all())
             else:
                 await self.error_and_delete(message, self.config.texts['wrong_channel'] % ('!ticket', self.config.tickets().mention))
                 return
@@ -991,7 +991,7 @@ class UserInfo(Module):
 class VoiceSupport(Module):
     async def on_voice_state_update(self, member: discord.Member, before: discord.VoiceState, after: discord.VoiceState) -> None:
         if after.channel is not None and after.channel.id == self.config.voice_support().id:
-            await self.config.team_voice_support().send(self.config.texts['voice_support'] % (self.config.voice_support_role().mention, member.mention))
+            await self.config.team_voice_support().send(self.config.texts['voice_support'] % (self.config.voice_support_role().mention, member.mention), allowed_mentions=discord.AllowedMentions.all())
 
 
 class Write(Module):
