@@ -215,9 +215,13 @@ class Levels(Module):
         content = message.content
         if content.startswith(('!leaderboard', '!lb')):
             args = content.split()
-            lb = self.get_lb(min(self.config.values['leaderboard_default'], len(self.config.server().members) - 1))
+            lb = {}
             start = 0
-            if len(args) >= 2 and '-' in args[1]:
+            if len(args) == 1:
+                lb = self.get_lb(min(self.config.values['leaderboard_default'], len(self.config.server().members) - 1))
+            elif args[1].isdigit():
+                lb = self.get_lb(min(int(args[1]), self.config.values['leaderboard_max'], len(self.config.server().members) - 1))
+            elif '-' in args[1]:
                 ints = args[1].split('-')
                 if len(ints) == 2 and (i.isdigit for i in ints):
                     try:
@@ -233,11 +237,9 @@ class Levels(Module):
                 else:
                     await self.error_and_delete(message, self.config.texts['leaderboard']['invalid'])
                     return
-            elif len(args) >= 2 and args[1].isdigit():
-                lb = self.get_lb(min(int(args[1]), self.config.values['leaderboard_max'], len(self.config.server().members) - 1))
             text = ''
             for rank, key in enumerate(lb, start=1):
-                text += self.config.texts['leaderboard']['row'] % (rank + start, self.config.member(key).mention, lb[key], await self.get_level(lb[key]))
+                text += self.config.texts['leaderboard']['row'] % (rank if start == 0 else rank + start - 1, self.config.member(key).mention, lb[key], await self.get_level(lb[key]))
             await message.channel.send(text)
         elif content.startswith(('!level', '!rank')):
             if message.channel.id == self.config.bots().id:
