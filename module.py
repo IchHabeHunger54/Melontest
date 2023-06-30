@@ -119,6 +119,9 @@ class Module:
     def get_interval(self) -> int:
         return self.interval
 
+    def bot_user(self) -> ClientUser:
+        return self.config.client.user
+
     def server(self) -> Guild:
         return self.config.client.get_guild(self.config.guild)
 
@@ -142,53 +145,56 @@ class Module:
                 return c
         return None
 
-    def is_test_administrator_or_higher(self, member: Member) -> bool:
-        return self.has_role(member, self.config.roles['test_administrator']) or self.is_administrator(member)
-
-    def is_head_moderator_or_higher(self, member: Member) -> bool:
-        return self.has_role(member, self.config.roles['head_moderator']) or self.is_test_administrator_or_higher(member)
-
-    def is_moderator_or_higher(self, member: Member) -> bool:
-        return self.has_role(member, self.config.roles['moderator']) or self.is_head_moderator_or_higher(member)
-
-    def is_test_moderator_or_higher(self, member: Member) -> bool:
-        return self.has_role(member, self.config.roles['test_moderator']) or self.is_moderator_or_higher(member)
-
-    def is_supporter_or_higher(self, member: Member) -> bool:
-        return self.has_role(member, self.config.roles['supporter']) or self.is_test_moderator_or_higher(member)
-
-    def is_test_supporter_or_higher(self, member: Member) -> bool:
-        return self.has_role(member, self.config.roles['test_supporter']) or self.is_supporter_or_higher(member)
-
-    def is_team(self, member: Member) -> bool:
-        return self.is_test_supporter_or_higher(member)
-
     def default_role(self) -> Role:
-        return self.server().get_role(self.config.roles['default'])
+        return self.role(self.config.roles['default'])
 
     def premium_role(self) -> Role:
-        return self.server().get_role(self.config.roles['premium'])
+        return self.role(self.config.roles['premium'])
 
     def special_role(self) -> Role:
-        return self.server().get_role(self.config.roles['special'])
+        return self.role(self.config.roles['special'])
 
     def special_requirement_role(self) -> Role:
-        return self.server().get_role(self.config.roles['special_requirement'])
+        return self.role(self.config.roles['special_requirement'])
 
     def prank_mute_requirement_role(self) -> Role:
-        return self.server().get_role(self.config.roles['prank_mute_requirement'])
+        return self.role(self.config.roles['prank_mute_requirement'])
+
+    def vip_role(self) -> Role:
+        return self.role(self.config.roles['vip'])
+
+    def builder_role(self) -> Role:
+        return self.role(self.config.roles['builder'])
+
+    def test_supporter(self):
+        return self.role(self.config.roles['test_supporter'])
+
+    def supporter(self):
+        return self.role(self.config.roles['supporter'])
+
+    def test_moderator(self):
+        return self.role(self.config.roles['test_moderator'])
+
+    def moderator(self):
+        return self.role(self.config.roles['moderator'])
+
+    def head_moderator(self):
+        return self.role(self.config.roles['head_moderator'])
+
+    def test_administrator(self):
+        return self.role(self.config.roles['test_administrator'])
 
     def chat_support_role(self) -> Role:
-        return self.server().get_role(self.config.roles['chat_support'])
+        return self.role(self.config.roles['chat_support'])
 
     def voice_support_role(self) -> Role:
-        return self.server().get_role(self.config.roles['voice_support'])
+        return self.role(self.config.roles['voice_support'])
 
     def video_role(self) -> Role:
-        return self.server().get_role(self.config.roles['video'])
+        return self.role(self.config.roles['video'])
 
     def muted_role(self) -> Role:
-        return self.server().get_role(self.config.roles['muted'])
+        return self.role(self.config.roles['muted'])
 
     def chat(self) -> TextChannel:
         return self.text_channel(self.config.channels['chat'])
@@ -244,6 +250,27 @@ class Module:
     def voice_category(self) -> CategoryChannel:
         return self.category('voice')
 
+    def is_team(self, member: Member) -> bool:
+        return self.is_test_supporter_or_higher(member)
+
+    def is_test_supporter_or_higher(self, member: Member) -> bool:
+        return self.has_role(member, self.test_supporter()) or self.is_supporter_or_higher(member)
+
+    def is_supporter_or_higher(self, member: Member) -> bool:
+        return self.has_role(member, self.supporter()) or self.is_test_moderator_or_higher(member)
+
+    def is_test_moderator_or_higher(self, member: Member) -> bool:
+        return self.has_role(member, self.test_moderator()) or self.is_moderator_or_higher(member)
+
+    def is_moderator_or_higher(self, member: Member) -> bool:
+        return self.has_role(member, self.moderator()) or self.is_head_moderator_or_higher(member)
+
+    def is_head_moderator_or_higher(self, member: Member) -> bool:
+        return self.has_role(member, self.head_moderator()) or self.is_test_administrator_or_higher(member)
+
+    def is_test_administrator_or_higher(self, member: Member) -> bool:
+        return self.has_role(member, self.test_administrator()) or self.is_administrator(member)
+
     def new_embed(self, title: str, color: int) -> Embed:
         embed = Embed(title=title, color=color, timestamp=datetime.utcnow())
         embed.set_footer(text=self.config.embeds['text'], icon_url=self.config.embeds['icon'])
@@ -294,8 +321,8 @@ class Module:
         await message.delete()
 
     @staticmethod
-    def has_role(member: Member, role_id: int) -> bool:
-        return any(role.id == role_id for role in member.roles)
+    def has_role(member: Member, role: Role) -> bool:
+        return any(r.id == role.id for r in member.roles)
 
     @staticmethod
     def is_administrator(member: Member) -> bool:

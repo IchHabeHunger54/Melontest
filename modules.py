@@ -210,7 +210,7 @@ class Levels(Module):
     async def run_schedule(self) -> None:
         self.cooldowns = []
         for vc in self.server().voice_channels:
-            if len(vc.members) > 1 and vc.category_id != self.config.categories['tickets']:
+            if len(vc.members) > 1 and vc.category_id != self.tickets_category().id:
                 for member in vc.members:
                     if not member.voice.afk and ((not member.voice.mute and not member.voice.self_mute) or member.voice.self_stream):
                         self.award_level(member)
@@ -462,11 +462,11 @@ class Moderation(Module):
             if (now - datetime.strptime(i[3][:19], '%Y-%m-%d %H:%M:%S')).days < self.values['warn_expire_days']:
                 active += 1
         if active >= self.values['mute_warnings']:
-            await self.timeout(member, self.values['mute_duration'], self.text['too_many_warnings'], self.config.client.user, channel)
+            await self.timeout(member, self.values['mute_duration'], self.text['too_many_warnings'], self.bot_user(), channel)
         if active >= self.values['kick_warnings']:
-            await self.kick(member, self.text['too_many_warnings'], self.config.client.user, channel)
+            await self.kick(member, self.text['too_many_warnings'], self.bot_user(), channel)
         if active >= self.values['ban_warnings']:
-            await self.ban(member, self.text['too_many_warnings'], self.config.client.user, channel)
+            await self.ban(member, self.text['too_many_warnings'], self.bot_user(), channel)
 
     async def timeout(self, member: Member, duration: int, reason: str, team_member: User, channel: TextChannel) -> None:
         await member.timeout(datetime.now().astimezone() + timedelta(seconds=duration), reason=reason)
@@ -542,7 +542,7 @@ class Moderation(Module):
                 return
             member = await self.non_team_member_from_id(args[1], message)
             if member is not None:
-                await self.timeout(member, self.get_duration(args[2]), ' '.join(args[3:]), self.config.client.user, message.channel)
+                await self.timeout(member, self.get_duration(args[2]), ' '.join(args[3:]), self.bot_user(), message.channel)
         elif args[0] == '!unmute':
             if not self.is_team(message.author):
                 await self.error_and_delete(message, self.config.texts['team_only'])
@@ -565,7 +565,7 @@ class Moderation(Module):
                 return
             member = await self.non_team_member_from_id(args[1], message)
             if member is not None:
-                await self.kick(member, ' '.join(args[2:]), self.config.client.user, message.channel)
+                await self.kick(member, ' '.join(args[2:]), self.bot_user(), message.channel)
         elif args[0] == '!ban':
             if not self.is_team(message.author):
                 await self.error_and_delete(message, self.config.texts['team_only'])
@@ -575,14 +575,14 @@ class Moderation(Module):
                 return
             member = await self.non_team_member_from_id(args[1], message)
             if member is not None:
-                await self.ban(member, ' '.join(args[2:]), self.config.client.user, message.channel)
+                await self.ban(member, ' '.join(args[2:]), self.bot_user(), message.channel)
         else:
-            if self.is_team(message.author):
+            if self.vip_role() in message.author.roles or self.builder_role() in message.author.roles or self.is_team(message.author):
                 return
             blacklist = set(self.values['ping_blacklist'])
             for member in message.mentions:
                 if member.id in blacklist:
-                    await self.warn(message.author, self.text['ping_reason'], self.config.client.user, message.channel)
+                    await self.warn(message.author, self.text['ping_reason'], self.bot_user(), message.channel)
                     await message.delete()
 
 
@@ -846,12 +846,12 @@ class TempVoice(Module):
             self.channels[member.id] = (await self.server().create_voice_channel(self.text['name'] % member.display_name, category=self.voice_category(), overwrites={
                 self.server().default_role: PermissionOverwrite(view_channel=False, connect=False),
                 self.default_role(): PermissionOverwrite(view_channel=True, connect=True),
-                self.role(self.config.roles['test_supporter']): PermissionOverwrite(view_channel=True, connect=True),
-                self.role(self.config.roles['supporter']): PermissionOverwrite(view_channel=True, connect=True),
-                self.role(self.config.roles['test_moderator']): PermissionOverwrite(view_channel=True, connect=True),
-                self.role(self.config.roles['moderator']): PermissionOverwrite(view_channel=True, connect=True),
-                self.role(self.config.roles['head_moderator']): PermissionOverwrite(view_channel=True, connect=True),
-                self.role(self.config.roles['test_administrator']): PermissionOverwrite(view_channel=True, connect=True),
+                self.test_supporter(): PermissionOverwrite(view_channel=True, connect=True),
+                self.supporter(): PermissionOverwrite(view_channel=True, connect=True),
+                self.test_moderator(): PermissionOverwrite(view_channel=True, connect=True),
+                self.moderator(): PermissionOverwrite(view_channel=True, connect=True),
+                self.head_moderator(): PermissionOverwrite(view_channel=True, connect=True),
+                self.test_administrator(): PermissionOverwrite(view_channel=True, connect=True),
                 member: PermissionOverwrite(move_members=True)
             })).id
             self.connect[self.channels[member.id]] = True
@@ -870,7 +870,7 @@ class Tickets(Module):
     async def on_message(self, message: Message) -> None:
         content = message.content.lower()
         if content.startswith('!ticket'):
-            if message.channel.id == self.config.channels['tickets']:
+            if message.channel.id == self.tickets():
                 ticket = self.database.execute('SELECT channel FROM tickets WHERE owner = %s', message.author.id)
                 if ticket:
                     await self.error_and_delete(message, self.text['ticket_failure'] % self.text_channel(ticket[0][0]))
@@ -880,19 +880,19 @@ class Tickets(Module):
                     self.server().default_role: PermissionOverwrite(read_messages=False),
                     self.server().me: PermissionOverwrite(read_messages=True),
                     message.author: PermissionOverwrite(read_messages=True),
-                    self.role(self.config.roles['test_supporter']): PermissionOverwrite(read_messages=True),
-                    self.role(self.config.roles['supporter']): PermissionOverwrite(read_messages=True),
-                    self.role(self.config.roles['test_moderator']): PermissionOverwrite(read_messages=True),
-                    self.role(self.config.roles['moderator']): PermissionOverwrite(read_messages=True),
-                    self.role(self.config.roles['head_moderator']): PermissionOverwrite(read_messages=True),
-                    self.role(self.config.roles['test_administrator']): PermissionOverwrite(read_messages=True)
+                    self.test_supporter(): PermissionOverwrite(read_messages=True),
+                    self.supporter(): PermissionOverwrite(read_messages=True),
+                    self.test_moderator(): PermissionOverwrite(read_messages=True),
+                    self.moderator(): PermissionOverwrite(read_messages=True),
+                    self.head_moderator(): PermissionOverwrite(read_messages=True),
+                    self.test_administrator(): PermissionOverwrite(read_messages=True),
                 })
                 self.database.execute('UPDATE tickets SET channel = %s WHERE owner = %s;', ticket.id, message.author.id)
                 await ticket.send(self.text['ticket_success'] % (self.chat_support_role().mention, message.author.mention), allowed_mentions=AllowedMentions.all())
             else:
                 await self.error_and_delete(message, self.config.texts['wrong_channel'] % ('!ticket', self.tickets().mention))
                 return
-        elif message.channel.id == self.config.channels['tickets']:
+        elif message.channel.id == self.tickets():
             await self.error_and_delete(message, self.text['ticket_invalid'])
             return
         if content.startswith('!close'):
