@@ -274,7 +274,9 @@ class Levels(Module):
         await super().on_ready()
         for i in [i for i in self.config.server().members if i.get_role(self.config.special_requirement_role().id)]:
             await i.remove_roles(self.config.special_role())
-        await random.choice([i for i in self.config.server().members if not self.config.is_team(i) and i.get_role(self.config.special_requirement_role().id)]).add_roles(self.config.special_role())
+        special = random.choice([i for i in self.config.server().members if not self.config.is_team(i) and i.get_role(self.config.special_requirement_role().id)])
+        await special.add_roles(self.config.special_role())
+        await self.config.chat().send(self.config.texts['special_notification'] % special.mention)
 
     async def get_level(self, xp: int) -> int:
         for key in self.levels:

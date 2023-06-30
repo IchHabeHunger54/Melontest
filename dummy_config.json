@@ -174,6 +174,7 @@
       "image_1": "https://static.wikia.nocookie.net/minecraft_de_gamepedia/images/1/1e/TNT.png",
       "image_0": "https://i.pinimg.com/originals/06/c3/92/06c392b847166a9a671bfcd590d8fff7.gif"
     },
+    "special_notification": "Und die heutige Wundermelone ist... %s! Als Wundermelone bekommst du doppelte XP durch Schreiben und Voice-Aktivität.",
     "temp_voice": {
       "name": "\uD83C\uDF49 %s",
       "failure": "Du hast keinen Voice Channel!",
