@@ -2,7 +2,7 @@ import asyncio
 import random
 from datetime import datetime, timedelta, timezone
 
-import emoji
+import emoji as demoji
 from discord import *
 from discord.ext import tasks
 
@@ -159,7 +159,7 @@ class EmoteModeration(Module):
         if self.is_team(message.author):
             return
         content = message.content
-        emotes = content.count('<a:') + (emoji.demojize(content).count(':') - content.count(':')) // 2
+        emotes = content.count('<a:') + (demoji.demojize(content).count(':') - content.count(':')) // 2
         if emotes > self.values:
             await self.error_and_delete(message, self.text % message.author.mention)
 
