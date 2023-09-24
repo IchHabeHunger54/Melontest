@@ -147,6 +147,11 @@ class Counter(Module):
             await message.channel.send(f'{variable} = {self.database.execute("SELECT value FROM counter WHERE id = %s;", variable)[0][0]}')
 
 
+class DefaultRole(Module):
+    async def on_member_join(self, member: Member) -> None:
+        await member.add_roles(self.default_role())
+
+
 class Creeper(Module):
     async def on_message(self, message: Message) -> None:
         content = message.content.lower()
@@ -674,19 +679,7 @@ class RockPaperScissors(Module):
 class Roles(Module):
     async def on_message(self, message: Message) -> None:
         content = message.content.lower()
-        if content.startswith('!videos'):
-            if message.channel.id != self.bots().id:
-                await self.error_and_delete(message, self.config.texts['wrong_channel'] % ('!videos', self.bots().mention))
-                return
-            await message.author.add_roles(self.video_role())
-            await message.channel.send(self.text['videos'])
-        elif content.startswith('!keinevideos'):
-            if message.channel.id != self.bots().id:
-                await self.error_and_delete(message, self.config.texts['wrong_channel'] % ('!keinevideos', self.bots().mention))
-                return
-            await message.author.remove_roles(self.video_role())
-            await message.channel.send(self.text['keinevideos'])
-        elif self.is_team(message.author):
+        if self.is_team(message.author):
             if content.startswith('!chatsupport'):
                 await message.author.add_roles(self.chat_support_role())
                 await message.channel.send(self.text['chatsupport'])

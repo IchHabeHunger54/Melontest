@@ -166,22 +166,22 @@ class Module:
     def builder_role(self) -> Role:
         return self.role(self.config.roles['builder'])
 
-    def test_supporter(self):
+    def test_supporter(self) -> Role:
         return self.role(self.config.roles['test_supporter'])
 
-    def supporter(self):
+    def supporter(self) -> Role:
         return self.role(self.config.roles['supporter'])
 
-    def test_moderator(self):
+    def test_moderator(self) -> Role:
         return self.role(self.config.roles['test_moderator'])
 
-    def moderator(self):
+    def moderator(self) -> Role:
         return self.role(self.config.roles['moderator'])
 
-    def head_moderator(self):
+    def head_moderator(self) -> Role:
         return self.role(self.config.roles['head_moderator'])
 
-    def test_administrator(self):
+    def test_administrator(self) -> Role:
         return self.role(self.config.roles['test_administrator'])
 
     def chat_support_role(self) -> Role:

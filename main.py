@@ -9,6 +9,7 @@ config.modules = [
     Clear(config, 'clear'),
     Counter(config, 'counter'),
     Creeper(config, 'creeper'),
+    DefaultRole(config, 'default_role'),
     EmoteModeration(config, 'emote_moderation'),
     Flomote(config, 'flomote'),
     Help(config, 'help'),
