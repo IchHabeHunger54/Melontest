@@ -870,7 +870,7 @@ class Tickets(Module):
     async def on_message(self, message: Message) -> None:
         content = message.content.lower()
         if content.startswith('!ticket'):
-            if message.channel.id == self.tickets():
+            if message.channel.id == self.tickets().id:
                 ticket = self.database.execute('SELECT channel FROM tickets WHERE owner = %s', message.author.id)
                 if ticket:
                     await self.error_and_delete(message, self.text['ticket_failure'] % self.text_channel(ticket[0][0]))
@@ -889,10 +889,11 @@ class Tickets(Module):
                 })
                 self.database.execute('UPDATE tickets SET channel = %s WHERE owner = %s;', ticket.id, message.author.id)
                 await ticket.send(self.text['ticket_success'] % (self.chat_support_role().mention, message.author.mention), allowed_mentions=AllowedMentions.all())
+                await message.delete()
             else:
                 await self.error_and_delete(message, self.config.texts['wrong_channel'] % ('!ticket', self.tickets().mention))
                 return
-        elif message.channel.id == self.tickets():
+        elif message.channel.id == self.tickets().id:
             await self.error_and_delete(message, self.text['ticket_invalid'])
             return
         if content.startswith('!close'):
