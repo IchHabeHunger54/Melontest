@@ -335,20 +335,6 @@ class Levels(Module):
                 self.database.execute('UPDATE levels SET amount = %s WHERE id = %s;', amount[0][0] + int(random.randrange(self.values['give_min'], self.values['give_max'] + 1) * multiplier), member.id)
 
 
-class LinkModeration(Module):
-    async def on_message(self, message: Message) -> None:
-        if self.is_team(message.author):
-            return
-        content = message.content.lower()
-        # noinspection HttpUrlsUsage
-        if not any(s in content for s in ['http://', 'https://']):
-            return
-        if any(elem in content for elem in self.values['blacklist']):
-            await self.error_and_delete(message, self.text % message.author.mention)
-        elif not any(elem in content for elem in self.values['whitelist']):
-            await self.error_and_delete(message, self.text % message.author.mention)
-
-
 class Logger(Module):
     async def on_member_join(self, member: Member) -> None:
         embed = self.embed(self.text['guild_joined'])

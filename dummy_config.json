@@ -246,18 +246,6 @@
       "premium": 1.5,
       "special": 2
     },
-    "link_moderation": {
-      "blacklist": [],
-      "whitelist": [
-        "cdn.discordapp.com",
-        "cdn.discordapp.net",
-        "discord.com",
-        "giphy",
-        "imgur",
-        "tenor",
-        "wikipedia.org"
-      ]
-    },
     "moderation": {
       "ban_warnings": 5,
       "kick_warnings": 4,

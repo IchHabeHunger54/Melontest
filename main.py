@@ -14,7 +14,6 @@ config.modules = [
     Flomote(config, 'flomote'),
     Help(config, 'help'),
     Levels(config, 'levels'),
-    LinkModeration(config, 'link_moderation'),
     Logger(config, 'logger'),
     Moderation(config, 'moderation'),
     Ping(config, 'ping'),
