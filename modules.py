@@ -774,18 +774,22 @@ class TempVoice(Module):
                 self.view[channel_id] = True
                 await self.update_channel(message.author)
                 await message.channel.send(self.text['show'])
+                await self.voice_log().send(self.text['show_log'] % author)
             elif args[1] == 'hide':
                 self.view[channel_id] = False
                 await self.update_channel(message.author)
                 await message.channel.send(self.text['hide'])
+                await self.voice_log().send(self.text['hide_log'] % author)
             elif args[1] == 'open':
                 self.connect[channel_id] = True
                 await self.update_channel(message.author)
                 await message.channel.send(self.text['open'])
+                await self.voice_log().send(self.text['open_log'] % author)
             elif args[1] == 'close':
                 self.connect[channel_id] = False
                 await self.update_channel(message.author)
                 await message.channel.send(self.text['close'])
+                await self.voice_log().send(self.text['close_log'] % author)
             elif args[1] == 'limit':
                 if len(args) == 2:
                     await self.error_and_delete(message, self.text['limit_missing'])
@@ -810,7 +814,11 @@ class TempVoice(Module):
                 await message.channel.send(self.text['name_success'] % name)
                 await self.voice_log().send(self.text['name_log'] % (author, name))
             elif args[1] == 'soundboard':
-                await channel.set_permissions(target=self.default_role(), use_soundboard=not channel.permissions_for(self.default_role()).use_soundboard)
+                soundboard = not channel.permissions_for(self.default_role()).use_soundboard
+                await channel.set_permissions(target=self.default_role(), use_soundboard=soundboard)
+                await channel.set_permissions(target=self.default_role(), use_external_sounds=soundboard)
+                await message.channel.send(self.text['soundboard_on' if soundboard else 'soundboard_off'])
+                await self.voice_log().send(self.text['soundboard_log_on' if soundboard else 'soundboard_log_off'] % author)
             else:
                 await self.error_and_delete(message, self.text['invalid'] % args[1])
 
