@@ -33,6 +33,7 @@
     },
     "caps_moderation": "%s Bitte sende keine Nachrichten in Caps (Großbuchstaben)!",
     "creeper": "Es ist erlaubt, das Wort Creeper zu schreiben. Es ist jedoch verboten, den Songtext von \"Creeper, Aw Man\" (Revenge) zu schreiben, da es in der Vergangenheit immer wieder zu Spam geführt hat.",
+    "embed_only": "%s Bitte sende hier keine Reaktionen, der Channel soll wirklich nur Memes enthalten!",
     "emote_moderation": "%s Bitte sende nicht mehr als 4 Emotes pro Nachricht!",
     "flomote": {
       "floeyes": "<:Flo_1:673538831626010631><:Flo_2:673538857937010699>",
