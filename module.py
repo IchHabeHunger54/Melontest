@@ -172,9 +172,6 @@ class Module:
     def supporter(self) -> Role:
         return self.role(self.config.roles['supporter'])
 
-    def test_moderator(self) -> Role:
-        return self.role(self.config.roles['test_moderator'])
-
     def moderator(self) -> Role:
         return self.role(self.config.roles['moderator'])
 
@@ -257,10 +254,7 @@ class Module:
         return self.has_role(member, self.test_supporter()) or self.is_supporter_or_higher(member)
 
     def is_supporter_or_higher(self, member: Member) -> bool:
-        return self.has_role(member, self.supporter()) or self.is_test_moderator_or_higher(member)
-
-    def is_test_moderator_or_higher(self, member: Member) -> bool:
-        return self.has_role(member, self.test_moderator()) or self.is_moderator_or_higher(member)
+        return self.has_role(member, self.supporter()) or self.is_moderator_or_higher(member)
 
     def is_moderator_or_higher(self, member: Member) -> bool:
         return self.has_role(member, self.moderator()) or self.is_head_moderator_or_higher(member)

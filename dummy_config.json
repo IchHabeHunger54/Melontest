@@ -266,7 +266,8 @@
         373641153133936641,
         282912778073931786,
         411159465522495501,
-        444933507823828992
+        444933507823828992,
+		692174892942098492
       ],
       "warn_expire_days": 14
     },
@@ -353,7 +354,6 @@
     "builder": 0,
     "test_supporter": 0,
     "supporter": 0,
-    "test_moderator": 0,
     "moderator": 0,
     "head_moderator": 0,
     "test_administrator": 0,
@@ -384,7 +384,6 @@
     "builder": 0,
     "test_supporter": 0,
     "supporter": 0,
-    "test_moderator": 0,
     "moderator": 0,
     "head_moderator": 0,
     "test_administrator": 0,
