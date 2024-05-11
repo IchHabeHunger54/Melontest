@@ -151,6 +151,11 @@ class DefaultRole(Module):
     async def on_member_join(self, member: Member) -> None:
         await member.add_roles(self.default_role())
 
+    async def on_ready(self) -> None:
+        await super().on_ready()
+        for i in [i for i in self.server().members if not i.get_role(self.default_role().id)]:
+            await i.add_roles(self.default_role())
+
 
 class Creeper(Module):
     async def on_message(self, message: Message) -> None:
