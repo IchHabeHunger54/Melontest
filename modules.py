@@ -159,6 +159,17 @@ class Creeper(Module):
             await message.channel.send(self.text)
 
 
+class EmbedOnlyChannel(Module):
+    async def on_message(self, message: Message) -> None:
+        if message.channel.id not in self.config.channels['embed_only']:
+            return
+        if self.is_team(message.author):
+            return
+        images = [e for e in message.attachments if e.content_type != 'image' and e.content_type != 'video']
+        if len(images) == 0:
+            await self.error_and_delete(message, self.text % message.author.mention)
+
+
 class EmoteModeration(Module):
     async def on_message(self, message: Message) -> None:
         if self.is_team(message.author):

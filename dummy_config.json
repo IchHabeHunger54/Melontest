@@ -288,6 +288,7 @@
   "debug_guild": 0,
   "channels": {
     "level": [],
+    "embed_only": [],
     "chat": 0,
     "bots": 0,
     "rules": 0,
@@ -307,6 +308,7 @@
   },
   "debug_channels": {
     "level": [],
+    "embed_only": [],
     "chat": 0,
     "bots": 0,
     "rules": 0,

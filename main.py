@@ -10,6 +10,7 @@ config.modules = [
     Counter(config, 'counter'),
     Creeper(config, 'creeper'),
     DefaultRole(config, 'default_role'),
+    EmbedOnlyChannel(config, 'embed_only'),
     EmoteModeration(config, 'emote_moderation'),
     Flomote(config, 'flomote'),
     Help(config, 'help'),
