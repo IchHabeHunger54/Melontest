@@ -1,4 +1,5 @@
 import json
+import logging as pylogging
 from datetime import datetime
 from typing import Optional
 
@@ -336,4 +337,4 @@ class Database:
                     connection.commit()
                     return result
         except (Exception, psycopg2.DatabaseError) as e:
-            print('Caught SQL Error:', e)
+            pylogging.debug('Caught SQL Error: %s', e)

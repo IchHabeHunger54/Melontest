@@ -143,8 +143,8 @@ async def on_ready() -> None:
         await m.on_ready()
     debug('Called on_ready for modules! Took %s', datetime.now() - time)
     debug('Startup complete!')
-    debug('User:', bot.user)
-    debug('Total time:', datetime.now() - start_time)
+    debug('User: %s', bot.user)
+    debug('Total time: %s', datetime.now() - start_time)
 
 
 @bot.event
