@@ -316,6 +316,7 @@ class Levels(Module):
         lb = dict(self.database.execute('SELECT * FROM levels;'))
         result = {}
         for k in lb.keys():
+            # noinspection PyTypeChecker
             if self.member(k) is not None:
                 result[k] = lb[k]
         return dict(sorted(result.items(), key=lambda x: x[1], reverse=True)[begin:end])
@@ -775,15 +776,22 @@ class TempVoice(Module):
     async def on_message(self, message: Message) -> None:
         content = message.content
         if content.lower().startswith('!vc '):
-            author = message.author.id
-            channel_id = self.channels[author]
-            channel = self.voice_channel(channel_id)
             if message.channel.id != self.bots().id:
                 await self.error_and_delete(message, self.config.texts['wrong_channel'] % ('!vc', self.bots().mention))
                 return
-            if author not in self.channels:
-                await self.error_and_delete(message, self.text['failure'])
-                return
+            author = message.author.id
+            if self.is_team(message.author):
+                channel = [vc for vc in [self.voice_channel(vc) for vc in self.channels.values()] if message.author in vc.members][0]
+                if channel is None:
+                    await self.error_and_delete(message, self.text['team_failure'])
+                    return
+                channel_id = channel.id
+            else:
+                if author not in self.channels:
+                    await self.error_and_delete(message, self.text['failure'])
+                    return
+                channel_id = self.channels[author]
+                channel = self.voice_channel(channel_id)
             args = content.split()
             args[1] = args[1].lower()
             if args[1] == 'show':
@@ -849,11 +857,8 @@ class TempVoice(Module):
             self.channels[member.id] = (await self.server().create_voice_channel(self.text['name'] % member.display_name, category=self.voice_category(), overwrites={
                 self.server().default_role: PermissionOverwrite(view_channel=False, connect=False),
                 self.default_role(): PermissionOverwrite(view_channel=True, connect=True),
-                self.test_supporter(): PermissionOverwrite(view_channel=True, connect=True),
-                self.supporter(): PermissionOverwrite(view_channel=True, connect=True),
+                self.test_moderator(): PermissionOverwrite(view_channel=True, connect=True),
                 self.moderator(): PermissionOverwrite(view_channel=True, connect=True),
-                self.head_moderator(): PermissionOverwrite(view_channel=True, connect=True),
-                self.test_administrator(): PermissionOverwrite(view_channel=True, connect=True),
                 member: PermissionOverwrite(move_members=True)
             })).id
             self.connect[self.channels[member.id]] = True
@@ -882,11 +887,8 @@ class Tickets(Module):
                     self.server().default_role: PermissionOverwrite(read_messages=False),
                     self.server().me: PermissionOverwrite(read_messages=True),
                     message.author: PermissionOverwrite(read_messages=True),
-                    self.test_supporter(): PermissionOverwrite(read_messages=True),
-                    self.supporter(): PermissionOverwrite(read_messages=True),
+                    self.test_moderator(): PermissionOverwrite(read_messages=True),
                     self.moderator(): PermissionOverwrite(read_messages=True),
-                    self.head_moderator(): PermissionOverwrite(read_messages=True),
-                    self.test_administrator(): PermissionOverwrite(read_messages=True),
                 })
                 self.database.execute('UPDATE tickets SET channel = %s WHERE owner = %s;', ticket.id, message.author.id)
                 await ticket.send(self.text['ticket_success'] % (self.chat_support_role().mention, message.author.mention), allowed_mentions=AllowedMentions.all())

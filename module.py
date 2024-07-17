@@ -165,20 +165,11 @@ class Module:
     def builder_role(self) -> Role:
         return self.role(self.config.roles['builder'])
 
-    def test_supporter(self) -> Role:
-        return self.role(self.config.roles['test_supporter'])
-
-    def supporter(self) -> Role:
-        return self.role(self.config.roles['supporter'])
+    def test_moderator(self) -> Role:
+        return self.role(self.config.roles['test_moderator'])
 
     def moderator(self) -> Role:
         return self.role(self.config.roles['moderator'])
-
-    def head_moderator(self) -> Role:
-        return self.role(self.config.roles['head_moderator'])
-
-    def test_administrator(self) -> Role:
-        return self.role(self.config.roles['test_administrator'])
 
     def chat_support_role(self) -> Role:
         return self.role(self.config.roles['chat_support'])
@@ -247,22 +238,10 @@ class Module:
         return self.category('voice')
 
     def is_team(self, member: Member) -> bool:
-        return self.is_test_supporter_or_higher(member)
-
-    def is_test_supporter_or_higher(self, member: Member) -> bool:
-        return self.has_role(member, self.test_supporter()) or self.is_supporter_or_higher(member)
-
-    def is_supporter_or_higher(self, member: Member) -> bool:
-        return self.has_role(member, self.supporter()) or self.is_moderator_or_higher(member)
+        return self.is_moderator_or_higher(member)
 
     def is_moderator_or_higher(self, member: Member) -> bool:
-        return self.has_role(member, self.moderator()) or self.is_head_moderator_or_higher(member)
-
-    def is_head_moderator_or_higher(self, member: Member) -> bool:
-        return self.has_role(member, self.head_moderator()) or self.is_test_administrator_or_higher(member)
-
-    def is_test_administrator_or_higher(self, member: Member) -> bool:
-        return self.has_role(member, self.test_administrator()) or self.is_administrator(member)
+        return self.has_role(member, self.moderator()) or self.is_administrator(member)
 
     def new_embed(self, title: str, color: int) -> Embed:
         embed = Embed(title=title, color=color, timestamp=datetime.utcnow())
