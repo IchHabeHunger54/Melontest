@@ -1,4 +1,5 @@
 config.json
+log
 .idea/
 old/
 **.iml

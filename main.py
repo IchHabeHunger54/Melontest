@@ -1,8 +1,28 @@
+import logging as pylogging
+
+import discord
+
 from modules import *
 
+
+def debug(msg: str, *args) -> None:
+    pylogging.debug(msg, *args)
+
+
+discord.utils.setup_logging(handler=pylogging.FileHandler(filename='./log', encoding='utf-8', mode='w'), level=pylogging.DEBUG, root=True)
+
+start_time = datetime.now()
+debug('Initiating startup...')
 time = datetime.now()
+debug('Initializing client...')
 bot = Client(intents=Intents.all(), allowed_mentions=AllowedMentions.none())
+debug('Initialized client! Took %s', datetime.now() - time)
+time = datetime.now()
+debug('Initializing config...')
 config = Config(bot)
+debug('Initialized config! Took %s', datetime.now() - time)
+time = datetime.now()
+debug('Initializing modules...')
 config.modules = [
     AmongUs(config, 'among_us'),
     CapsModeration(config, 'caps_moderation'),
@@ -33,7 +53,13 @@ config.modules = [
     VoiceSupport(config, 'voice_support'),
     Write(config, 'write')
 ]
+debug('Initialized modules! Took %s', datetime.now() - time)
+time = datetime.now()
+debug('Loading config...')
 config.load()
+debug('Loaded config! Took %s', datetime.now() - time)
+time = datetime.now()
+debug('Creating event handlers...')
 
 
 @bot.event
@@ -112,10 +138,13 @@ async def on_reaction_remove(reaction: Reaction, member: Member) -> None:
 
 @bot.event
 async def on_ready() -> None:
+    debug('Calling on_ready for modules...')
     for m in config.modules:
         await m.on_ready()
-    print('Successfully booted up as user', bot.user)
-    print('Booting took', datetime.now() - time)
+    debug('Called on_ready for modules! Took %s', datetime.now() - time)
+    debug('Startup complete!')
+    debug('User:', bot.user)
+    debug('Total time:', datetime.now() - start_time)
 
 
 @bot.event
@@ -126,4 +155,9 @@ async def on_voice_state_update(member: Member, before: VoiceState, after: Voice
         await m.on_voice_state_update(member, before, after)
 
 
+debug('Created event handlers! Took %s', datetime.now() - time)
+time = datetime.now()
+debug('Starting to run the bot...')
 bot.run(config.token)
+debug('Started to run the bot! Took %s', datetime.now() - time)
+time = datetime.now()

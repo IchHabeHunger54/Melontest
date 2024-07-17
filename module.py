@@ -328,9 +328,10 @@ class Database:
             with psycopg2.connect(user=self.username, password=self.password, host=self.hostname, database=self.database, port=self.port) as connection:
                 with connection.cursor() as cursor:
                     cursor.execute(query, args)
+                    # noinspection PyUnusedLocal
                     try:
                         result = cursor.fetchall()
-                    except psycopg2.ProgrammingError:
+                    except psycopg2.ProgrammingError as e:
                         result = None
                     connection.commit()
                     return result
