@@ -28,6 +28,7 @@ Um den Melonenbot selbst zum Laufen zu bringen, werden folgende Dinge benötigt:
   mittels `pip install -U git+https://github.com/Rapptz/discord.py`)
 - ~~Das `mysql-connector-python`-Package~~ Das `psycopg2`-Package (Installation mittels `pip install psycopg2`)
 - Das `emoji`-Package (Installation mittels `pip install emoji`)
+- Das `spotify`-Package (Installation mittels `pip install spotify`)
 - Eine funktionsfähige PostgreSQL-Datenbank, deren Zugangsdaten bekannt sind
 
 Folgende Schritte müssen gesetzt werden, um den Bot tatsächlich zum Laufen zu bringen:
@@ -73,4 +74,4 @@ wurde die Entscheidung getroffen, den Bot, der zu diesem Zeitpunkt hauptsächlic
 geschrieben war, von Grund auf neu zu entwickeln. Einige Features wurden an das damals neu erschienene Automod-Feature
 von Discord ausgelagert, der Rest wurde vollständig in Python implementiert.
 
-Aktuelle Entwickler des Bots sind IchHabeHunger54 und TryOne.
+Aktueller Entwickler des Bots ist IchHabeHunger54.

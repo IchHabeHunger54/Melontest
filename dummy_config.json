@@ -3,7 +3,7 @@
     "color": 15522876,
     "error_color": 11863301,
     "text": "Melonenbot",
-    "icon": "https://images-ext-1.discordapp.net/external/lZws7G7iw7fozgme7y0bQu-TsswDMAZHwlGVW85F2FU/https/cdn.discordapp.com/avatars/649282521066110986/62c862309170d6d10aecce16fd50cdbb.png"
+    "icon": "https://cdn.discordapp.com/avatars/1003281154096513115/e6e7de39b2565461f8758d2677a0ae58"
   },
   "texts": {
     "months": [
@@ -176,6 +176,12 @@
       "image_1": "https://static.wikia.nocookie.net/minecraft_de_gamepedia/images/1/1e/TNT.png",
       "image_0": "https://i.pinimg.com/originals/06/c3/92/06c392b847166a9a671bfcd590d8fff7.gif"
     },
+    "spotify_embed": {
+      "artists": "Künstler:",
+      "album": "Album:",
+      "duration": "Dauer:",
+      "suggested_by": "Vorgeschlagen von:"
+    },
     "temp_voice": {
       "name": "\uD83C\uDF49 %s",
       "failure": "Du hast keinen Voicechannel!",
@@ -283,6 +289,8 @@
     "database": "",
     "port": 0
   },
+  "spotify_id": "",
+  "spotify_secret": "",
   "is_debug": true,
   "token": "",
   "debug_token": "",

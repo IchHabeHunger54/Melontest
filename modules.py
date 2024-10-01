@@ -757,6 +757,27 @@ class Slowmode(Module):
             self.messages += 1
 
 
+class SpotifyEmbed(Module):
+    async def on_message(self, message: Message) -> None:
+        content = message.content.replace('intl_de/', '')
+        if 'open.spotify.com/track/' in content:
+            song_id = content.split('open.spotify.com/track/')[1]
+            for c in song_id:
+                if not c.isalnum():
+                    song_id = song_id[:song_id.index(c)]
+                    break
+            async with await self.get_spotify() as spotify:
+                song = await spotify.get_track(song_id)
+                embed = self.embed(song.name, 'https://open.spotify.com/track/' + song_id)
+                embed.set_thumbnail(url=song.images[0].url)
+                embed.add_field(name=self.text['artists'], value=', '.join([artist.name for artist in song.artists]), inline=False)
+                embed.add_field(name=self.text['album'], value=song.album.name, inline=False)
+                embed.add_field(name=self.text['duration'], value=datetime.fromtimestamp(song.duration / 1000).strftime('%M:%S'), inline=True)
+                embed.add_field(name=self.text['suggested_by'], value=message.author.mention)
+                await message.channel.send(embed=embed)
+                await message.delete()
+
+
 class TempVoice(Module):
     def __init__(self, config: Config, name: str):
         super().__init__(config, name)

@@ -4,6 +4,7 @@ from datetime import datetime
 from typing import Optional
 
 import psycopg2
+import spotify
 from discord import *
 from discord.ext import tasks
 
@@ -17,6 +18,8 @@ class Config:
         self.intervals = {}
         self.values = {}
         self.database = None
+        self.spotify_id = ''
+        self.spotify_secret = ''
         self.is_debug = True
         self.token = ''
         self.guild = 0
@@ -32,6 +35,8 @@ class Config:
         self.intervals = jsonfile['intervals']
         self.values = jsonfile['values']
         self.database = Database(jsonfile['database'])
+        self.spotify_id = jsonfile['spotify_id']
+        self.spotify_secret = jsonfile['spotify_secret']
         self.is_debug = jsonfile['is_debug']
         if self.is_debug:
             self.token = jsonfile['debug_token']
@@ -244,16 +249,16 @@ class Module:
     def is_moderator_or_higher(self, member: Member) -> bool:
         return self.has_role(member, self.moderator()) or self.is_administrator(member)
 
-    def new_embed(self, title: str, color: int) -> Embed:
-        embed = Embed(title=title, color=color, timestamp=datetime.utcnow())
+    def new_embed(self, title: str, color: int, url: str) -> Embed:
+        embed = Embed(title=title, color=color, timestamp=datetime.utcnow(), url=url)
         embed.set_footer(text=self.config.embeds['text'], icon_url=self.config.embeds['icon'])
         return embed
 
-    def embed(self, title: str) -> Embed:
-        return self.new_embed(title, self.config.embeds['color'])
+    def embed(self, title: str, url: str = None) -> Embed:
+        return self.new_embed(title, self.config.embeds['color'], url)
 
-    def error_embed(self, title: str) -> Embed:
-        return self.new_embed(title, self.config.embeds['error_color'])
+    def error_embed(self, title: str, url: str = None) -> Embed:
+        return self.new_embed(title, self.config.embeds['error_color'], url)
 
     def readable_date(self, date: str) -> str:
         return '\u200b' + date[8:10] + '. ' + self.config.texts['months'][int(date[5:7]) - 1] + ' ' + date[:4]
@@ -292,6 +297,9 @@ class Module:
     async def error_and_delete(self, message: Message, text: str) -> None:
         await message.channel.send(text, delete_after=self.config.values['delete_after'])
         await message.delete()
+
+    async def get_spotify(self) -> spotify.Client:
+        return spotify.Client(self.config.spotify_id, self.config.spotify_secret)
 
     @staticmethod
     def has_role(member: Member, role: Role) -> bool:
