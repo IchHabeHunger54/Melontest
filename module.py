@@ -1,5 +1,6 @@
 import json
 import logging as pylogging
+import subprocess
 from datetime import datetime
 from typing import Optional
 
@@ -219,6 +220,9 @@ class Module:
     def leave_log(self) -> TextChannel:
         return self.text_channel(self.config.channels['leave_log'])
 
+    def database_dump(self) -> TextChannel:
+        return self.text_channel(self.config.channels['database_dump'])
+
     def voice_support(self) -> VoiceChannel:
         return self.voice_channel(self.config.channels['voice_support'])
 
@@ -324,6 +328,22 @@ class Module:
         return base * factor
 
 
+class DailyModule(Module):
+    async def on_ready(self) -> None:
+        await self.run_schedule()
+        now = datetime.now()
+        seconds = int((datetime(year=now.year, month=now.month, day=now.day + 1, hour=self.config.values['daily']['hours'], minute=self.config.values['daily']['minutes']) - now).total_seconds())
+        self.run_schedule.change_interval(seconds=seconds)
+
+    @tasks.loop(seconds=1)
+    async def run_schedule(self) -> None:
+        self.run_schedule.change_interval(seconds=self.interval)
+        await self.daily()
+
+    async def daily(self):
+        pass
+
+
 class Database:
     def __init__(self, database: dict):
         self.username = database['username']
@@ -346,3 +366,7 @@ class Database:
                     return result
         except (Exception, psycopg2.DatabaseError) as e:
             pylogging.debug('Caught SQL Error: %s', e)
+
+    @staticmethod
+    def dump():
+        subprocess.call(['./dump.sh'])

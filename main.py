@@ -29,6 +29,7 @@ config.modules = [
     Clear(config, 'clear'),
     Counter(config, 'counter'),
     Creeper(config, 'creeper'),
+    DatabaseDump(config, 'database_dump'),
     DefaultRole(config, 'default_role'),
     EmbedOnlyChannel(config, 'embed_only'),
     EmoteModeration(config, 'emote_moderation'),

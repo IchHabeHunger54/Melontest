@@ -6,7 +6,7 @@ import emoji as demoji
 from discord import *
 from discord.ext import tasks
 
-from module import Config, Module
+from module import Config, DailyModule, Module
 
 
 class AmongUs(Module):
@@ -147,6 +147,19 @@ class Counter(Module):
             await message.channel.send(f'{variable} = {self.database.execute("SELECT value FROM counter WHERE id = %s;", variable)[0][0]}')
 
 
+class Creeper(Module):
+    async def on_message(self, message: Message) -> None:
+        content = message.content.lower()
+        if any(keyword in content for keyword in ('!creeper', 'creeper', 'creper')):
+            await message.channel.send(self.text)
+
+
+class DatabaseDump(DailyModule):
+    async def daily(self):
+        self.config.database.dump()
+        await self.database_dump().send(file=File('./dump.sql'))
+
+
 class DefaultRole(Module):
     async def on_member_join(self, member: Member) -> None:
         await member.add_roles(self.default_role())
@@ -155,13 +168,6 @@ class DefaultRole(Module):
         await super().on_ready()
         for i in [i for i in self.server().members if not i.get_role(self.default_role().id)]:
             await i.add_roles(self.default_role())
-
-
-class Creeper(Module):
-    async def on_message(self, message: Message) -> None:
-        content = message.content.lower()
-        if any(keyword in content for keyword in ('!creeper', 'creeper', 'creper')):
-            await message.channel.send(self.text)
 
 
 class EmbedOnlyChannel(Module):
@@ -749,21 +755,8 @@ class Slowmode(Module):
             self.messages += 1
 
 
-class SpecialRole(Module):
-    def __init__(self, config: Config, name: str):
-        super().__init__(config, name)
-
-    async def on_ready(self) -> None:
-        now = datetime.now()
-        seconds = int((datetime(year=now.year, month=now.month, day=now.day + 1, hour=self.values['hours'], minute=self.values['minutes']) - now).total_seconds())
-        self.run_schedule.change_interval(seconds=seconds)
-
-    @tasks.loop(seconds=1)
-    async def run_schedule(self) -> None:
-        self.run_schedule.change_interval(seconds=self.interval)
-        await self.set_special()
-
-    async def set_special(self):
+class SpecialRole(DailyModule):
+    async def daily(self):
         for i in [i for i in self.server().members if i.get_role(self.special_requirement_role().id)]:
             await i.remove_roles(self.special_role())
         special = random.choice([i for i in self.server().members if not self.is_team(i) and i.get_role(self.special_requirement_role().id)])
@@ -787,7 +780,7 @@ class SpotifyEmbed(Module):
                 embed.add_field(name=self.text['artists'], value=', '.join([artist.name for artist in song.artists]), inline=False)
                 embed.add_field(name=self.text['album'], value=song.album.name, inline=False)
                 embed.add_field(name=self.text['duration'], value=datetime.fromtimestamp(song.duration / 1000).strftime('%M:%S'), inline=True)
-                embed.add_field(name=self.text['suggested_by'], value=message.author.mention)
+                embed.add_field(name=self.text['author'], value=message.author.mention)
                 await message.channel.send(embed=embed)
                 await message.delete()
 

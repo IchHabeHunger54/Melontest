@@ -177,10 +177,10 @@
     },
     "special_role": "Und die heutige Wundermelone ist... %s! Als Wundermelone bekommst du doppelte XP durch Schreiben und Voice-Aktivität.",
     "spotify_embed": {
-      "artists": "Künstler:",
       "album": "Album:",
-      "duration": "Dauer:",
-      "suggested_by": "Vorgeschlagen von:"
+      "artists": "Künstler:",
+      "author": "Gesendet von:",
+      "duration": "Dauer:"
     },
     "temp_voice": {
       "name": "\uD83C\uDF49 %s",
@@ -243,6 +243,10 @@
     "temp_voice": 60
   },
   "values": {
+    "daily": {
+      "hours": 2,
+      "minutes": 0
+    },
     "among_us": {
       "crewmate": 100,
       "limit": 5,
@@ -281,11 +285,7 @@
       "warn_expire_days": 14
     },
     "prank_mute": 5,
-    "rules": 10,
-    "special_role": {
-      "hours": 2,
-      "minutes": 0
-    }
+    "rules": 10
   },
   "database": {
     "hostname": "",
@@ -314,6 +314,7 @@
     "voice_log": 0,
     "join_log": 0,
     "leave_log": 0,
+    "database_dump": 0,
     "voice_support": 0,
     "team_voice_support": 0,
     "tickets": 0,
@@ -334,6 +335,7 @@
     "voice_log": 0,
     "join_log": 0,
     "leave_log": 0,
+    "database_dump": 0,
     "voice_support": 0,
     "team_voice_support": 0,
     "tickets": 0,
