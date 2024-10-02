@@ -85,8 +85,7 @@
       "multiple_arguments": "`!level` funktioniert nur für einen User gleichzeitig!",
       "no_xp": "%s hat noch keine XP!",
       "success": "%s ist aktuell **Level %s** (%s XP) und damit auf **Rang %s**.\nBis zum **nächsten Level** braucht %s noch **%s XP**.\nBis zum **nächsten Rang** braucht %s noch **%s XP**.",
-      "success_1": "%s ist aktuell **Level %s** (%s XP) und damit auf **Rang %s**.\nBis zum **nächsten Level** braucht %s noch **%s XP**.",
-      "special_notification": "Und die heutige Wundermelone ist... %s! Als Wundermelone bekommst du doppelte XP durch Schreiben und Voice-Aktivität."
+      "success_1": "%s ist aktuell **Level %s** (%s XP) und damit auf **Rang %s**.\nBis zum **nächsten Level** braucht %s noch **%s XP**."
     },
     "link_moderation": "%s Bitte sende keine Links!",
     "logger": {
@@ -176,6 +175,7 @@
       "image_1": "https://static.wikia.nocookie.net/minecraft_de_gamepedia/images/1/1e/TNT.png",
       "image_0": "https://i.pinimg.com/originals/06/c3/92/06c392b847166a9a671bfcd590d8fff7.gif"
     },
+    "special_role": "Und die heutige Wundermelone ist... %s! Als Wundermelone bekommst du doppelte XP durch Schreiben und Voice-Aktivität.",
     "spotify_embed": {
       "artists": "Künstler:",
       "album": "Album:",
@@ -239,6 +239,7 @@
     "levels": 60,
     "rules": 3600,
     "slowmode": 60,
+    "special_role": 86400,
     "temp_voice": 60
   },
   "values": {
@@ -280,7 +281,11 @@
       "warn_expire_days": 14
     },
     "prank_mute": 5,
-    "rules": 10
+    "rules": 10,
+    "special_role": {
+      "hours": 2,
+      "minutes": 0
+    }
   },
   "database": {
     "hostname": "",

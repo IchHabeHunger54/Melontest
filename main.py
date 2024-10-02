@@ -46,6 +46,7 @@ config.modules = [
     Rules(config, 'rules'),
     SelfDestruct(config, 'self_destruct'),
     Slowmode(config, 'slowmode'),
+    SpecialRole(config, 'special_role'),
     SpotifyEmbed(config, 'spotify_embed'),
     TempVoice(config, 'temp_voice'),
     Tickets(config, 'tickets'),

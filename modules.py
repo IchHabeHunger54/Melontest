@@ -297,14 +297,6 @@ class Levels(Module):
         if message.channel.id in self.config.channels['level']:
             self.award_level(message.author)
 
-    async def on_ready(self) -> None:
-        await super().on_ready()
-        for i in [i for i in self.server().members if i.get_role(self.special_requirement_role().id)]:
-            await i.remove_roles(self.special_role())
-        special = random.choice([i for i in self.server().members if not self.is_team(i) and i.get_role(self.special_requirement_role().id)])
-        await special.add_roles(self.special_role())
-        await self.chat().send(self.text['special_notification'] % special.mention, allowed_mentions=AllowedMentions.all())
-
     async def get_level(self, xp: int) -> int:
         for key in self.levels:
             value = self.levels[key]
@@ -755,6 +747,28 @@ class Slowmode(Module):
     async def on_message(self, message: Message) -> None:
         if message.channel.id == self.chat().id:
             self.messages += 1
+
+
+class SpecialRole(Module):
+    def __init__(self, config: Config, name: str):
+        super().__init__(config, name)
+
+    async def on_ready(self) -> None:
+        now = datetime.now()
+        seconds = int((datetime(year=now.year, month=now.month, day=now.day + 1, hour=self.values['hours'], minute=self.values['minutes']) - now).total_seconds())
+        self.run_schedule.change_interval(seconds=seconds)
+
+    @tasks.loop(seconds=1)
+    async def run_schedule(self) -> None:
+        self.run_schedule.change_interval(seconds=self.interval)
+        await self.set_special()
+
+    async def set_special(self):
+        for i in [i for i in self.server().members if i.get_role(self.special_requirement_role().id)]:
+            await i.remove_roles(self.special_role())
+        special = random.choice([i for i in self.server().members if not self.is_team(i) and i.get_role(self.special_requirement_role().id)])
+        await special.add_roles(self.special_role())
+        await self.chat().send(self.text % special.mention, allowed_mentions=AllowedMentions.all())
 
 
 class SpotifyEmbed(Module):
