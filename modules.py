@@ -766,7 +766,7 @@ class SpecialRole(DailyModule):
 
 class SpotifyEmbed(Module):
     async def on_message(self, message: Message) -> None:
-        content = message.content.replace('intl_de/', '')
+        content = message.content.replace('intl-de/', '')
         if 'open.spotify.com/track/' in content:
             song_id = content.split('open.spotify.com/track/')[1]
             for c in song_id:
