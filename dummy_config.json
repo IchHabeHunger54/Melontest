@@ -239,7 +239,6 @@
     "levels": 60,
     "rules": 3600,
     "slowmode": 60,
-    "special_role": 86400,
     "temp_voice": 60
   },
   "values": {

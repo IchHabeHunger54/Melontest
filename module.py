@@ -339,7 +339,10 @@ class DailyModule(Module):
 
     @tasks.loop(seconds=1)
     async def run_schedule(self) -> None:
-        self.run_schedule.change_interval(seconds=self.interval)
+        self.run_schedule.change_interval(seconds=86400)
+        timeinterval = datetime.fromtimestamp(86400) - datetime.fromtimestamp(0)
+        then = datetime.now() + timeinterval
+        pylogging.debug('Rescheduled daily module to run next at ' + str(then) + ' (86400 seconds from now)')
         await self.daily()
 
     async def daily(self):
