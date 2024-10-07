@@ -410,7 +410,7 @@ class Logger(Module):
             embed.add_field(name=self.text['before'], value=before.global_name, inline=False)
             embed.add_field(name=self.text['after'], value=after.global_name, inline=True)
             await self.member_log().send(embed=embed)
-        if after.avatar.url != before.avatar.url:
+        if before is not None and after.avatar.url != before.avatar.url:
             embed = self.embed(self.text['avatar_updated'])
             embed.add_field(name=self.text['user'], value=str(before), inline=False)
             embed.add_field(name=self.text['ping'], value=before.mention, inline=True)

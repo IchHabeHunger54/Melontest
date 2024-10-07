@@ -332,8 +332,10 @@ class DailyModule(Module):
     async def on_ready(self) -> None:
         await self.run_schedule()
         now = datetime.now()
-        seconds = int((datetime(year=now.year, month=now.month, day=now.day + 1, hour=self.config.values['daily']['hours'], minute=self.config.values['daily']['minutes']) - now).total_seconds())
+        then = datetime(year=now.year, month=now.month, day=now.day + 1, hour=self.config.values['daily']['hours'], minute=self.config.values['daily']['minutes'])
+        seconds = int((then - now).total_seconds())
         self.run_schedule.change_interval(seconds=seconds)
+        pylogging.debug('Scheduled daily module to run next at ' + str(then) + ' (' + str(seconds) + ' seconds from now)')
 
     @tasks.loop(seconds=1)
     async def run_schedule(self) -> None:

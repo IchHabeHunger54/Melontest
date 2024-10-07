@@ -40,7 +40,6 @@ Folgende Schritte müssen gesetzt werden, um den Bot tatsächlich zum Laufen zu 
 - Die Konfiguration muss befüllt werden. Von Bedeutung sind alle Werte für `database`, `channels`, `roles` sowie die
   Werte `token` und `guild`. Sollte `is_debug` auf `true` gesetzt sein, müssen die Werte mit `debug_`-Präfix stattdessen
   gesetzt werden (optimalerweise setzt man beides).
-- In `dump.sh` muss außerdem das Datenbank-Passwort noch einmal gesetzt werden.
 - Um nun den Melonenbot zu starten, einfach `main.py` laufen lassen.
 
 ## Codedesign
