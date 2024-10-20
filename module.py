@@ -328,27 +328,6 @@ class Module:
         return base * factor
 
 
-class DailyModule(Module):
-    async def on_ready(self) -> None:
-        await self.run_schedule()
-        now = datetime.now()
-        then = datetime(year=now.year, month=now.month, day=now.day + 1, hour=self.config.values['daily']['hours'], minute=self.config.values['daily']['minutes'])
-        seconds = int((then - now).total_seconds())
-        self.run_schedule.change_interval(seconds=seconds)
-        pylogging.debug('Scheduled daily module to run next at ' + str(then) + ' (' + str(seconds) + ' seconds from now)')
-
-    @tasks.loop(seconds=1)
-    async def run_schedule(self) -> None:
-        self.run_schedule.change_interval(seconds=86400)
-        timeinterval = datetime.fromtimestamp(86400) - datetime.fromtimestamp(0)
-        then = datetime.now() + timeinterval
-        pylogging.debug('Rescheduled daily module to run next at ' + str(then) + ' (86400 seconds from now)')
-        await self.daily()
-
-    async def daily(self):
-        pass
-
-
 class Database:
     def __init__(self, database: dict):
         self.username = database['username']

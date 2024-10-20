@@ -6,7 +6,7 @@ import emoji as demoji
 from discord import *
 from discord.ext import tasks
 
-from module import Config, DailyModule, Module
+from module import Config, Module
 
 
 class AmongUs(Module):
@@ -154,8 +154,8 @@ class Creeper(Module):
             await message.channel.send(self.text)
 
 
-class DatabaseDump(DailyModule):
-    async def daily(self):
+class DatabaseDump(Module):
+    async def on_ready(self) -> None:
         self.config.database.dump()
         await self.database_dump().send(file=File('./dump.sql'))
 
@@ -756,7 +756,7 @@ class Slowmode(Module):
 
 
 class SpecialRole(DailyModule):
-    async def daily(self):
+    async def on_ready(self) -> None:
         for i in [i for i in self.server().members if i.get_role(self.special_requirement_role().id)]:
             await i.remove_roles(self.special_role())
         special = random.choice([i for i in self.server().members if not self.is_team(i) and i.get_role(self.special_requirement_role().id)])
