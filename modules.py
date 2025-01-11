@@ -755,7 +755,7 @@ class Slowmode(Module):
             self.messages += 1
 
 
-class SpecialRole(DailyModule):
+class SpecialRole(Module):
     async def on_ready(self) -> None:
         for i in [i for i in self.server().members if i.get_role(self.special_requirement_role().id)]:
             await i.remove_roles(self.special_role())
@@ -868,7 +868,6 @@ class TempVoice(Module):
             elif args[1] == 'soundboard':
                 soundboard = not channel.permissions_for(self.default_role()).use_soundboard
                 await channel.set_permissions(target=self.default_role(), use_soundboard=soundboard)
-                await channel.set_permissions(target=self.default_role(), use_external_sounds=soundboard)
                 await message.channel.send(self.text['soundboard_on' if soundboard else 'soundboard_off'])
                 await self.voice_log().send(self.text['soundboard_log_on' if soundboard else 'soundboard_log_off'] % author)
             else:
@@ -982,9 +981,9 @@ class Tricks(Module):
                     return
                 tricklist = '\n'.join(['!' + elem for elem in self.tricks.keys()])
                 if tricklist:
-                    await message.channel.send(self.text['list'] + self.text['none'])
-                else:
                     await message.channel.send(self.text['list'] + tricklist)
+                else:
+                    await message.channel.send(self.text['list'] + self.text['none'])
             else:
                 name = content.split()[0][1:]
                 if name in self.tricks:

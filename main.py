@@ -7,6 +7,7 @@ from modules import *
 
 def debug(msg: str, *args) -> None:
     pylogging.debug(msg, *args)
+    print(msg % args)
 
 
 discord.utils.setup_logging(handler=pylogging.FileHandler(filename='./log', encoding='utf-8', mode='w'), level=pylogging.DEBUG, root=True)
