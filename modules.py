@@ -216,6 +216,15 @@ class Help(Module):
                 await self.error_and_delete(message, self.text['invalid'] % args[1])
 
 
+class Honeypot(Module):
+    async def on_message(self, message: Message) -> None:
+        if message.channel.id == self.honeypot().id:
+            member = message.author
+            reason = self.text['honeypot']
+            await member.ban(reason=reason, delete_message_days=1)
+            await self.moderation_log().send(self.text['ban_success'] % (member.mention, reason, self.bot_user().mention))
+
+
 class Levels(Module):
     def __init__(self, config: Config, name: str):
         super().__init__(config, name)

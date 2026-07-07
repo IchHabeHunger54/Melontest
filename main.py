@@ -36,6 +36,7 @@ config.modules = [
     EmoteModeration(config, 'emote_moderation'),
     Flomote(config, 'flomote'),
     Help(config, 'help'),
+    Honeypot(config, 'honeypot'),
     Levels(config, 'levels'),
     Logger(config, 'logger'),
     Moderation(config, 'moderation'),

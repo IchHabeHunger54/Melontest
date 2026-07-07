@@ -79,6 +79,7 @@
         "warnings": "**Verwendung:** `!warnings <optional: User>`\n**Nur im Botchannel verwendbar.**\n\nZeigt die Warns von <User> an.\n\n**Optionen:**\n- <User>: Der User, für den die Warns angezeigt werden sollen. Kann entweder ein Ping oder eine ID sein. **Optional, verwendet den Absender der Nachricht wenn nicht angegeben.**"
       }
     },
+    "honeypot": "In #nicht-hier-schreiben geschrieben",
     "levels": {
       "invalid": "Die angegebene Range ist ungültig! Es müssen 2 Zahlen sein, und der Beginn muss kleiner als das Ende sein!",
       "row": "**#%s:** %s (%s XP, Level %s)\n",
@@ -317,6 +318,7 @@
     "voice_support": 0,
     "team_voice_support": 0,
     "tickets": 0,
+    "honeypot": 0,
     "afk": 0,
     "voice_join": 0,
     "voice_move": 0
@@ -338,6 +340,7 @@
     "voice_support": 0,
     "team_voice_support": 0,
     "tickets": 0,
+    "honeypot": 0,
     "afk": 0,
     "voice_join": 0,
     "voice_move": 0

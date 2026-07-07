@@ -232,6 +232,9 @@ class Module:
     def tickets(self) -> TextChannel:
         return self.text_channel(self.config.channels['tickets'])
 
+    def honeypot(self) -> TextChannel:
+        return self.text_channel(self.config.channels['honeypot'])
+
     def afk(self) -> VoiceChannel:
         return self.voice_channel(self.config.channels['afk'])
 
