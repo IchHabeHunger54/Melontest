@@ -235,7 +235,7 @@
     "voice_support": "%s %s benötigt Support per Voice!"
   },
   "intervals": {
-    "among_us": 86400,
+    "among_us": 28800,
     "among_us_offset": 28800,
     "levels": 60,
     "rules": 3600,
