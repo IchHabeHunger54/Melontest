@@ -220,9 +220,9 @@ class Honeypot(Module):
     async def on_message(self, message: Message) -> None:
         if message.channel.id == self.honeypot().id:
             member = message.author
-            reason = self.text['honeypot']
+            reason = self.text
             await member.ban(reason=reason, delete_message_days=1)
-            await self.moderation_log().send(self.text['ban_success'] % (member.mention, reason, self.bot_user().mention))
+            await self.moderation_log().send(self.config.texts['moderation']['ban_success'] % (member.mention, reason, self.bot_user().mention))
 
 
 class Levels(Module):
