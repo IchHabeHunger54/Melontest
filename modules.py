@@ -111,7 +111,7 @@ class Clear(Module):
 
 class Counter(Module):
     async def on_message(self, message: Message) -> None:
-        if ' ' in message.content:
+        if len(message.content) == 0 or ' ' in message.content:
             return
         content = message.content.lower()
         variable = None
@@ -253,6 +253,8 @@ class Levels(Module):
 
     async def on_message(self, message: Message) -> None:
         content = message.content
+        if len(message.content) == 0:
+            return
         if content.startswith(('!leaderboard', '!lb')):
             args = content.split()
             lb = {}
@@ -500,6 +502,8 @@ class Moderation(Module):
         await self.moderation_log().send(self.text['ban_success'] % (member.mention, reason, team_member.mention))
 
     async def on_message(self, message: Message) -> None:
+        if len(message.content) == 0:
+            return
         args = message.content.split()
         args[0] = args[0].lower()
         if args[0] == '!warn':
@@ -616,6 +620,8 @@ class Ping(Module):
 
 class PrankMute(Module):
     async def on_message(self, message: Message) -> None:
+        if len(message.content) == 0:
+            return
         args = message.content.split()
         if args[0].lower() == '?mute':
             if not message.author.get_role(self.prank_mute_requirement_role().id):

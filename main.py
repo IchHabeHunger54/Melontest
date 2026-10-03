@@ -99,8 +99,6 @@ async def on_user_update(before: User, after: User) -> None:
 async def on_message(message: Message) -> None:
     if message.author == bot.user or message.author.bot:
         return
-    if message.content == '':
-        return
     for m in config.modules:
         await m.on_message(message)
 
@@ -109,8 +107,6 @@ async def on_message(message: Message) -> None:
 async def on_message_delete(message: Message) -> None:
     if message.author == bot.user or message.author.bot:
         return
-    if message.content == '':
-        return
     for m in config.modules:
         await m.on_message_delete(message)
 
@@ -118,8 +114,6 @@ async def on_message_delete(message: Message) -> None:
 @bot.event
 async def on_message_edit(before: Message, after: Message) -> None:
     if before.author == bot.user or before.author.bot:
-        return
-    if before.content == '' and after.content == '':
         return
     for m in config.modules:
         await m.on_message_edit(before, after)
